@@ -1,0 +1,240 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-03 15:45+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../template/codefox.ui.in.h:1
+msgid "Codefox"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:2
+msgid "File"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:3
+msgid "Edit"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:4
+msgid "Code"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:5
+msgid "Format"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:6 ../src/filetree.c:230
+msgid "Project"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:7
+msgid "Build"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:8
+msgid "Run"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:9
+msgid "Debug"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:10
+msgid "Help"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:11
+msgid "Create a new item"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:12
+msgid "toolbutton1"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:13
+msgid "Open a local file"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:14
+msgid "toolbutton"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:15
+msgid "Save current code"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:16
+msgid "Save currnet code to a local file"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:17
+msgid "toolbutton2"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:18
+msgid "Cut selected code"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:19
+msgid "Copy selected code"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:20
+msgid "Paste code to current location"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:21
+msgid "toolbutton3"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:22
+msgid "Delete selected code"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:23
+msgid "Build current project"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:24
+msgid "Run compiled executable"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:25
+msgid "Debug current project"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:26
+msgid "toolbutton4"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:27
+msgid "Status"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:28
+msgid "Compiler"
+msgstr ""
+
+#: ../template/codefox.ui.in.h:29
+msgid "Notepad"
+msgstr ""
+
+#: ../src/callback.c:63 ../src/callback.c:107 ../src/callback.c:108
+#: ../src/callback.c:214 ../src/ui.c:385
+msgid "Untitled"
+msgstr ""
+
+#: ../src/callback.c:197
+#, c-format
+msgid "%s has been modified, save to file?"
+msgstr ""
+
+#: ../src/callback.c:218 ../src/ui.c:483
+msgid "Save File"
+msgstr ""
+
+#: ../src/callback.c:308
+msgid "Start compilation."
+msgstr ""
+
+#: ../src/callback.c:363
+#, c-format
+msgid "Compilation finished with %d error(s), %d warning(s)."
+msgstr ""
+
+#: ../src/callback.c:529 ../src/callback.c:580 ../src/ui.c:716
+#, c-format
+msgid " Line: %d\tColumn: %d"
+msgstr ""
+
+#: ../src/compile.c:184
+msgid "err"
+msgstr ""
+
+#: ../src/compile.c:184
+msgid "fat"
+msgstr ""
+
+#: ../src/compile.c:209
+msgid "war"
+msgstr ""
+
+#: ../src/editor.c:85
+msgid "Close Tab"
+msgstr ""
+
+#: ../src/filetree.c:242
+msgid "default"
+msgstr ""
+
+#: ../src/ui.c:211
+msgid "Filesystem operations:"
+msgstr ""
+
+#: ../src/ui.c:229
+msgid "This is Codefox "
+msgstr ""
+
+#: ../src/ui.c:231
+msgid ", have fun!"
+msgstr ""
+
+#: ../src/ui.c:238
+msgid "Compiler outputs:"
+msgstr ""
+
+#: ../src/ui.c:250
+msgid "Write down any notes you want here..."
+msgstr ""
+
+#: ../src/ui.c:285
+#, c-format
+msgid "Couldn't load icon: %s"
+msgstr ""
+
+#: ../src/ui.c:363
+msgid "Perhaps the most lightweight C/C++ IDE..."
+msgstr ""
+
+#: ../src/ui.c:449
+msgid "An untitled file has been created."
+msgstr ""
+
+#: ../src/ui.c:453
+msgid " has been saved."
+msgstr ""
+
+#: ../src/ui.c:457
+msgid " has been open."
+msgstr ""
+
+#: ../src/ui.c:475
+msgid "Open File"
+msgstr ""
+
+#: ../src/ui.c:734 ../src/ui.c:736
+#, c-format
+msgid " Mode: %s"
+msgstr ""
+
+#: ../src/ui.c:734
+msgid "Overwrite"
+msgstr ""
+
+#: ../src/ui.c:736
+msgid "Insert"
+msgstr ""

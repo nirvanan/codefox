@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: Codefox
+Description: Codefox - A Lightweight C/C++ IDE.
+Version: 0.02
+Requires: gtk+-3.0
+
