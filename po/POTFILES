@@ -1,0 +1,26 @@
+	../template/codefox.ui.in \
+	../src/autoindent.h \
+	../src/callback.c \
+	../src/callback.h \
+	../src/compile.c \
+	../src/compile.h \
+	../src/editor.c \
+	../src/editor.h \
+	../src/filetree.c \
+	../src/filetree.h \
+	../src/highlighting.c \
+	../src/highlighting.h \
+	../src/main.c \
+	../src/misc.c \
+	../src/misc.h \
+	../src/staticcheck.c \
+	../src/staticcheck.h \
+	../src/symbol.c \
+	../src/symbol.h \
+	../src/tag.c \
+	../src/tag.h \
+	../src/ui.c \
+	../src/ui.h \
+	../src/keywords.h \
+	../src/prefix.c \
+	../src/prefix.h

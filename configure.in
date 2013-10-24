@@ -1,0 +1,81 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.69])
+AC_INIT(Codefox, 0.02, nirvanan@live.cn, codefox)
+AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_DEFINE(ENABLE_BINRELOC, , [define ENABLE_BINRELOC])
+AM_MAINTAINER_MODE
+
+AM_INIT_AUTOMAKE([1.11 -Wall foreign no-define tar-ustar no-dist-gzip dist-xz])
+
+# Support silent build rules, requires at least automake-1.11. Disable
+# by either passing --disable-silent-rules to configure or passing V=1
+# to make
+AM_SILENT_RULES([yes])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+LT_PREREQ([2.2.6])
+LT_INIT([dlopen win32-dll disable-static])
+
+GLIB_GSETTINGS
+
+PKG_PROG_PKG_CONFIG
+
+GNOME_COMPILE_WARNINGS([maximum])
+
+# Checks for libraries.
+PKG_CHECK_MODULES(GTK, [
+  gtk+-3.0 >= 3.2.0
+])
+
+# Checks for header files.
+AC_CHECK_HEADERS([stdlib.h string.h unistd.h time.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_PID_T
+AC_CHECK_TYPE(time_t, , AC_MSG_ERROR(time_t not found))
+
+IT_PROG_INTLTOOL([0.41.0])
+
+AC_PATH_PROG(GLIB_MKENUMS, glib-mkenums)
+AM_PATH_GTK_3_0(3.0.0,,AC_MSG_ERROR(codefox 0.02 needs GTK+ 3.0.0))
+
+AM_GNU_GETTEXT_VERSION([0.17])
+AM_GNU_GETTEXT([external])
+
+GETTEXT_PACKAGE=codefox
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Package name for gettext])
+
+# Checks for library functions.
+AC_FUNC_FORK
+AC_CHECK_FUNCS([dup2])
+
+AC_CONFIG_FILES([Makefile
+src/Makefile
+icons/Makefile
+icons/16x16/Makefile
+icons/24x24/Makefile
+icons/32x32/Makefile
+icons/48x48/Makefile
+icons/scalable/Makefile
+po/Makefile.in
+template/Makefile
+template/codefox.ui
+data/Makefile
+data/codefox.pc
+data/codefox.appdata.xml
+
+])
+
+AC_OUTPUT
+
