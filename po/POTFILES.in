@@ -1,0 +1,46 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+[encoding: UTF-8]
+[type: gettext/glade]template/codefox.ui.in
+[type: gettext/glade]template/codefox-create-file.ui.in
+[type: gettext/glade]template/codefox-editor-settings.ui.in
+[type: gettext/glade]template/codefox-new-project.ui.in
+[type: gettext/glade]template/codefox-project-settings.ui.in
+src/autoindent.c
+src/autoindent.h
+src/callback.c
+src/callback.h
+src/compile.c
+src/compile.h
+src/debug.c
+src/debug.h
+src/debugview.c
+src/debugview.h
+src/editor.c
+src/editor.h
+src/edithistory.c
+src/edithistory.h
+src/editorconfig.c
+src/editorconfig.h
+src/filetree.c
+src/filetree.h
+src/highlighting.c
+src/highlighting.h
+src/keywords.h
+src/main.c
+src/misc.c
+src/misc.h
+src/prefix.c
+src/prefix.h
+src/project.c
+src/project.h
+src/search.c
+src/search.h
+src/staticcheck.c
+src/staticcheck.h
+src/symbol.c
+src/symbol.h
+src/tag.c
+src/tag.h
+src/ui.c
+src/ui.h

@@ -1,0 +1,377 @@
+# Codefox simplified chinese translation.
+# Copyright (C) 2013 Gordon Lee
+# This file is distributed under the same license as the PACKAGE package.
+# Gordon Lee <nirvanan@live.cn>, 2013.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Codefox guess\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-10-25 22:33+0800\n"
+"PO-Revision-Date: 2013-10-02 23:12+0800\n"
+"Last-Translator: Gordon Lee <nirvanan@live.cn>\n"
+"Language-Team: Gordon Lee <nirvanan@live.cn>\n"
+"Language: 简体中文\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../template/codefox.ui.in.h:1
+msgid "Codefox"
+msgstr "Codefox"
+
+#: ../template/codefox.ui.in.h:2
+msgid "File"
+msgstr "文件"
+
+#: ../template/codefox.ui.in.h:3
+msgid "New Project"
+msgstr "新建工程"
+
+#: ../template/codefox.ui.in.h:4
+msgid "Open Project"
+msgstr "打开工程"
+
+#: ../template/codefox.ui.in.h:5
+msgid "Edit"
+msgstr "编辑"
+
+#: ../template/codefox.ui.in.h:6
+msgid "Code"
+msgstr "代码"
+
+#: ../template/codefox.ui.in.h:7
+msgid "Format"
+msgstr "格式化"
+
+#: ../template/codefox.ui.in.h:8 ../src/filetree.c:245
+msgid "Project"
+msgstr "工程"
+
+#: ../template/codefox.ui.in.h:9
+msgid "Build"
+msgstr "组建"
+
+#: ../template/codefox.ui.in.h:10
+msgid "Run"
+msgstr "运行"
+
+#: ../template/codefox.ui.in.h:11
+msgid "Clear"
+msgstr "清理"
+
+#: ../template/codefox.ui.in.h:12
+msgid "Settings"
+msgstr "设置"
+
+#: ../template/codefox.ui.in.h:13
+msgid "Debug"
+msgstr "调试"
+
+#: ../template/codefox.ui.in.h:14
+msgid "Next"
+msgstr "下一步"
+
+#: ../template/codefox.ui.in.h:15
+msgid "Step"
+msgstr "进入"
+
+#: ../template/codefox.ui.in.h:16
+msgid "Continue"
+msgstr "继续"
+
+#: ../template/codefox.ui.in.h:17
+msgid "Stop"
+msgstr "停止"
+
+#: ../template/codefox.ui.in.h:18
+msgid "Help"
+msgstr "帮助"
+
+#: ../template/codefox.ui.in.h:19
+msgid "Create a new item"
+msgstr "创建新标签"
+
+#: ../template/codefox.ui.in.h:20
+msgid "toolbutton1"
+msgstr "toolbutton1"
+
+#: ../template/codefox.ui.in.h:21
+msgid "Open a local file"
+msgstr "打开本地文件"
+
+#: ../template/codefox.ui.in.h:22
+msgid "toolbutton"
+msgstr "toolbutton"
+
+#: ../template/codefox.ui.in.h:23
+msgid "Save current code"
+msgstr "保存当前代码"
+
+#: ../template/codefox.ui.in.h:24
+msgid "Save currnet code to a local file"
+msgstr "保存当前代码到本地文件"
+
+#: ../template/codefox.ui.in.h:25
+msgid "toolbutton2"
+msgstr "toolbutton2"
+
+#: ../template/codefox.ui.in.h:26
+msgid "Create a new project"
+msgstr "创建新工程"
+
+#: ../template/codefox.ui.in.h:27
+msgid "Open a exist project"
+msgstr "打开存在的工程"
+
+#: ../template/codefox.ui.in.h:28
+msgid "openprojectbutton"
+msgstr "openprojectbutton"
+
+#: ../template/codefox.ui.in.h:29
+msgid "Build current project"
+msgstr "组建工程"
+
+#: ../template/codefox.ui.in.h:30
+msgid "Run compiled executable"
+msgstr "运行"
+
+#: ../template/codefox.ui.in.h:31
+msgid "toolbutton3"
+msgstr "toolbutton3"
+
+#: ../template/codefox.ui.in.h:32
+msgid "Clear built project"
+msgstr "清理已组建的工程"
+
+#: ../template/codefox.ui.in.h:33
+msgid "toolbutton4"
+msgstr "toolbutton4"
+
+#: ../template/codefox.ui.in.h:34
+msgid "Debug current project"
+msgstr "调试"
+
+#: ../template/codefox.ui.in.h:35
+msgid "Next line"
+msgstr "下一行"
+
+#: ../template/codefox.ui.in.h:36
+msgid "Step into current line"
+msgstr "进入当前行"
+
+#: ../template/codefox.ui.in.h:37
+msgid "Continue running the program"
+msgstr "继续运行"
+
+#: ../template/codefox.ui.in.h:38
+msgid "Stop debug"
+msgstr "停止调试"
+
+#: ../template/codefox.ui.in.h:39
+msgid "Status"
+msgstr "状态"
+
+#: ../template/codefox.ui.in.h:40
+msgid "Compiler"
+msgstr "编译器"
+
+#: ../template/codefox.ui.in.h:41
+msgid "Local"
+msgstr "局部变量"
+
+#: ../template/codefox.ui.in.h:42
+msgid "Call Stack"
+msgstr "调用栈帧"
+
+#: ../template/codefox.ui.in.h:43
+msgid "Watch"
+msgstr "监视器"
+
+#: ../template/codefox.ui.in.h:44
+msgid "Notepad"
+msgstr "笔记本"
+
+#: ../src/callback.c:142 ../src/callback.c:143 ../src/ui.c:680
+msgid "Untitled"
+msgstr "无标题文档"
+
+#: ../src/callback.c:247
+msgid "Start building."
+msgstr "开始组建。"
+
+#: ../src/callback.c:270
+msgid "Building finished."
+msgstr "组建完成。"
+
+#: ../src/callback.c:590
+msgid "Failed to create file."
+msgstr "创建文件失败。"
+
+#: ../src/callback.c:634
+msgid "Failed to add file to project."
+msgstr "添加文件失败。"
+
+#: ../src/callback.c:661
+msgid "Delete file from project and filesystem?"
+msgstr "从工程及文件系统中删除文件？"
+
+#: ../src/callback.c:667
+msgid "Failed to remove file from filesystem."
+msgstr "删除文件失败。"
+
+#: ../src/compile.c:199
+msgid "err"
+msgstr "错"
+
+#: ../src/compile.c:199
+msgid "fat"
+msgstr "致"
+
+#: ../src/compile.c:224
+msgid "war"
+msgstr "警"
+
+#: ../src/editor.c:89
+msgid "Close Tab"
+msgstr "关闭标签"
+
+#: ../src/filetree.c:269
+msgid "header"
+msgstr "头文件"
+
+#: ../src/filetree.c:270
+msgid "source"
+msgstr "源代码"
+
+#: ../src/filetree.c:271
+msgid "resource"
+msgstr "资源文件"
+
+#: ../src/misc.c:212
+msgid " in "
+msgstr " in "
+
+#: ../src/misc.c:220 ../src/misc.c:226
+msgid " at "
+msgstr " at "
+
+#: ../src/ui.c:311
+msgid "Filesystem operations:"
+msgstr "文件系统操作："
+
+#: ../src/ui.c:329
+msgid "This is Codefox "
+msgstr "这是Codefox "
+
+#: ../src/ui.c:331
+msgid ", have fun!"
+msgstr "，尽情享受吧！"
+
+#: ../src/ui.c:339
+msgid "Compiler outputs:"
+msgstr "编译器输出："
+
+#: ../src/ui.c:351
+msgid "Write down any notes you want here..."
+msgstr "写下你想记录的任何东西。。。"
+
+#: ../src/ui.c:376
+#, c-format
+msgid "Couldn't load icon: %s"
+msgstr "不能读取图标：%s"
+
+#: ../src/ui.c:658
+msgid "Perhaps the most lightweight C/C++ IDE..."
+msgstr "也许是最轻量级的C/C++集成开发环境..."
+
+#: ../src/ui.c:748
+msgid "An untitled file has been created."
+msgstr "一个无标题文档已经被创建。"
+
+#: ../src/ui.c:752
+msgid " has been saved."
+msgstr " 已经被保存。"
+
+#: ../src/ui.c:756
+msgid " has been opened."
+msgstr " 已经被打开。"
+
+#: ../src/ui.c:761
+msgid " has been created."
+msgstr " 已经被保存。"
+
+#: ../src/ui.c:765
+msgid " has been added to current project."
+msgstr " 已经被添加到工程。"
+
+#: ../src/ui.c:769
+msgid " has been created and added to current project."
+msgstr " 已经被创建并添加到工程。"
+
+#: ../src/ui.c:773
+msgid " has been removed from project."
+msgstr " 已经从工程中删除。"
+
+#: ../src/ui.c:791
+msgid "Open File"
+msgstr "打开文件"
+
+#: ../src/ui.c:802
+msgid "Codefox project"
+msgstr "Codefox工程"
+
+#: ../src/ui.c:808
+msgid "Save File"
+msgstr "保存文件"
+
+#: ../src/ui.c:1082
+#, c-format
+msgid " Line: %d\tColumn: %d"
+msgstr " 行：%d\t列：%d"
+
+#: ../src/ui.c:1100 ../src/ui.c:1102
+#, c-format
+msgid " Mode: %s"
+msgstr " 模式：%s"
+
+#: ../src/ui.c:1100
+msgid "Overwrite"
+msgstr "覆盖"
+
+#: ../src/ui.c:1102
+msgid "Insert"
+msgstr "插入"
+
+#: ../src/ui.c:1327
+msgid "Add local file"
+msgstr "打开本地文件"
+
+#: ../src/ui.c:1328
+msgid "Create empty file"
+msgstr "创建新标签"
+
+#: ../src/ui.c:1329
+msgid "Delete this item"
+msgstr "删除文件"
+
+#: ../src/ui.c:1801
+#, c-format
+msgid "%s has been modified, save to file?"
+msgstr "%s 已经被修改，是否保存？"
+
+#~ msgid "Cut selected code"
+#~ msgstr "剪切"
+
+#~ msgid "Copy selected code"
+#~ msgstr "复制"
+
+#~ msgid "Delete selected code"
+#~ msgstr "删除"
+
+#~ msgid "Compilation finished with %d error(s), %d warning(s)."
+#~ msgstr "编译完成，发生%d个错误和%d个警告。"
+
+#~ msgid "default"
+#~ msgstr "默认"
