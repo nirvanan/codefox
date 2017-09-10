@@ -25,13 +25,14 @@
 #include "highlighting.h"
 #include "ui.h"
 #include "project.h"
+#include "env.h"
 
 extern CWindow *window;
 
 #define MAX_RESULT_LENTH 100000
 #define MAX_LINE_LENTH 1000
 
-gpointer 
+gboolean 
 static_check (gpointer data)
 {	
 	/* Get current code and check for errors and warnings. */
@@ -50,8 +51,8 @@ static_check (gpointer data)
 	project_path = NULL;
 	file_path = (gchar *) g_malloc (MAX_LINE_LENTH);
 
-	while (1) {
-		g_usleep (500000);
+	if (1) {
+		//g_usleep (500000);
 
 		if (ui_have_editor ()) {
 			ui_current_editor_filepath (file_path);
@@ -60,8 +61,21 @@ static_check (gpointer data)
 				project_path = project_current_path ();
 
 			if (project_path == NULL || file_path[0] == 0) {
+				g_free (file_path);
 
-				continue;
+				return TRUE;
+			}
+			if (project_get_type () == PROJECT_C && !env_prog_exist (ENV_PROG_GCC)) {
+				g_warning ("gcc not found.");
+				g_free (file_path);
+
+				return FALSE;
+			}
+			if (project_get_type () == PROJECT_CPP && !env_prog_exist (ENV_PROG_GPP)) {
+				g_warning ("g++ not found.");
+				g_free (file_path);
+
+				return FALSE;
 			}
 
 			project_type = project_get_type ();
@@ -77,11 +91,15 @@ static_check (gpointer data)
 			if (code == NULL) {
 				g_free (code_path);
 				g_free (libs);
+				g_free (file_path);
 
-				continue;
+				return TRUE;
 			}
 
 			misc_set_file_content (code_path, code);
+
+			g_free (code);
+
 			output = (gchar *) g_malloc (MAX_RESULT_LENTH);
 			compile_static_check (code_path, project_type, libs, output);
 
@@ -105,6 +123,7 @@ static_check (gpointer data)
 					gint column;
 					gchar *code_line;
 					gint len;
+					gint code_len;
 
 					compile_get_location (line, &row, &column);
 
@@ -116,14 +135,13 @@ static_check (gpointer data)
 					code_line = (gchar *) g_malloc (MAX_LINE_LENTH);
 					ui_current_editor_line (code_line, row - 1);
 					len = 0;
-					while (column - 1 + len >= 0 && code_line[column - 1 + len] &&
-						   (code_line[column - 1 + len]) ||
-						   (DIGIT (code_line[column - 1 + len]) 
-						   && code_line[column - 1 + len] != '.')){
+					code_len = strlen(code_line);
+					while (column - 1 + len >= 0 && column - 1 + len < code_len 
+						   && code_line[column - 1 + len] != '.') {
 						len++;
 					}
 
-					if (BRACKET (code_line[column - 1]))
+					if (column - 1 >= 0 && column - 1 < code_len && BRACKET (code_line[column - 1]))
 						len = 1;
 					
 					ui_current_editor_error_tag_add (row - 1, column - 1, len);
@@ -146,5 +164,5 @@ static_check (gpointer data)
 	
 	g_free (file_path);
 
-	return 0;
+	return TRUE;
 }

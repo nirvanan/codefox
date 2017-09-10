@@ -61,8 +61,4 @@ misc_file_exist (const gchar *filepath);
 void
 misc_exec_file (const gchar *filepath);
 
-void
-misc_parse_gdb_bt_line (const gchar *output, const gboolean first, gchar *frame_name, gchar *frame_args,
-						gchar *file_line, gint *offset);
-
 #endif

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(Codefox, 0.06, nirvanan@live.cn, codefox)
+AC_INIT(Codefox, 0.09, nirvanan@live.cn, codefox)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -10,7 +10,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_DEFINE(ENABLE_BINRELOC, , [define ENABLE_BINRELOC])
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE([1.11 -Wall foreign no-define tar-ustar no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.15 -Wall foreign no-define tar-ustar no-dist-gzip dist-xz])
 
 # Support silent build rules, requires at least automake-1.11. Disable
 # by either passing --disable-silent-rules to configure or passing V=1
@@ -22,6 +22,7 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+AC_PROG_RANLIB
 AC_CHECK_PROG(HAVE_CTAGS, ctags, yes)
 AC_CHECK_PROG(HAVE_CSCOPE, cscope, yes)
 AC_CHECK_PROG(HAVE_GDB, gdb, yes)
@@ -33,8 +34,6 @@ LT_INIT([dlopen win32-dll disable-static])
 GLIB_GSETTINGS
 
 PKG_PROG_PKG_CONFIG
-
-GNOME_COMPILE_WARNINGS([maximum])
 
 # Checks for libraries.
 PKG_CHECK_MODULES(codefox, [
@@ -49,7 +48,7 @@ AC_SUBST(XML_LIBS)
 
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h string.h unistd.h time.h])
+AC_CHECK_HEADERS([fcntl.h limits.h stdlib.h string.h sys/param.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
@@ -68,7 +67,9 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Package name for gettext
 
 # Checks for library functions.
 AC_FUNC_FORK
-AC_CHECK_FUNCS([dup2])
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([atexit dup2 memset strchr strdup strrchr strstr])
+
 
 AC_CONFIG_FILES([Makefile
 src/Makefile
@@ -85,6 +86,7 @@ template/codefox-new-project.ui
 template/codefox-create-file.ui
 template/codefox-project-settings.ui
 template/codefox-editor-settings.ui
+template/codefox-fun-tip.ui
 data/Makefile
 data/codefox.pc
 data/codefox.appdata.xml

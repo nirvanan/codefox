@@ -31,6 +31,7 @@
 
 #include "debug.h"
 #include "misc.h"
+#include "env.h"
 
 #define MAX_FILEPATH_LENTH 1000
 #define MAX_LINE_LENTH 1000
@@ -56,9 +57,9 @@ static gboolean debug_conection_broken (const gchar *output);
 static void
 debug_breakpoint_list_clear ()
 {
-	GSList * iterator;
+	GList * iterator;
 
-	for (iterator = (GSList *) breakpoint_list; iterator; iterator = iterator->next) {
+	for (iterator = breakpoint_list; iterator; iterator = iterator->next) {
 		CBreakPoint *breakpoint;
 
 		breakpoint = (CBreakPoint *) iterator->data;
@@ -87,10 +88,28 @@ debug_breakpoint_add (const gchar *breakpoint_desc)
 }
 
 static gboolean 
-debug_conection_broken (const gchar *output)
+debug_conection_broken (const gchar *NOUSE)
 {
-	return (g_strcmp0 (output, _("Remote connection closed\n")) == 0 ||
-			g_strcmp0 (output, _("The program is not being run.\n")) == 0);
+	return !target_pid || kill (target_pid, 0) != 0
+		   || !gdb_pid || kill (gdb_pid, 0) != 0
+		   || !proc_pid || kill (proc_pid, 0) != 0;
+}
+
+static void
+debug_skip_startup_output ()
+{
+	gchar *line = (gchar *) g_malloc (MAX_LINE_LENTH * sizeof (gchar));
+
+	while (1) {
+		line[0] = 0;
+		errno = 0;
+		fgets (line, MAX_LINE_LENTH, out_file);
+		if (errno == EAGAIN) {
+			continue;
+		}
+		if (g_str_has_prefix (line, "(gdb)"))
+			break;
+	}
 }
 
 void
@@ -100,6 +119,16 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 	gchar *line;
 	FILE *pipe_file;
 	gint NOUSE;
+
+	if (!env_prog_exist (ENV_PROG_XTERM) || !env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
+		g_warning ("xterm gdb or gdbserver not found.");
+
+		return;
+	}
+
+	target_pid = (pid_t) 0;
+	gdb_pid = (pid_t) 0;
+	proc_pid = (pid_t) 0;
 
 	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENTH);
@@ -128,7 +157,7 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 		close (fd1[0]);
 		close (fd2[1]);
 
-		execlp ("gdb", "gdb", "--quiet", exe_path, NULL);
+		execlp ("gdb", "gdb", "--quiet", "--interpreter=mi", exe_path, NULL);
 
 		exit (0);
 	}
@@ -145,6 +174,7 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 		fcntl (fd2[0], F_SETFL, old_fl | O_NONBLOCK);
 		setvbuf (in_file, NULL, _IONBF, 0);
 
+		debug_skip_startup_output ();
 		debug_breakpoint_list_clear ();
 
 		g_mutex_lock (&debug_mutex);
@@ -156,11 +186,62 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 	g_free (line);
 }
 
+static debug_parse_mi_line (gchar *line)
+{
+	gchar *temp = (gchar *)g_malloc (MAX_LINE_LENTH * sizeof (gchar));
+	gint i;
+	gint j;
+	gint len;
+
+	i = 0;
+	j = 0;
+	len = strlen (line);
+	i += 2;
+	len -= 2;
+	while (i < len) {
+		if (line[i] == '\\' && i + 1 < len) {
+			gint ok = 1;
+			
+			switch (line[i + 1]) {
+			case 'n':
+				temp[j++] = '\n';
+				break;
+			case 't':
+				temp[j++] = '\t';
+				break;
+			case '\'':
+				temp[j++] = '\'';
+				break;
+			case '\"':
+				temp[j++] = '\"';
+				break;
+			case '\\':
+				temp[j++] = '\\';
+				break;
+			default:
+				g_warning ("unknown mi escape char: \\%c.", line[i + 1]);
+				ok = 0;
+				break;
+			}
+			if (ok) {
+				i += 2;
+				continue;
+			}
+		}
+		temp[j++] = line[i++];
+	}
+	temp[j] = 0;
+	g_strlcpy (line, temp, MAX_LINE_LENTH);
+
+	g_free (temp);
+}
+
 void
 debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 {
 	gchar *line;
 	gint NOUSE;
+	gint start;
 
 	g_mutex_lock (&debug_mutex);
 	if (!debugging) {
@@ -178,18 +259,28 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 	}
 	NOUSE = write (fd1[1], "\n", 1);
 
-	g_usleep (100000);
-
 	line = (gchar *) g_malloc (MAX_LINE_LENTH);
 	line[0] = 0;
 	if (output != NULL)
 		output[0] = 0;
-	errno = 0;
-	while (fgets (line, MAX_LINE_LENTH, out_file)) {
-		if (errno == EAGAIN) {
-			break;
-		}
 
+	start = 0;
+	while (1) {
+		line[0] = 0;
+		errno = 0;
+		fgets (line, MAX_LINE_LENTH, out_file);
+		if (errno == EAGAIN) {
+			continue;
+		}
+		if (!start && (!g_str_has_prefix (line, "&") || !g_str_has_prefix (line + 2, command)))
+			continue;
+		start = 1;
+		if (g_str_has_prefix (line, "(gdb)"))
+			break;
+		if (strlen (line) > 0 && line[0] == '~')
+			debug_parse_mi_line (line);
+		else
+			continue;
 		if (output != NULL)
 			g_strlcat (output, line, MAX_RESULT_LENTH);
 	}
@@ -202,12 +293,12 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 void
 debug_breakpoints_insert (GList *list)
 {
-	GSList * iterator;
+	GList * iterator;
 
-	if (!debugging)
+	if (!debug_is_active ())
 		return ;
 
-	for (iterator = (GSList *) list; iterator; iterator = iterator->next) {
+	for (iterator = list; iterator; iterator = iterator->next) {
 		gchar *breakpoint_desc;
 		CBreakPoint *breakpoint;
 		gint i;
@@ -224,6 +315,7 @@ debug_connect (const gchar *project_path, const gchar *project_name)
 	gchar *output;
 	gint i;
 	gint pid;
+	gint len;
 
 	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	output = (gchar *) g_malloc (MAX_RESULT_LENTH);
@@ -232,12 +324,23 @@ debug_connect (const gchar *project_path, const gchar *project_name)
 	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENTH);
 
 	debug_command_exec ("target remote", GDB_SERVER_PORT_ARG, NULL);
-	g_usleep (100000);
 	debug_command_exec ("info", "proc", output);
 	i = 0;
-	while (!g_str_has_prefix (output + i, _("process")))
+	len = strlen (output);
+	while (i < len && !g_str_has_prefix (output + i, "process"))
 		i++;
-	i += strlen (_("process")) + 1;
+	if (i >= len) {
+		g_warning ("can't get gdbserver pid.");
+		kill (gdb_pid, SIGKILL);
+		kill (target_pid, SIGKILL);
+
+		g_mutex_lock (&debug_mutex);
+		debugging = FALSE;
+		g_mutex_unlock (&debug_mutex);
+
+		return ;
+	}
+	i += strlen ("process") + 1;
 	sscanf (output + i, "%d", &pid);
 	proc_pid = (pid_t) pid;
 }
@@ -245,7 +348,7 @@ debug_connect (const gchar *project_path, const gchar *project_name)
 void
 debug_breakpoint_update (gchar *breakpoint_desc)
 {
-	GSList * iterator;
+	GList *iterator;
 	CBreakPoint *breakpoint;
 	gchar *filepath;
 	gint line;
@@ -255,7 +358,7 @@ debug_breakpoint_update (gchar *breakpoint_desc)
 
 	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	sscanf (breakpoint_desc, "%s %d", filepath, &line);
-	for (iterator = (GSList *) breakpoint_list; iterator; iterator = iterator->next) {
+	for (iterator = breakpoint_list; iterator; iterator = iterator->next) {
 		breakpoint = (CBreakPoint *) iterator->data;
 
 		if (g_strcmp0 (filepath, breakpoint->filepath) == 0 && line == breakpoint->line) {
@@ -311,10 +414,10 @@ debug_current_file_line (const gboolean startup, gchar *filename, gint *line)
 	}
 
 	i = 0;
-	if (startup) {
-		while (output[i] && !g_str_has_prefix (output + i, _(" at ")))
+	if (FALSE) {
+		while (output[i] && !g_str_has_prefix (output + i, " at "))
 			i++;
-		i += strlen (_(" at "));
+		i += strlen (" at ");
 		j = 0;
 		while (output[i] && output[i] != ':') {
 			filename[j] = output[i];
@@ -362,7 +465,7 @@ debug_current_locals (GList **locals)
 		return ;
 	}
 
-	if (!g_str_has_prefix (output, _("No locals."))) {
+	if (!g_str_has_prefix (output, "No locals.")) {
 		gchar *name;
 		gchar *value;
 
@@ -427,6 +530,55 @@ debug_expression_value (const gchar *expression, gchar *value)
 		g_strlcpy (value, _("Can't get the value."), MAX_LINE_LENTH);
 }
 
+static void
+debug_parse_gdb_bt_line (const gchar *output, const gboolean first, gchar *frame_name, gchar *frame_args,
+						gchar *file_line, gint *offset)
+{
+	gint i;
+	gint len;
+	gint line_end;
+
+	len = strlen (output);
+	frame_name[0] = 0;
+	frame_args[0] = 0;
+	file_line[0] = 0;
+
+	line_end = *offset;
+	while (line_end < len && output[line_end] != '\n')
+		line_end++;
+
+	while (!g_str_has_prefix (output + *offset, "  "))
+		(*offset)++;
+	(*offset) += 2;
+
+	if (!first) {
+		while (*offset < line_end && !g_str_has_prefix (output + *offset, " in "))
+			(*offset)++;
+		(*offset) += 4;
+	}
+
+	sscanf (output + *offset, "%s", frame_name);
+	(*offset) += strlen (frame_name) + 1;
+	i = 0;
+	while (*offset < line_end && !g_str_has_prefix (output + *offset, " at ") 
+		   && !g_str_has_prefix (output + *offset, " from ")) {
+		frame_args[i] = output[(*offset)];
+		(*offset)++;
+		i++;
+	}
+	frame_args[i] = 0;
+	if (*offset < line_end && g_str_has_prefix (output + *offset, " at "))
+		(*offset) += strlen (" at ");
+	else if (*offset < line_end && !g_str_has_prefix (output + *offset, " from "))
+		(*offset) += strlen (" from ");
+	else {
+		(*offset) = line_end + 1;
+		return ;
+	}
+	sscanf (output + (*offset), "%s", file_line);
+	(*offset) = line_end + 1;
+}
+
 void
 debug_current_stack (GList **stack)
 {
@@ -457,12 +609,12 @@ debug_current_stack (GList **stack)
 	frame_name = (gchar *) g_malloc (MAX_LINE_LENTH);
 	frame_args = (gchar *) g_malloc (MAX_LINE_LENTH);
 	file_line = (gchar *) g_malloc (MAX_LINE_LENTH);
-	misc_parse_gdb_bt_line (output, TRUE, frame_name, frame_args, file_line, &i);
+	debug_parse_gdb_bt_line (output, TRUE, frame_name, frame_args, file_line, &i);
 	line = (gchar *) g_malloc (MAX_LINE_LENTH);
 	g_sprintf (line, "%s %s %s", frame_name, file_line, frame_args);
 	*stack = g_list_append (*stack, (gpointer) line);
 	while (output[i]) {
-		misc_parse_gdb_bt_line (output, FALSE, frame_name, frame_args, file_line, &i);
+		debug_parse_gdb_bt_line (output, FALSE, frame_name, frame_args, file_line, &i);
 		line = (gchar *) g_malloc (MAX_LINE_LENTH);
 		g_sprintf (line, "%s %s %s", frame_name, file_line, frame_args);
 
@@ -475,36 +627,37 @@ debug_current_stack (GList **stack)
 	g_free (file_line);
 }
 
-gpointer 
-debug_monitor (gpointer data)
-{
-	while (1) {
-		if (kill (proc_pid, 0) != 0) {
-			kill (gdb_pid, SIGKILL);
-
-			ui_disable_debug_widgets ();
-			ui_enable_project_widgets ();
-			ui_disable_debug_view ();
-
-			g_mutex_lock (&debug_mutex);
-			debugging = FALSE;
-			g_mutex_unlock (&debug_mutex);
-
-			return NULL;
-		}
-
-		g_usleep (200000);
-	}
-
-}
-
 void
 debug_stop ()
 {
-	kill (target_pid, SIGKILL);
-	kill (gdb_pid, SIGKILL);
+	if (!kill (target_pid, 0))
+		kill (target_pid, SIGKILL);
+	if (!kill (gdb_pid, 0))
+		kill (gdb_pid, SIGKILL);
+	if (!kill (proc_pid, 0))
+		kill (proc_pid, SIGKILL);
 
 	g_mutex_lock (&debug_mutex);
 	debugging = FALSE;
 	g_mutex_unlock (&debug_mutex);
 }
+
+gboolean 
+debug_monitor (gpointer data)
+{
+	if (1) {
+		if (debug_conection_broken (NULL)) {
+			ui_disable_debug_widgets ();
+			ui_enable_project_widgets ();
+			ui_disable_debug_view ();
+			ui_debug_ptr_remove ();
+
+			debug_stop ();
+
+			return FALSE;
+		}
+	}
+	
+	return TRUE;
+}
+

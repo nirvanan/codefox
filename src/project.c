@@ -49,7 +49,7 @@ project_path_init ()
 
 	default_projects_root = (gchar *) malloc(MAX_PATH_LENTH);
 	g_strlcpy (default_projects_root, g_getenv("HOME"), MAX_PATH_LENTH);
-	g_strlcat (default_projects_root, "/projects", MAX_PATH_LENTH);
+	g_strlcat (default_projects_root, "/Projects", MAX_PATH_LENTH);
 	suc = g_mkdir (default_projects_root, DIR_MODE);
 
 	if (suc == 0)
@@ -182,17 +182,22 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
 	g_strlcpy (type, tmp_c, MAX_PATH_LENTH);
+	xmlFree (tmp_c);
 	project->project_type = (g_strcmp0(type, "C++") == 0);
+
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
 	g_strlcpy (project->project_name, tmp_c, MAX_PATH_LENTH);
+	xmlFree (tmp_c);
+
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
 	g_strlcpy (project->project_path, tmp_c, MAX_PATH_LENTH);
+	xmlFree (tmp_c);
 
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
@@ -206,6 +211,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		tmp_c = xmlNodeGetContent(node);
 		g_strlcpy (new_header, tmp_c, MAX_PATH_LENTH);
 		project->header_list = g_list_append (project->header_list, (gpointer) new_header);
+		xmlFree (tmp_c);
 	}
 
 	child = child->next;
@@ -220,6 +226,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		tmp_c = xmlNodeGetContent(node);
 		g_strlcpy (new_source, tmp_c, MAX_PATH_LENTH);
 		project->source_list = g_list_append (project->source_list, (gpointer) new_source);
+		xmlFree (tmp_c);
 	}
 
 	child = child->next;
@@ -234,6 +241,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		tmp_c = xmlNodeGetContent(node);
 		g_strlcpy (new_resource, tmp_c, MAX_PATH_LENTH);
 		project->resource_list = g_list_append (project->resource_list, (gpointer) new_resource);
+		xmlFree (tmp_c);
 	}
 
 	child = child->next;
@@ -241,13 +249,17 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
 	g_strlcpy (project->libs, tmp_c, MAX_PATH_LENTH);
+	xmlFree (tmp_c);
+
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
 	g_strlcpy (project->opts, tmp_c, MAX_PATH_LENTH);
+	xmlFree (tmp_c);
 
 	g_free (type);
+	xmlFreeDoc (doc);
 }
 
 void
@@ -395,8 +407,14 @@ project_generate_makefile(CProject *project)
 	g_strlcat (makefile_buf, "\nOBJS=$(patsubst %c, %o, $(SRCS))\n", MAX_MAKEFILE_LENTH);
 	g_strlcat (makefile_buf, "LIBS=", MAX_MAKEFILE_LENTH);
 	g_strlcat (makefile_buf, project->libs, MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\nCFLAGS=`pkg-config --cflags ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "LDFLAGS=`pkg-config --libs ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENTH);
+	if (strlen (project->libs) > 0) {
+		g_strlcat (makefile_buf, "\nCFLAGS=`pkg-config --cflags ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "LDFLAGS=`pkg-config --libs ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENTH);
+	}
+	else {
+		g_strlcat (makefile_buf, "\nCFLAGS=$(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "LDFLAGS=$(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENTH);
+	}
 	g_strlcat (makefile_buf, "all: ${PROG_NAME}\n", MAX_MAKEFILE_LENTH);
 	g_strlcat (makefile_buf, "${PROG_NAME}:${OBJS}\n", MAX_MAKEFILE_LENTH);
 	g_strlcat (makefile_buf, "\t${CC} -o ${PROG_NAME} ${OBJS} ${LDFLAGS}\n", MAX_MAKEFILE_LENTH);

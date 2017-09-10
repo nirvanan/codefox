@@ -39,4 +39,6 @@ codefox_SOURCES = autoindent.c \
 	edithistory.c \
 	edithistory.h \
 	search.c \
-	search.h
+	search.h \
+	env.c \
+	env.h

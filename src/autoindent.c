@@ -97,6 +97,8 @@ autoindent_bracket_match (GtkTextBuffer *buffer, gint line, gint offset)
 	for (i = i + 1; text[i] == '\t'; i++, tabs++)
 		;
 	
+	g_free (text);
+
 	if (find)
 		return tabs;
 	else
@@ -142,6 +144,8 @@ autoindent_if_else_match (GtkTextBuffer *buffer, gint line, gint offset)
 	for (i = i + 1; text[i] == '\t'; i++, tabs++)
 		;
 	
+	g_free (text);
+
 	if (find)
 		return tabs;
 	else
@@ -312,6 +316,9 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 				gtk_text_buffer_delete (buffer, &ins, &ine);
 			}
 		}
+
+		g_free (line1);
+		g_free (line2);
 	}
 	
 	g_free (block);

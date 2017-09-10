@@ -20,7 +20,6 @@
  * Boston, MA 02111-1307, USA.
  */
  
-#include "compile.h"
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -28,11 +27,13 @@
 
 #include <glib/gi18n-lib.h>
 #include <glib.h>
+#include "compile.h"
+#include "env.h"
 
 #define MAX_LINE_LENTH 1000
 #define MAX_RESULT_LENTH 100000
 
-static gchar *buffer;
+static gchar buffer[MAX_RESULT_LENTH + 1];
 static gboolean done;
 static gint offset;
 static GMutex compile_mutex;
@@ -44,6 +45,12 @@ compile_compile (gpointer data)
 	gchar *line;
 	const gchar *path;
 	gint NOUSE;
+
+	if (!env_prog_exist (ENV_PROG_MAKE)) {
+		g_warning ("make not found.");
+
+		return;
+	}
 
 	path = (const gchar *) data;
 	fflush (stdin);
@@ -64,6 +71,8 @@ compile_compile (gpointer data)
 	g_mutex_unlock (&compile_mutex);
 
 	g_free (line);
+
+	pclose (pi);
 }
 
 static gpointer 
@@ -93,6 +102,8 @@ compile_clear (gpointer data)
 	g_mutex_unlock (&compile_mutex);
 
 	g_free (line);
+
+	pclose (pi);
 }
 
 gboolean
@@ -137,7 +148,6 @@ compile_getline (gchar *line)
 void
 compile_current_project (const gchar *path, const gboolean compile)
 {
-	buffer = (gchar *) g_malloc (MAX_RESULT_LENTH);
 	buffer[0] = 0;
 	done = FALSE;
 	offset = 0;
@@ -146,8 +156,6 @@ compile_current_project (const gchar *path, const gboolean compile)
 		g_thread_new ("compile", compile_compile, (gpointer) path);
 	else
 		g_thread_new ("clear", compile_clear, (gpointer) path);
-
-	g_free (buffer);
 }
 
 void
@@ -161,10 +169,12 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 
 	line = (gchar *) g_malloc (MAX_LINE_LENTH);
 	command = (gchar *) g_malloc (MAX_LINE_LENTH);
-	g_strlcpy (command, type? "g++ -S ": "gcc -S ", MAX_LINE_LENTH);
-	g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENTH);
-	g_strlcat (command, libs, MAX_LINE_LENTH);
-	g_strlcat (command, "` ", MAX_LINE_LENTH);
+	g_strlcpy (command, type? "g++ -S -Wall ": "gcc -S -Wall ", MAX_LINE_LENTH);
+	if (strlen (libs) > 0) {
+		g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENTH);
+		g_strlcat (command, libs, MAX_LINE_LENTH);
+		g_strlcat (command, "` ", MAX_LINE_LENTH);
+	}
 	g_strlcat (command, filepath, MAX_LINE_LENTH);
 	g_strlcat (command, " 2>&1", MAX_LINE_LENTH);
 
@@ -175,6 +185,8 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 
 	g_free (line);
 	g_free (command);
+
+	pclose (pi);
 }
 
 gint
@@ -184,8 +196,8 @@ compile_is_error (gchar *output)
 	gint i, j;
 	gchar tag[100];
 	
-	if (!output[0])
-		return 1;
+	if (strlen (output) <= 0)
+		return 0;
 		
 	for (i = 0; i < strlen (output) - 5; i++)
 		if (output[i] == ' ')
@@ -209,8 +221,8 @@ compile_is_warning (gchar *output)
 	gint i, j;
 	gchar tag[100];
 	
-	if (!output[0])
-		return 1;
+	if (strlen (output) <= 0)
+		return 0;
 		
 	for (i = 0; i < strlen (output) - 5; i++)
 		if (output[i] == ' ')

@@ -37,6 +37,8 @@
 #include "prefix.h"
 #include "editor.h"
 #include "editorconfig.h"
+#include "project.h"
+#include "env.h"
 
 #define TIME_BUF_SIZE 100
 #define MESSAGE_BUF_SIZE 1000
@@ -67,6 +69,18 @@ static CPreferencesWindow *preferences_window;
 
 static GMutex ui_mutex;
 
+static const gchar *license = 
+"Codefox is free software: you can redistribute it and/or modify it\n"
+"under the terms of the GNU General Public License as published\n"
+"by the Free Software Foundation, either version 3 of the License,\n"
+"or (at your option) any later version.\n\n"
+"Codefox is distributed in the hope that it will be useful, but\n"
+"WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+"See the GNU General Public License for more details.\n\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with Codefox. If not, see <http://www.gnu.org/licenses/>.";
+
 static GtkStockItem items[] =
 {
 	{CODEFOX_STOCK_BUILD, "Build", 0, 0, NULL},
@@ -94,10 +108,10 @@ static void ui_filetree_init(CWindow *window);
 static void ui_toolpad_init(CWindow *window);
 static void ui_debug_view_init (GtkBuilder *builder);
 static void ui_init_stock_items();
-static CEditor *ui_get_current_editor();
 static void ui_new_project_dialog_init (GtkBuilder *builder);
 static void ui_filetree_menu_init ();
 static void ui_editorconfig_init ();
+static void ui_project_label_init ();
 static void ui_editors_config_update ();
 
 /* Connect all callbacks widgets need. */
@@ -265,6 +279,7 @@ ui_window_init(GtkBuilder *builder, CWindow *window)
 	window->statustree = gtk_builder_get_object (builder, "statustree");
 	window->compilertree = gtk_builder_get_object (builder, "compilertree");
 	window->notepadview = gtk_builder_get_object (builder, "notepadview");
+	window->projectlabel = gtk_builder_get_object (builder, "projectlabel");
 	window->locationlabel = gtk_builder_get_object (builder, "locationlabel");
 	window->modelabel = gtk_builder_get_object (builder, "modelabel");
 	window->status_image = gtk_builder_get_object (builder, "statusimage");
@@ -272,6 +287,7 @@ ui_window_init(GtkBuilder *builder, CWindow *window)
 	window->pre_search_toolbar = gtk_builder_get_object (builder, "presearchbutton");
 	window->next_search_toolbar = gtk_builder_get_object (builder, "nextsearchbutton");
 	window->debug_ptr = NULL;
+	window->editor_list = NULL;
 }
 
 /* Init the file tree view. */
@@ -321,6 +337,7 @@ ui_toolpad_init(CWindow *window)
 					   1, welcome_text, 
 					   2, "Orange", -1);
 	g_free (welcome_text);
+	g_free (time);
 
 	store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -361,7 +378,7 @@ ui_init_stock_items()
 		for (j = 0; j < G_N_ELEMENTS (icon_size); j++) {
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, items[i].stock_id, icon_size[j], 0, &error);
 			if (!pixbuf) {
-			    g_warning (_("Couldn't load icon: %s"), error->message);
+			    g_warning (_("Couldn't load icon: %s."), error->message);
 			    g_error_free (error);
 			} else {
 				GtkIconSource *source;
@@ -369,6 +386,8 @@ ui_init_stock_items()
 				source = gtk_icon_source_new ();
 				gtk_icon_source_set_pixbuf (source, pixbuf);
 				gtk_icon_set_add_source (icon_set, source);
+
+				gtk_icon_source_free (source);
 			}
 
 			g_object_unref (pixbuf);
@@ -386,6 +405,15 @@ ui_editorconfig_init ()
 {
 	editorconfig_default_config_new ();
 	editorconfig_user_config_from_default ();
+}
+
+static void
+ui_project_label_init ()
+{
+	gchar label[MAX_FILEPATH_LENTH];
+
+	g_sprintf (label, "%s: %s", _("Project"), _("None"));
+	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
 }
 
 static void
@@ -418,6 +446,27 @@ ui_preferences_window_init ()
 					  G_CALLBACK (on_preferences_close_clicked), NULL);
 	g_signal_connect_after (preferences_window->close_button, "clicked", 
 					  G_CALLBACK (on_preferences_close_clicked_after), NULL);
+}
+
+static void
+ui_fun_tip_init ()
+{
+	GtkBuilder *builder;
+	gchar *data_dir;
+	gchar *template_file;
+	gint response;
+
+	function_tip = (CFunctionTip *) g_malloc (sizeof (CFunctionTip));
+	builder = gtk_builder_new ();
+	data_dir = g_build_filename (CODEFOX_DATADIR, "codefox", NULL);
+	template_file = g_build_filename (data_dir, "codefox-fun-tip.ui", NULL);
+	gtk_builder_add_from_file (builder, template_file, NULL);
+
+	g_free (data_dir);
+	g_free (template_file);
+
+	function_tip->tip_window = gtk_builder_get_object (builder, "toplevel");
+	function_tip->tip_label = gtk_builder_get_object (builder, "label");
 }
 
 static void
@@ -458,12 +507,37 @@ ui_disable_save_widgets()
 void
 ui_enable_project_widgets()
 {
+	if (project_get_type () == PROJECT_C && (!env_prog_exist (ENV_PROG_GCC) || !env_prog_exist (ENV_PROG_MAKE))) {
+		g_warning ("gcc or make not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("gcc or make not found, please check and install."));
+
+		return;
+	}
+	if (project_get_type () == PROJECT_CPP && (!env_prog_exist (ENV_PROG_GPP) || !env_prog_exist (ENV_PROG_MAKE))) {
+		g_warning ("g++ or make not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("g++ or make not found, please check and install."));
+
+		return;
+	}
+
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_toolbar), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->clear_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->clear_toolbar), 1);
+	if (!env_prog_exist (ENV_PROG_XTERM)) {
+		g_warning ("xterm not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("xterm not found, please check and install."));
+
+		return;
+	}	
 	gtk_widget_set_sensitive (GTK_WIDGET (window->run_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->run_toolbar), 1);
+	if (!env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
+		g_warning ("gdb or gdbserver not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("gdb or gdbserver not found, please check and install."));
+
+		return;
+	}
 	gtk_widget_set_sensitive (GTK_WIDGET (window->debug_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->debug_toolbar), 1);
 }
@@ -484,6 +558,18 @@ ui_disable_project_widgets()
 void
 ui_enable_build_widgets()
 {
+	if (project_get_type () == PROJECT_C && (!env_prog_exist (ENV_PROG_GCC) || !env_prog_exist (ENV_PROG_MAKE))) {
+		g_warning ("gcc or make not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("gcc or make not found, please check and install."));
+
+		return;
+	}
+	if (project_get_type () == PROJECT_CPP && (!env_prog_exist (ENV_PROG_GPP) || !env_prog_exist (ENV_PROG_MAKE))) {
+		g_warning ("g++ or make not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("g++ or make not found, please check and install."));
+
+		return;
+	}
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_toolbar), 1);
 }
@@ -498,6 +584,12 @@ ui_disable_build_widgets()
 void
 ui_enable_debug_widgets()
 {
+	if (!env_prog_exist (ENV_PROG_XTERM) || !env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
+		g_warning ("xterm or gdb or gdbserver not found.");
+		ui_status_entry_new (FILE_OP_WARNING, _("xterm or gdb or gdbserver not found, please check and install."));
+
+		return;
+	}
 	gtk_widget_set_sensitive (GTK_WIDGET (window->next_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->step_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->continue_item), 1);
@@ -600,9 +692,6 @@ ui_init()
 	
 	window = (CWindow *) g_malloc (sizeof(CWindow));
 
-	function_tip = (CFunctionTip *) g_malloc (sizeof(CFunctionTip));
-	function_tip->active = FALSE;
-
 	member_menu = (CMemberMenu *) g_malloc (sizeof(CMemberMenu));
 	member_menu->active = FALSE;
 	member_menu->prefix = (gchar *) g_malloc (NAX_TIP_LENTH);
@@ -615,7 +704,9 @@ ui_init()
 	ui_toolpad_init(window);
 	ui_filetree_menu_init ();
 	ui_editorconfig_init ();
+	ui_project_label_init ();
 	ui_preferences_window_init ();
+	ui_fun_tip_init ();
 
 	new_project_dialog = NULL;
 	
@@ -639,19 +730,22 @@ ui_about_dialog_new()
 	GdkPixbuf *logo;
 	GtkIconTheme *icon_theme;
 	
-	gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(about_dialog), "Codefox");
-    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about_dialog), PACKAGE_VERSION);
-    gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(about_dialog), authors);
-    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(about_dialog),
+	gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG(about_dialog), "Codefox");
+    gtk_about_dialog_set_version (GTK_ABOUT_DIALOG(about_dialog), PACKAGE_VERSION);
+    gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG(about_dialog), authors);
+    gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG(about_dialog), authors);
+    gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(about_dialog), authors);
+    gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG(about_dialog),
     							  _("Perhaps the most lightweight C/C++ IDE..."));
-    gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(about_dialog), 
-    							   "Copyright (c) 2012 Gordon Lee");
-    gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(about_dialog), "Free");
+    gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG(about_dialog), 
+    							   "Copyright © 2012-2017 Gordon Lee");
+    gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about_dialog), license);
+	gtk_about_dialog_set_wrap_license (GTK_ABOUT_DIALOG (about_dialog), TRUE);
     icon_theme = gtk_icon_theme_get_default ();
     logo = gtk_icon_theme_load_icon (icon_theme, "codefox", LOGO_SIZE, 0, NULL);
     gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG(about_dialog), logo);
     gtk_about_dialog_set_website (GTK_ABOUT_DIALOG(about_dialog),
-    							  "http://lee75.brinkster.com");
+    							  "https://github.com/nirvanan/Codefox");
 
     gtk_dialog_run (GTK_DIALOG(about_dialog));
     gtk_widget_destroy (about_dialog);
@@ -662,23 +756,26 @@ ui_about_dialog_new()
 void
 ui_editor_new()
 {
+	
 	CEditor *new_editor;
 	gint index;
 
 	new_editor = ceditor_new (_("Untitled"));
 	ceditor_show (new_editor);
+	ceditor_recover_breakpoint (new_editor);
+	window->editor_list = g_list_append (window->editor_list, new_editor);
 	index = gtk_notebook_append_page (GTK_NOTEBOOK (window->code_notebook), 
-									  new_editor->scroll, 
+									  new_editor->textbox, 
 									  new_editor->label_box);
 	
-	window->editor_list = g_list_append (window->editor_list, new_editor);
 	if (index != -1)
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), 
 									   index);
+
 	if (g_list_length (window->editor_list) != 0) {
 		ui_enable_save_widgets ();
 	}
-
+	
 	ui_current_editor_change_mode ();
 }
 
@@ -686,15 +783,16 @@ ui_editor_new()
 void
 ui_editor_new_with_text(const gchar *filepath, const gchar *code_buf)
 {
-	CEditor *new_editor;
+		CEditor *new_editor;
 	gint index;
 
 	new_editor = ceditor_new_with_text (filepath, code_buf);
 	ceditor_show (new_editor);
-	index = gtk_notebook_append_page (GTK_NOTEBOOK (window->code_notebook), 
-									  new_editor->scroll, 
-									  new_editor->label_box);
+	ceditor_recover_breakpoint (new_editor);
 	window->editor_list = g_list_append (window->editor_list, new_editor);
+	index = gtk_notebook_append_page (GTK_NOTEBOOK (window->code_notebook), 
+									  new_editor->textbox, 
+									  new_editor->label_box);
 									  
 	/* Swap to show the created tab of codenotebook.*/
 	if (index != -1)
@@ -705,6 +803,7 @@ ui_editor_new_with_text(const gchar *filepath, const gchar *code_buf)
 		ui_enable_save_widgets ();
 	}
 
+	
 	ui_current_editor_change_mode ();
 }
 
@@ -760,6 +859,14 @@ ui_status_entry_new(const gint op, const gchar *filepath)
 		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
 		g_strlcat (message_buf, _(" has been removed from project."), MESSAGE_BUF_SIZE);
 		break;
+	case FILE_OP_WARNING:
+		g_strlcpy (message_buf, _("WARNING: "), MESSAGE_BUF_SIZE);
+		g_strlcat (message_buf, filepath, MESSAGE_BUF_SIZE);
+		break;
+	case FILE_OP_ERROR:
+		g_strlcpy (message_buf, _("ERROR: "), MESSAGE_BUF_SIZE);
+		g_strlcat (message_buf, filepath, MESSAGE_BUF_SIZE);
+		break;
 	}
 
 	gtk_tree_store_set(store, &iter, 0, time_buf, 1, message_buf, 2, "gray", -1);
@@ -806,9 +913,12 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 	}
 
 	if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
-		g_strlcpy (filepath, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog)),
-				   MAX_FILEPATH_LENTH);
+		gchar *path;
+
+		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+		g_strlcpy (filepath, path, MAX_FILEPATH_LENTH);
 		
+		g_free (path);
 	}
 	else {
 		g_strlcpy (filepath, "NULL", MAX_FILEPATH_LENTH);
@@ -821,15 +931,7 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 gboolean
 ui_have_editor()
 {
-	g_mutex_lock (&ui_mutex);
-
-	gboolean ret;
-
-	ret = ui_get_current_editor() != NULL;
-
-	g_mutex_unlock (&ui_mutex);
-
-	return ret;
+	return ui_get_current_editor() != NULL;
 }
 
 /* Find editor with associated filepath. */
@@ -849,7 +951,39 @@ ui_find_editor(const gchar *filepath)
 	return FALSE;
 }
 
-static CEditor *
+/* Find editor with associated filepath. */
+CEditor *
+ui_get_editor(const gchar *filepath)
+{
+	GList * iterator;
+
+	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
+		CEditor *editor;
+
+		editor = (CEditor *) iterator->data;
+		if (g_strcmp0 (editor->filepath, filepath) == 0)
+			return editor;
+	}
+
+	return NULL;
+}
+
+void
+ui_show_editor_by_path (const gchar *filepath)
+{
+	CEditor *editor;
+	gint page;
+
+	editor = ui_get_editor (filepath);
+	if (editor != NULL) {
+		page = gtk_notebook_page_num (GTK_NOTEBOOK (window->code_notebook), editor->textbox);
+		if (page != -1) {
+			gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), page);
+		}
+	}
+}
+
+CEditor *
 ui_get_current_editor()
 {
 	gint page;
@@ -868,7 +1002,7 @@ ui_get_current_editor()
 		CEditor *editor;
 
 		editor = (CEditor *) iterator->data;
-		if (GTK_WIDGET (editor->scroll) == current_page) {
+		if (GTK_WIDGET (editor->textbox) == current_page) {
 			return editor;
 		}
 	}
@@ -880,8 +1014,7 @@ ui_get_current_editor()
 void
 ui_current_editor_filepath(gchar *filepath)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
@@ -890,16 +1023,13 @@ ui_current_editor_filepath(gchar *filepath)
 		g_strlcpy (filepath, editor->filepath, MAX_FILEPATH_LENTH);
 	else
 		filepath[0] = 0;
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 /* Get current editor code under editing. */
 gchar *
 ui_current_editor_code()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
@@ -908,8 +1038,7 @@ ui_current_editor_code()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return NULL;
 	}
 
@@ -919,10 +1048,8 @@ ui_current_editor_code()
 
 	ret = gtk_text_buffer_get_text (buffer, &start, &end, 1);
 
-	g_mutex_unlock (&ui_mutex);
-
+	
 	return ret;
-
 }
 
 /* Post action after saving a file. */
@@ -958,22 +1085,18 @@ ui_emit_clipboard_signal(gint clipboard_signal)
 void
 ui_emit_close_signal()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return ;
 	}
 
-	g_mutex_unlock (&ui_mutex);
-
+	
 	ceditor_emit_close_signal (editor);
-
 }
 
 void
@@ -1015,6 +1138,7 @@ ui_current_editor_delete_range()
 void
 ui_current_editor_format()
 {
+	
 	CEditor *editor;
 	GtkTextIter start, end;
 	GtkTextBuffer *buffer;
@@ -1041,12 +1165,15 @@ ui_current_editor_format()
 
 	if (end_line >= 1)
 		autoindent_apply (buffer, NULL, 0, end_line);
+
+	g_free (text);
 }
 
 /* Update cursor position. */
 void
 ui_current_editor_update_cursor()
 {
+	
 	GtkTextBuffer *buffer;
 	GtkTextMark *insert;
 	GtkTextIter iter;
@@ -1069,6 +1196,7 @@ ui_current_editor_update_cursor()
 	location = g_malloc (100);
 	sprintf (location, _(" Line: %d\tColumn: %d"), line + 1, column);
 	gtk_label_set_label (GTK_LABEL (window->locationlabel), location);
+
 	g_free (location);
 }
 
@@ -1076,6 +1204,7 @@ ui_current_editor_update_cursor()
 void
 ui_current_editor_change_mode()
 {
+	
 	CEditor *editor;
 	gboolean overwrite;
 	gchar *label;
@@ -1084,7 +1213,7 @@ ui_current_editor_change_mode()
 	overwrite = gtk_text_view_get_overwrite (GTK_TEXT_VIEW (editor->textview));
 	label = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 
-	if (!overwrite)
+	if (overwrite)
 		sprintf (label, _(" Mode: %s"), _("Overwrite"));
 	else
 		sprintf (label, _(" Mode: %s"), _("Insert"));
@@ -1098,6 +1227,7 @@ void
 ui_update_line_number_label (const gboolean insert, const gint append, 
 							 const GtkTextIter *start, const GtkTextIter *end)
 {
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
@@ -1348,8 +1478,12 @@ ui_filetree_menu_popup ()
 	gtk_widget_show(GTK_WIDGET (filetree_menu->create_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->delete_item));
 
-	if (child == -1)
+	if (child == -1) {
+		g_free (name);
+		g_free (path);
+
 		return ;
+	}
 
 	if (isfile) {
 		gtk_widget_hide(GTK_WIDGET (filetree_menu->add_item));
@@ -1451,8 +1585,7 @@ ui_compiletree_clear ()
 void
 ui_append_files_to_second_level(const GList *list, const gint row)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	GList * iterator;
 
 	for (iterator = list; iterator; iterator = iterator->next) {
@@ -1467,68 +1600,55 @@ ui_append_files_to_second_level(const GList *list, const gint row)
 
 	filetree_select_second_level (GTK_TREE_VIEW (window->filetree), -1);
 
-	g_mutex_unlock (&ui_mutex);
-}
+	}
 
 void
 ui_current_editor_line (gchar *line, const gint lineno)
 {
-	g_mutex_lock (&ui_mutex);
-
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
 		return ;
 	}
 
 	ceditor_get_line (editor, line, lineno);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
 ui_current_editor_error_tag_clear ()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return ;
 	}
 
 	ceditor_error_tag_clear (editor);
 
-	g_mutex_unlock (&ui_mutex);
-}
+	}
 
 void
 ui_current_editor_error_tag_add (const gint row, const gint column, const gint len)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return ;
 	}
 
 	ceditor_error_tag_add (editor, row, column, len);
 
-	g_mutex_unlock (&ui_mutex);
-}
+	}
 
 static void
 ui_memu_popup_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
@@ -1536,32 +1656,6 @@ ui_memu_popup_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
 {
 	*push_in = FALSE;
 	ui_current_editor_insert_location (x, y);
-}
-
-static GtkWidget *
-ui_tip_window_new(gchar *tip)
-{
-	GtkWidget *win;
-	GtkWidget *label;
-	GtkWidget *eb;
-	GdkVisual *visual;
-	GdkColor color;
-	PangoFontDescription *pfd;
-
-	win = gtk_window_new (GTK_WINDOW_POPUP);
-	gtk_container_set_border_width (GTK_CONTAINER (win), 0);
-
-	eb = gtk_event_box_new ();
-	gtk_container_set_border_width (GTK_CONTAINER (eb), 1);
-	gtk_container_add (GTK_CONTAINER (win), eb);
-
-	label = gtk_label_new (tip);  
-	gtk_container_add (GTK_CONTAINER (eb), label);
-
-	pfd = pango_font_description_from_string ("monospace");
-	gtk_widget_override_font (label, pfd);
-
-	return win;
 }
 
 void
@@ -1575,15 +1669,14 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 	full = (gchar *) g_malloc (NAX_TIP_LENTH);
 	full[0] = 0;
 	for (iterator = signs; iterator; iterator = iterator->next) {
+		g_strlcat (full, name, NAX_TIP_LENTH);
+		g_strlcat (full, " : ", NAX_TIP_LENTH);
 		g_strlcat (full, (gchar *) iterator->data, NAX_TIP_LENTH);
 		g_strlcat (full, "\n", NAX_TIP_LENTH);
 	}
 	full[strlen (full) - 1] = 0;
 
-	if (function_tip->active)
-		gtk_widget_destroy (GTK_WIDGET (function_tip->tip_window));
-
-	function_tip->tip_window = (GObject *) ui_tip_window_new (full);
+	gtk_label_set_label (GTK_LABEL (function_tip->tip_label), full);
 	ui_current_editor_insert_location (&x, &y);
 	gtk_window_move (GTK_WINDOW (function_tip->tip_window), x, y);
 	gtk_widget_show_all (GTK_WIDGET (function_tip->tip_window));
@@ -1599,7 +1692,7 @@ ui_tip_window_destory ()
 	if (!function_tip->active)
 		return ;
 
-	gtk_widget_destroy (GTK_WIDGET (function_tip->tip_window));
+	gtk_widget_hide (GTK_WIDGET (function_tip->tip_window));
 	function_tip->active = FALSE;
 }
 
@@ -1619,8 +1712,9 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		GtkWidget *stock;
 
 		item = gtk_image_menu_item_new_with_label ((gchar *) iterator->data);
-		stock = gtk_image_new_from_stock (CODEFOX_STOCK_FUNCTION, GTK_ICON_SIZE_MENU);
+		stock = gtk_image_new_from_icon_name (CODEFOX_STOCK_FUNCTION, GTK_ICON_SIZE_MENU);
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), stock);
+		gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
 		gtk_widget_override_font (item, pfd);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
@@ -1634,8 +1728,9 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		GtkWidget *stock;
 
 		item = gtk_image_menu_item_new_with_label ((gchar *) iterator->data);
-		stock = gtk_image_new_from_stock (CODEFOX_STOCK_VARIABLE, GTK_ICON_SIZE_MENU);
+		stock = gtk_image_new_from_icon_name (CODEFOX_STOCK_VARIABLE, GTK_ICON_SIZE_MENU);
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), stock);
+		gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
 		gtk_widget_override_font (item, pfd);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
@@ -1647,6 +1742,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 
 	gtk_widget_override_font (GTK_WIDGET (member_menu->menu), pfd);
 	gtk_menu_shell_set_take_focus (GTK_MENU_SHELL (member_menu->menu), FALSE);
+	gtk_widget_set_can_focus (GTK_WIDGET (member_menu->menu), FALSE);
 	gtk_menu_popup (GTK_MENU (member_menu->menu), NULL, NULL, 
 							  (GtkMenuPositionFunc) ui_memu_popup_position, 
 							  NULL, 3, 0);
@@ -1762,22 +1858,35 @@ ui_member_menu_prefix ()
 	return member_menu->prefix;
 }
 
-void
-ui_current_editor_close ()
+static CEditor *
+ui_get_editor_by_button(GtkButton *button)
 {
-	g_mutex_lock (&ui_mutex);
+	GList *iterator;
+	
+	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
+		CEditor *editor;
 
+		editor = (CEditor *) iterator->data;
+		if (editor->close_button == button)
+			return editor;
+	}
+
+	return NULL;
+}
+
+void
+ui_editor_close (GtkButton *button)
+{
 	CEditor *editor;
 	gint n_page;
 
-	editor = ui_get_current_editor ();
+	editor = ui_get_editor_by_button (button);
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
 		return ;
 	}
 
+	ui_select_editor_with_path (editor->filepath);
 	if (ceditor_get_dirty (editor)) {
 		GtkWidget *dialog;
 		gint result;
@@ -1800,76 +1909,72 @@ ui_current_editor_close ()
 		gtk_widget_destroy (dialog);
 
 		if (result == GTK_RESPONSE_CANCEL) {
-			g_mutex_unlock (&ui_mutex);
-
 			return ;
 		}
 		else if (result == GTK_RESPONSE_ACCEPT) {
-			g_mutex_unlock (&ui_mutex);
-
 			ui_emit_save_signal ();
-
-			g_mutex_lock (&ui_mutex);
 		}
 	}
-
-	g_mutex_unlock (&ui_mutex);
-
+	
 	n_page = gtk_notebook_page_num (GTK_NOTEBOOK (window->code_notebook),
-									GTK_WIDGET (editor->scroll));
+									GTK_WIDGET (editor->textbox));
 	gtk_notebook_remove_page (GTK_NOTEBOOK (window->code_notebook), n_page);
 
-	g_mutex_lock (&ui_mutex);
 	window->editor_list = g_list_remove(window->editor_list, editor);
 
 	if (g_list_length (window->editor_list) == 0) {
 		ui_disable_save_widgets ();
 	}
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
-ui_current_editor_set_dirty ()
+ui_current_editor_close ()
 {
-	g_mutex_lock (&ui_mutex);
-
 	CEditor *editor;
 	gint n_page;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
+		return ;
+	}
 
+	ui_editor_close (editor->close_button);
+}
+
+void
+ui_current_editor_set_dirty ()
+{
+	
+	CEditor *editor;
+	gint n_page;
+
+	editor = ui_get_current_editor ();
+
+	if (editor == NULL) {
+		
 		return ;
 	}
 
 	ceditor_set_dirty (editor, 1);
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
 ui_status_image_set (const gboolean error, const gboolean warning)
 {
-	g_mutex_lock (&ui_mutex);
-
 	if (error)
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSERROR, GTK_ICON_SIZE_MENU);
 	else if (warning)
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSWARNING, GTK_ICON_SIZE_MENU);
 	else
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSPASS, GTK_ICON_SIZE_MENU);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
-ui_hightlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
+ui_highlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 						 GtkTextIter *end)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	GtkTextIter startitr, enditr;
 	gint start_line, end_line;
 	CEditor *current;
@@ -1881,20 +1986,17 @@ ui_hightlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 	gtk_text_iter_forward_to_line_end (&enditr);
 	
 	highlight_apply (textbuffer, &startitr, &enditr);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
-ui_hightlight_on_insert (GtkTextBuffer *textbuffer, GtkTextIter *location, gint *end_line_ptr)
+ui_highlight_on_insert (GtkTextBuffer *textbuffer, GtkTextIter *location, gint lines, gint *end_line_ptr)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	GtkTextIter start, end;
 	gint start_line, end_line;
 
 	end_line = gtk_text_iter_get_line (location);
-	start_line = end_line;
+	start_line = end_line - lines;
 	*end_line_ptr = end_line;
 
 	gtk_text_buffer_get_iter_at_line (textbuffer, &start, start_line);
@@ -1902,8 +2004,6 @@ ui_hightlight_on_insert (GtkTextBuffer *textbuffer, GtkTextIter *location, gint 
 	gtk_text_iter_forward_to_line_end (&end);
 
 	highlight_apply (textbuffer, &start, &end);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
@@ -1921,8 +2021,7 @@ ui_preferences_window_hide ()
 static void
 ui_editors_config_update ()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 	GList * iterator;
 
@@ -1932,8 +2031,6 @@ ui_editors_config_update ()
 		editor = (CEditor *) iterator->data;
 		ceditor_highlighting_update (editor);
 	}
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
@@ -1961,28 +2058,22 @@ ui_preferences_config_update ()
 void
 ui_current_editor_breakpoint_update (gdouble x, gdouble y, gchar *breakpoint_desc)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
 		return ;
 	}
 
 	ceditor_breakpoint_update (editor, x, y, breakpoint_desc);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
 ui_editors_breakpoint_tag_update ()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 	GList * iterator;
 
@@ -1992,8 +2083,6 @@ ui_editors_breakpoint_tag_update ()
 		editor = (CEditor *) iterator->data;
 		ceditor_breakpoint_tags_resize (editor);
 	}
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
@@ -2021,8 +2110,7 @@ ui_disable_debug_view ()
 void
 ui_breakpoint_tags_get (GList **list)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 	GList * iterator;
 
@@ -2032,16 +2120,12 @@ ui_breakpoint_tags_get (GList **list)
 		editor = (CEditor *) iterator->data;
 		ceditor_breakpoint_tags_get (editor, list);
 	}
-
-	g_mutex_unlock (&ui_mutex);
-
 }
 
 void
 ui_debug_ptr_add (const gchar *filepath, const gint line)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 	GList * iterator;
 
@@ -2051,23 +2135,16 @@ ui_debug_ptr_add (const gchar *filepath, const gint line)
 	if (filepath == NULL) {
 		editor = ui_get_current_editor ();
 		window->debug_ptr = (GObject *) ceditor_icon_add (editor, line);
-
-		g_mutex_unlock (&ui_mutex);
 		return ;
 	}
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
-
 		editor = (CEditor *) iterator->data;
 		if (g_strcmp0 (filepath, editor->filepath) == 0) {
 			window->debug_ptr = (GObject *) ceditor_icon_add (editor, line);
-
-			g_mutex_unlock (&ui_mutex);
 			return ;
 		}
 	}
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
@@ -2101,8 +2178,7 @@ ui_debug_view_stack_add (const gchar *frame_name, const gchar *frame_args,
 void
 ui_select_editor_with_path (const gchar *filepath)
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	GList * iterator;
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
@@ -2113,15 +2189,11 @@ ui_select_editor_with_path (const gchar *filepath)
 			gint index;
 
 			index = gtk_notebook_page_num (GTK_NOTEBOOK (window->code_notebook), 
-										   editor->scroll);
+										   editor->textbox);
 			gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), index);
-
-			g_mutex_unlock (&ui_mutex);
 			return ;
 		}
 	}
-
-	g_mutex_lock (&ui_mutex);
 }
 
 void
@@ -2159,9 +2231,9 @@ ui_current_editor_can_undo ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL)
-		return ;
+		return FALSE;
 
-	ceditor_can_undo (editor);
+	return ceditor_can_undo (editor);
 }
 
 gboolean
@@ -2172,49 +2244,41 @@ ui_current_editor_can_redo ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL)
-		return ;
+		return FALSE;
 
-	ceditor_can_redo (editor);
+	return ceditor_can_redo (editor);
 }
 
 void
 ui_current_editor_undo ()
 {
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return ;
 	}
 
 	ceditor_undo (editor);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
 ui_current_editor_redo ()
 {	
-	g_mutex_lock (&ui_mutex);
-
+	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		g_mutex_unlock (&ui_mutex);
-
+		
 		return ;
 	}
 
 	ceditor_redo (editor);
-
-	g_mutex_unlock (&ui_mutex);
 }
 
 void
@@ -2258,7 +2322,7 @@ ui_current_editor_search_next (const gboolean pre)
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL)
-		return ;
+		return 0;
 
 	return ceditor_search_next (editor, pre);
 }
@@ -2274,4 +2338,22 @@ ui_current_editor_select_range (const gint offset, const gint len)
 		return ;
 
 	ceditor_select_range (editor, offset, len);
+}
+
+void
+ui_set_window_title (const gchar *project_name)
+{
+	gchar title[MAX_FILEPATH_LENTH];
+
+	g_sprintf (title, "Codefox - %s", project_name);
+	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
+}
+
+void
+ui_set_project_label (const gchar *project_name)
+{
+	gchar label[MAX_FILEPATH_LENTH];
+
+	g_sprintf (label, "%s: %s", _("Project"), project_name);
+	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
 }

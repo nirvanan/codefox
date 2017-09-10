@@ -1,5 +1,5 @@
 /*
- * highlighting.h
+ * env.h
  * This file is part of codefox
  *
  * Copyright (C) 2012-2013 - Gordon Lee
@@ -20,40 +20,25 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef HIGHLIGHTING_H
-#define HIGHLIGHTING_H
+#ifndef ENV_H
+#define ENV_H
 
 #include <gtk/gtk.h>
-#include "tag.h"
 
-#define CHAR(c) ((c >= 'a' && c <= 'z') || \
- (c >= 'A' && c <= 'Z') || c == '#' || c == '_')
-
-#define DIGIT(c) ((c >= '0' && c <= '9') || c == '.')
-
-#define BRACKET(c) (c == '{' || c == '}' || c == '[' || \
-c == '(' || c == ')')
-
-#define SPACE(c) (c == ' ' || c == '\n' || c == '\t')
-
-void
-highlight_register (GtkTextBuffer *buffer);
+/* External programs */
+#define ENV_PROG_XTERM 1
+#define ENV_PROG_GDBSERVER 2
+#define ENV_PROG_GDB 3
+#define ENV_PROG_CTAGS 4
+#define ENV_PROG_CSCOPE 5
+#define ENV_PROG_GCC 6
+#define ENV_PROG_GPP 7
+#define ENV_PROG_MAKE 8	
 
 void
-highlight_replace (GtkTextBuffer *buffer);
+env_init();
 
-void
-highlight_add_tag (GtkTextBuffer *buffer, GtkTextIter *startitr,
-				   gint offset, gint len, gchar *tag);
-
-void
-highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
-				 GtkTextIter *end);
-
-void
-highlight_set_tab (GtkTextView *buffer);
-
-gboolean 
-highlight_parse (gpointer data);
+gboolean
+env_prog_exist (const gint prog);
 
 #endif

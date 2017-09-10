@@ -66,6 +66,8 @@ filetree_append (GtkTreeView *tree, GtkTreeIter *father,
 	path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), &iter);
 	gtk_tree_view_expand_to_path (tree, path);
 	gtk_tree_selection_select_path (selection, path);
+
+	gtk_tree_path_free (path);
 }
 
 void
@@ -364,4 +366,6 @@ filetree_append_to_second_level (GtkTreeView *tree, gint row, const gchar *filen
 	g_strlcat (filepath, "/", MAX_FILEPATH_LENTH);
 	g_strlcat (filepath, filename, MAX_FILEPATH_LENTH);
 	filetree_append (GTK_TREE_VIEW (tree), &iter, isfile, filename, filepath);
+	
+	g_free (filepath);
 }

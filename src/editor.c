@@ -33,6 +33,9 @@
 #include "callback.h"
 
 #define MAX_LINE_LENTH 1000
+#define MAX_LINE_NUMBER_LENGTH 20
+
+static GList *breakpoint_list;
 
 static void ceditor_set_tabs (GtkWidget *textview);
 static void ceditor_line_label_set_font (CEditor *editor);
@@ -41,6 +44,37 @@ static CBreakPointTag * ceditor_find_breakpoint (CEditor *editor, gint line);
 static GtkWidget * ceditor_breakpoint_tag_add (CEditor *editor, gint line);
 static void ceditor_breakpoint_tag_remove (CEditor *editor, GtkWidget *icon);
 
+static void
+ceditor_add_global_breakpoint (const gchar *filepath, const gint line)
+{
+	CBreakPointNode *node;
+
+	node = (CBreakPointNode *) g_malloc (sizeof (CBreakPointNode));
+	node->filepath = (gchar *) g_malloc ((strlen (filepath) + 1) * sizeof (gchar));
+	g_strlcpy (node->filepath, filepath, strlen (filepath) + 1);
+	node->line = line;
+	breakpoint_list = g_list_append (breakpoint_list, (gpointer) node);
+}
+
+static void
+ceditor_remove_global_breakpoint (const gchar *filepath, const gint line)
+{
+	GList *iterator;
+	
+	for (iterator = breakpoint_list; iterator; iterator = iterator->next) {
+		CBreakPointNode *breakpoint;
+		
+		breakpoint = (CBreakPointNode *) iterator->data;
+		if (g_strcmp0 (breakpoint->filepath, filepath) == 0 && breakpoint->line == line) {
+			breakpoint_list = g_list_remove (breakpoint_list, (gpointer) breakpoint);
+
+			g_free (breakpoint->filepath);
+			g_free (breakpoint);
+
+			break;
+		}
+	}
+}
 
 static void
 ceditor_set_tabs (GtkWidget *textview)
@@ -94,6 +128,7 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	gtk_widget_set_has_tooltip (GTK_WIDGET (new_editor->label_box), 1);
 	gtk_widget_set_tooltip_text (GTK_WIDGET (new_editor->label_box), label);
 	new_editor->scroll = gtk_scrolled_window_new (NULL, NULL);
+	new_editor->event_scroll = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (new_editor->scroll),
 									GTK_POLICY_AUTOMATIC,
 									GTK_POLICY_AUTOMATIC);
@@ -107,18 +142,22 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	att = pango_attr_foreground_new (40000, 40000, 40000);
 	pango_attr_list_insert (labelatt, att);
 	gtk_label_set_attributes (GTK_LABEL (new_editor->lineno), labelatt);
+	pango_attr_list_unref (labelatt);
 	new_editor->linebox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 	new_editor->eventbox = gtk_event_box_new ();
 	new_editor->textbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 	new_editor->notationfixed = gtk_fixed_new ();
 	gtk_widget_set_size_request (new_editor->notationfixed, 18, -1);
-	gtk_box_pack_start (GTK_BOX (new_editor->linebox), new_editor->lineno, 0, 0, 0);
-	gtk_box_pack_start (GTK_BOX (new_editor->linebox), new_editor->notationfixed, 0, 0, 0);
+	gtk_box_pack_start (GTK_BOX (new_editor->linebox), new_editor->lineno, 0, 1, 0);
+	gtk_box_pack_start (GTK_BOX (new_editor->linebox), new_editor->notationfixed, 0, 1, 0);
 	gtk_container_add (GTK_CONTAINER (new_editor->eventbox), new_editor->linebox);
-	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->eventbox, 0, 0, 0);
-	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->textview, 1, 1, 1);
-	//gtk_container_add (GTK_CONTAINER (new_editor->scroll), new_editor->textview);
-	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (new_editor->scroll), new_editor->textbox);
+	gtk_container_add (GTK_CONTAINER (new_editor->event_scroll), new_editor->eventbox);
+	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->event_scroll, 0, 0, 0);
+	gtk_container_add (GTK_CONTAINER (new_editor->scroll), new_editor->textview);
+	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->scroll, 1, 1, 0);
+	gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW (new_editor->event_scroll),
+										gtk_scrolled_window_get_vadjustment (new_editor->scroll));
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (new_editor->event_scroll), GTK_POLICY_NEVER, GTK_POLICY_EXTERNAL);
 
 	new_editor->notationlist = NULL;
 	new_editor->breakpoint_list = NULL;
@@ -127,7 +166,7 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	/* Connect signal handlers. */
 	g_signal_connect_after (new_editor->textview, "move-cursor", 
 						G_CALLBACK (on_cursor_change), NULL);
-	g_signal_connect (new_editor->textview, "toggle-overwrite", 
+	g_signal_connect_after (new_editor->textview, "toggle-overwrite", 
 						G_CALLBACK (on_mode_change), NULL);
 	g_signal_connect (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview)), "mark-set",
 						G_CALLBACK (on_textview_clicked), NULL);
@@ -159,7 +198,8 @@ ceditor_new (const gchar *label)
 	/* Create a new empty editor, label will be "Untitled". */
 	CEditor *new_editor;
 
-	new_editor = (CEditor *) g_malloc (sizeof(CEditor));
+	new_editor = (CEditor *) g_malloc (sizeof (CEditor));
+	memset (new_editor, 0, sizeof (CEditor));
 	new_editor->textview = gtk_text_view_new ();
 	ceditor_init (new_editor, label);
 	ceditor_append_line_label (new_editor, 1);
@@ -182,6 +222,7 @@ ceditor_new_with_text (const gchar *label, const gchar *code_buf)
 	GtkTextBuffer *buffer;
 
 	new_editor = (CEditor *) g_malloc (sizeof(CEditor));
+	memset (new_editor, 0, sizeof (CEditor));
 	tag_table =  gtk_text_tag_table_new ();
 	buffer = gtk_text_buffer_new (tag_table);
 	gtk_text_buffer_insert_at_cursor (buffer, code_buf, strlen(code_buf)); /* FIXME: use glib! */
@@ -224,7 +265,8 @@ ceditor_remove (CEditor *editor)
 		CBreakPointTag *breakpoint;
 
 		breakpoint = (CBreakPointTag *) iterator->data;
-		gtk_widget_destroy (breakpoint->icon);
+		if (GTK_IS_WIDGET (breakpoint->icon))
+			gtk_widget_destroy (breakpoint->icon);
 
 		g_free (breakpoint);
 	}
@@ -252,6 +294,8 @@ ceditor_save_path (CEditor *editor, gchar *filepath)
 	output = fopen (filepath, "w");
 	fputs (text, output);
 	fclose (output);
+
+	g_free (text);
 }
 
 void
@@ -310,6 +354,7 @@ ceditor_show (CEditor *editor)
 	gtk_widget_show (editor->label_name);
 	gtk_widget_show (editor->close_button);
 	gtk_widget_show (editor->scroll);
+	gtk_widget_show (editor->event_scroll);
 	gtk_widget_show (editor->textview);
 	gtk_widget_show (editor->lineno);
 	gtk_widget_show (editor->linebox);
@@ -319,32 +364,59 @@ ceditor_show (CEditor *editor)
 }
 
 void
+ceditor_recover_breakpoint (CEditor *editor)
+{
+	GList *iterator;
+	
+	for (iterator = breakpoint_list; iterator; iterator = iterator->next) {
+		CBreakPointNode *breakpoint;
+		
+		breakpoint = (CBreakPointNode *) iterator->data;
+		if (g_strcmp0 (breakpoint->filepath, editor->filepath) == 0) {
+			CBreakPointTag *tag;
+			GtkWidget *icon;
+			
+			tag = (CBreakPointTag *) g_malloc (sizeof (CBreakPointTag));
+			tag->filepath = editor->filepath;
+			tag->line = breakpoint->line;
+
+			editor->breakpoint_list = g_list_append (editor->breakpoint_list, (gpointer) breakpoint);
+			icon = ceditor_breakpoint_tag_add (editor, breakpoint->line);
+			tag->icon = icon;
+		}
+	}
+}
+
+void
 ceditor_append_line_label (CEditor *editor, gint lines)
 {
 	/* Update line number column. */
 	gchar *text;
 	gint i;
 	gint len;
+	gint label_len;
+	gint extra_len = lines * (MAX_LINE_NUMBER_LENGTH + 1);
 	
-	text = g_malloc (10240);
-	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), 10240);
+	label_len = strlen (gtk_label_get_text (GTK_LABEL (editor->lineno))) + extra_len + 1;
+	text = g_malloc (sizeof (gchar) * label_len);
+	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), label_len);
 	
 	if (editor->linecount != 0)
-		g_strlcat (text, "\n", 10240);
+		g_strlcat (text, "\n", label_len);
 	for (i = 1; i <= lines; i++)
 	{
-		gchar line[100];
+		gchar line[MAX_LINE_NUMBER_LENGTH + 2];
 		
 		sprintf (line, "%d\n", i + editor->linecount);
-		g_strlcat (text, line, 10240);
+		g_strlcat (text, line, label_len);
 	}
 	len = strlen (text);
 
 	/* Update linecount. */
 	editor->linecount += lines;
 
-	if (text[strlen (text) - 1] == '\n')
-		text[strlen (text) - 1] = 0;
+	if (text[len - 1] == '\n')
+		text[len - 1] = 0;
 	
 	gtk_label_set_text (GTK_LABEL (editor->lineno), text);
 	g_free (text);
@@ -490,13 +562,16 @@ ceditor_get_line (CEditor *editor, gchar *line, const gint lineno)
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
 	FILE *output;
+	gchar *text;
 	
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	gtk_text_buffer_get_iter_at_line (buffer, &start, lineno);
 	gtk_text_buffer_get_iter_at_line (buffer, &end, lineno);
 	gtk_text_iter_forward_to_line_end (&end);
-	g_strlcpy (line, gtk_text_buffer_get_text (buffer, &start, &end, 1),
-			   MAX_LINE_LENTH);
+	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
+	g_strlcpy (line, text, MAX_LINE_LENTH);
+
+	g_free (text);
 }
 
 void
@@ -542,7 +617,7 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 	gtk_text_view_get_iter_location (GTK_TEXT_VIEW (editor->textview), &insert, &location);
 
 	*x = location.x;
-	*y = location.y + location.height;
+	*y = location.y;// + location.height;
 
 	gtk_text_view_buffer_to_window_coords (GTK_TEXT_VIEW (editor->textview), GTK_TEXT_WINDOW_WIDGET,
 										   *x, *y, x, y);
@@ -609,7 +684,7 @@ ceditor_breakpoint_tag_add (CEditor *editor, gint line)
 	gint line_height;
 	gint line_label_height;
 
-	line_label_height = gtk_widget_get_allocated_height (editor->lineno);
+	gtk_widget_get_preferred_height (editor->lineno, NULL, &line_label_height);
 	line_height = line_label_height / editor->linecount;
 	icon_theme = gtk_icon_theme_get_default ();
 	pixbuf = gtk_icon_theme_load_icon (icon_theme, CODEFOX_STOCK_BREAKPOINT, line_height, 0, NULL);
@@ -636,7 +711,7 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 	CBreakPointTag *breakpoint;
 	GtkWidget *icon;
 
-	line_label_height = gtk_widget_get_allocated_height (editor->lineno);
+	gtk_widget_get_preferred_height (editor->lineno, NULL, &line_label_height);
 	line = ((gint) y) / (line_label_height / editor->linecount) + 1;
 
 	if (line > editor->linecount)
@@ -654,6 +729,8 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 		breakpoint->icon = icon;
 
 		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
+
+		ceditor_add_global_breakpoint (editor->filepath, line);
 	}
 	else {
 		editor->breakpoint_list = g_list_remove (editor->breakpoint_list, (gpointer) breakpoint);
@@ -661,6 +738,8 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 
 		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
 
+		ceditor_remove_global_breakpoint (editor->filepath, line);
+		
 		g_free (breakpoint);
 	}
 }
@@ -707,7 +786,7 @@ ceditor_icon_add (CEditor *editor, const gint line)
 	gint line_height;
 	gint line_label_height;
 
-	line_label_height = gtk_widget_get_allocated_height (editor->lineno);
+	gtk_widget_get_preferred_height (editor->lineno, NULL, &line_label_height);
 	line_height = line_label_height / editor->linecount;
 	icon_theme = gtk_icon_theme_get_default ();
 	pixbuf = gtk_icon_theme_load_icon (icon_theme, CODEFOX_STOCK_DEBUGPTR, line_height, 0, NULL);
@@ -725,6 +804,11 @@ ceditor_step_add (CEditor *editor, const gboolean insert,
 				  const gint offset, const gint len,
 				  const gchar *text)
 {
+	if (editor->next_modify_omit)
+	{
+		editor->next_modify_omit = 0;
+		return ;
+	}
 	edit_history_step_add (editor->edit_history, insert, offset, len, text);
 }
 
@@ -745,6 +829,7 @@ ceditor_undo (CEditor *editor)
 {
 	GtkTextBuffer *buffer;
 
+	editor->next_modify_omit = 1;
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	edit_history_action (editor->edit_history, buffer, 1);
 }
@@ -754,6 +839,7 @@ ceditor_redo (CEditor *editor)
 {
 	GtkTextBuffer *buffer;
 
+	editor->next_modify_omit = 1;
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	edit_history_action (editor->edit_history, buffer, 0);
 }

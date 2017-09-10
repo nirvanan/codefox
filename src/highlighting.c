@@ -24,8 +24,11 @@
 #include "highlighting.h"
 #include "keywords.h"
 #include "editorconfig.h"
+#include "ui.h"
 
 #define MAX_LEX_SIZE 1000000
+
+static gchar lex[MAX_LEX_SIZE];
 
 void 
 highlight_register (GtkTextBuffer *buffer)
@@ -96,14 +99,13 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	/* Use a finite state machine to highlighting a code. */
 	gchar *text;	
 	gint i;
-	gchar *lex;
 	gint lex_len;
 	gint state;
 	GtkTextIter st, ed;
 	
 	text = gtk_text_iter_get_text (start, end);
-	lex = (gchar *) g_malloc (MAX_LEX_SIZE);
 	lex_len = 0;
+	lex[0] = 0;
 	state = 0;
 
 	gtk_text_buffer_get_start_iter (buffer, &st);
@@ -242,7 +244,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 		
 	}
 	
-	g_free (lex);
+	g_free (text);
 }
 
 void
@@ -264,5 +266,28 @@ highlight_set_tab (GtkTextView *textview)
 	gtk_text_view_set_tabs (GTK_TEXT_VIEW (textview), tab_array);
 
 	g_free (tab_string);
+	pango_tab_array_free (tab_array);
+	g_object_unref (G_OBJECT (layout));
 }
 
+gboolean 
+highlight_parse (gpointer data)
+{
+	CEditor *editor;
+
+	editor = ui_get_current_editor ();
+	if (editor != NULL) {
+		GtkTextBuffer *buffer;
+		GtkTextIter start, end;
+		
+		buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
+		gtk_text_buffer_get_start_iter (buffer, &start);
+		gtk_text_buffer_get_end_iter (buffer, &end);
+
+		highlight_apply (buffer, &start, &end);
+
+		return TRUE;
+	}
+
+	return TRUE;
+}

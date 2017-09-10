@@ -88,6 +88,7 @@ typedef struct {
 	GObject *statustree;
 	GObject *compilertree;
 	GObject *notepadview;
+	GObject *projectlabel;
 	GObject *locationlabel;
 	GObject *modelabel;
 	GObject *filetree;
@@ -128,6 +129,7 @@ typedef struct {
 
 typedef struct {
 	GObject *tip_window;
+	GObject *tip_label;
 	gboolean active;
 } CFunctionTip;
 
@@ -156,7 +158,9 @@ typedef enum {
 	FILE_OP_NEW_PROJECT,
 	FILE_OP_ADD_FILE,
 	FILE_OP_CREATE_FILE,
-	FILE_OP_DELETE_FILE
+	FILE_OP_DELETE_FILE,
+	FILE_OP_WARNING,
+	FILE_OP_ERROR
 } CFileOp;
 
 typedef enum {
@@ -244,6 +248,12 @@ ui_have_editor();
 
 gboolean
 ui_find_editor(const gchar *filepath);
+
+CEditor *
+ui_get_editor(const gchar *filepath);
+
+void
+ui_show_editor_by_path (const gchar *filepath);
 
 void
 ui_current_editor_filepath(gchar *filepath);
@@ -373,6 +383,9 @@ const gchar *
 ui_member_menu_prefix ();
 
 void
+ui_editor_close (GtkButton *button);
+
+void
 ui_current_editor_close ();
 
 void
@@ -382,11 +395,11 @@ void
 ui_status_image_set (const gboolean error, const gboolean warning);
 
 void
-ui_hightlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
+ui_highlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 						 GtkTextIter *end);
 
 void
-ui_hightlight_on_insert (GtkTextBuffer *textbuffer, GtkTextIter *location, gint *end_line_ptr);
+ui_highlight_on_insert (GtkTextBuffer *textbuffer, GtkTextIter *location, gint lines, gint *end_line_ptr);
 
 void
 ui_preferences_window_show ();
@@ -440,6 +453,9 @@ ui_debug_view_get_all_expression (GList **list);
 void
 ui_debug_view_set_values (GList *list);
 
+CEditor *
+ui_get_current_editor();
+
 void
 ui_current_editor_step_add (const gboolean insert,
 							const gint offset, const gint len,
@@ -471,5 +487,11 @@ ui_current_editor_search_next (const gboolean pre);
 
 void
 ui_current_editor_select_range (const gint offset, const gint len);
+
+void
+ui_set_window_title (const gchar *project_name);
+
+void
+ui_set_project_label (const gchar *project_name);
 
 #endif

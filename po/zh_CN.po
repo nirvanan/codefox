@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Codefox guess\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-10-25 22:33+0800\n"
+"POT-Creation-Date: 2017-09-11 01:32+0800\n"
 "PO-Revision-Date: 2013-10-02 23:12+0800\n"
 "Last-Translator: Gordon Lee <nirvanan@live.cn>\n"
 "Language-Team: Gordon Lee <nirvanan@live.cn>\n"
@@ -45,7 +45,8 @@ msgstr "代码"
 msgid "Format"
 msgstr "格式化"
 
-#: ../template/codefox.ui.in.h:8 ../src/filetree.c:245
+#: ../template/codefox.ui.in.h:8 ../src/filetree.c:247 ../src/ui.c:415
+#: ../src/ui.c:2357
 msgid "Project"
 msgstr "工程"
 
@@ -117,7 +118,7 @@ msgstr "保存当前代码到本地文件"
 msgid "toolbutton2"
 msgstr "toolbutton2"
 
-#: ../template/codefox.ui.in.h:26
+#: ../template/codefox.ui.in.h:26 ../template/codefox-new-project.ui.in.h:1
 msgid "Create a new project"
 msgstr "创建新工程"
 
@@ -193,173 +194,343 @@ msgstr "监视器"
 msgid "Notepad"
 msgstr "笔记本"
 
-#: ../src/callback.c:142 ../src/callback.c:143 ../src/ui.c:680
+#: ../template/codefox-create-file.ui.in.h:1
+msgid "File name:"
+msgstr "文件名："
+
+#: ../template/codefox-editor-settings.ui.in.h:1
+msgid "Preferences"
+msgstr "首选项"
+
+#: ../template/codefox-editor-settings.ui.in.h:2
+msgid "Code Font:"
+msgstr "代码字体："
+
+#: ../template/codefox-editor-settings.ui.in.h:3
+msgid "Keyword Color: "
+msgstr "关键字颜色："
+
+#: ../template/codefox-editor-settings.ui.in.h:4
+msgid "Pick a Color for Keyword"
+msgstr "选择关键字颜色"
+
+#: ../template/codefox-editor-settings.ui.in.h:5
+msgid "String Color:"
+msgstr "字符串颜色："
+
+#: ../template/codefox-editor-settings.ui.in.h:6
+msgid "Pick a Color for String"
+msgstr "选择字符串颜色"
+
+#: ../template/codefox-editor-settings.ui.in.h:7
+msgid "Constant Color: "
+msgstr "常量颜色："
+
+#: ../template/codefox-editor-settings.ui.in.h:8
+msgid "Pick a Color for Constant"
+msgstr "选择常量颜色"
+
+#: ../template/codefox-editor-settings.ui.in.h:9
+msgid "Comment Color:"
+msgstr "注释颜色："
+
+#: ../template/codefox-editor-settings.ui.in.h:10
+msgid "Pick a Color for Comment"
+msgstr "选择注释颜色"
+
+#: ../template/codefox-editor-settings.ui.in.h:11
+msgid "Preprocessor Color: "
+msgstr "预处理器颜色："
+
+#: ../template/codefox-editor-settings.ui.in.h:12
+msgid "Pick a Color for Preprocessor"
+msgstr "选择预处理器颜色"
+
+#: ../template/codefox-new-project.ui.in.h:2
+msgid "Create"
+msgstr "创建"
+
+#: ../template/codefox-new-project.ui.in.h:3
+#: ../template/codefox-project-settings.ui.in.h:3
+msgid "Cancel"
+msgstr "取消"
+
+#: ../template/codefox-new-project.ui.in.h:4
+msgid "Project name: "
+msgstr "工程名字："
+
+#: ../template/codefox-new-project.ui.in.h:5
+msgid "Project path: "
+msgstr "工程路径："
+
+#: ../template/codefox-new-project.ui.in.h:6
+msgid "Project type: "
+msgstr "工程类型："
+
+#: ../template/codefox-new-project.ui.in.h:7
+msgid "C"
+msgstr "C"
+
+#: ../template/codefox-new-project.ui.in.h:8
+msgid "C++"
+msgstr "C++"
+
+#: ../template/codefox-project-settings.ui.in.h:1
+msgid "Project Settings"
+msgstr "项目设置"
+
+#: ../template/codefox-project-settings.ui.in.h:2
+msgid "Save"
+msgstr "保存文件"
+
+#: ../template/codefox-project-settings.ui.in.h:4
+msgid "Libraries:"
+msgstr "库："
+
+#: ../template/codefox-project-settings.ui.in.h:5
+msgid "Compiler options:"
+msgstr "编译器选项："
+
+#: ../template/codefox-project-settings.ui.in.h:6
+msgid "Note: Separate each item with space(s)."
+msgstr "注意：每个选项间请用空格隔开。"
+
+#: ../src/callback.c:147 ../src/callback.c:148 ../src/ui.c:763
 msgid "Untitled"
 msgstr "无标题文档"
 
-#: ../src/callback.c:247
+#: ../src/callback.c:255
 msgid "Start building."
 msgstr "开始组建。"
 
-#: ../src/callback.c:270
+#: ../src/callback.c:278
 msgid "Building finished."
 msgstr "组建完成。"
 
-#: ../src/callback.c:590
+#: ../src/callback.c:605
 msgid "Failed to create file."
 msgstr "创建文件失败。"
 
-#: ../src/callback.c:634
+#: ../src/callback.c:649
 msgid "Failed to add file to project."
 msgstr "添加文件失败。"
 
-#: ../src/callback.c:661
+#: ../src/callback.c:676
 msgid "Delete file from project and filesystem?"
 msgstr "从工程及文件系统中删除文件？"
 
-#: ../src/callback.c:667
+#: ../src/callback.c:682
 msgid "Failed to remove file from filesystem."
 msgstr "删除文件失败。"
 
-#: ../src/compile.c:199
+#: ../src/callback.c:860
+msgid "failed to start or conect to debug process."
+msgstr "无法开始或连接调试进程。"
+
+#: ../src/compile.c:211
 msgid "err"
 msgstr "错"
 
-#: ../src/compile.c:199
+#: ../src/compile.c:211
 msgid "fat"
 msgstr "致"
 
-#: ../src/compile.c:224
+#: ../src/compile.c:236
 msgid "war"
 msgstr "警"
 
-#: ../src/editor.c:89
+#: ../src/debug.c:513 ../src/debug.c:530
+msgid "Can't get the value."
+msgstr "无法获取值。"
+
+#: ../src/debugview.c:51
+msgid "Local Variable:"
+msgstr "局部变量："
+
+#: ../src/debugview.c:58 ../src/debugview.c:138
+msgid "Value:"
+msgstr "值："
+
+#: ../src/debugview.c:86
+msgid "Function:"
+msgstr "函数："
+
+#: ../src/debugview.c:93
+msgid "Arguments:"
+msgstr "参数："
+
+#: ../src/debugview.c:100
+msgid "Source File:"
+msgstr "源文件："
+
+#: ../src/debugview.c:129
+msgid "Expression:"
+msgstr "表达式："
+
+#: ../src/editor.c:123
 msgid "Close Tab"
 msgstr "关闭标签"
 
-#: ../src/filetree.c:269
+#: ../src/filetree.c:271
 msgid "header"
 msgstr "头文件"
 
-#: ../src/filetree.c:270
+#: ../src/filetree.c:272
 msgid "source"
 msgstr "源代码"
 
-#: ../src/filetree.c:271
+#: ../src/filetree.c:273
 msgid "resource"
 msgstr "资源文件"
 
-#: ../src/misc.c:212
-msgid " in "
-msgstr " in "
+#: ../src/symbol.c:660
+msgid "can't open tag file, please check whether ctags is installed."
+msgstr "无法创建tag文件，请检查ctags是否安装。"
 
-#: ../src/misc.c:220 ../src/misc.c:226
-msgid " at "
-msgstr " at "
-
-#: ../src/ui.c:311
+#: ../src/ui.c:315
 msgid "Filesystem operations:"
 msgstr "文件系统操作："
 
-#: ../src/ui.c:329
+#: ../src/ui.c:333
 msgid "This is Codefox "
 msgstr "这是Codefox "
 
-#: ../src/ui.c:331
+#: ../src/ui.c:335
 msgid ", have fun!"
 msgstr "，尽情享受吧！"
 
-#: ../src/ui.c:339
+#: ../src/ui.c:344
 msgid "Compiler outputs:"
 msgstr "编译器输出："
 
-#: ../src/ui.c:351
+#: ../src/ui.c:356
 msgid "Write down any notes you want here..."
 msgstr "写下你想记录的任何东西。。。"
 
-#: ../src/ui.c:376
+#: ../src/ui.c:381
 #, c-format
-msgid "Couldn't load icon: %s"
+msgid "Couldn't load icon: %s."
 msgstr "不能读取图标：%s"
 
-#: ../src/ui.c:658
-msgid "Perhaps the most lightweight C/C++ IDE..."
-msgstr "也许是最轻量级的C/C++集成开发环境..."
+#: ../src/ui.c:415
+msgid "None"
+msgstr "无"
 
-#: ../src/ui.c:748
+#: ../src/ui.c:512 ../src/ui.c:563
+msgid "gcc or make not found, please check and install."
+msgstr "gcc或者make未找到，请检查并安装。"
+
+#: ../src/ui.c:518 ../src/ui.c:569
+msgid "g++ or make not found, please check and install."
+msgstr "g++或者make未找到，请检查并安装。"
+
+#: ../src/ui.c:529
+msgid "xterm not found, please check and install."
+msgstr "xterm未找到，请检查并安装。"
+
+#: ../src/ui.c:537
+msgid "gdb or gdbserver not found, please check and install."
+msgstr "gdb或者gdbserver未找到，请检查并安装。"
+
+#: ../src/ui.c:589
+msgid "xterm or gdb or gdbserver not found, please check and install."
+msgstr "xterm或者gdb或者gdbserver未找到，请检查并安装。"
+
+#: ../src/ui.c:739
+msgid "Perhaps the most lightweight C/C++ IDE..."
+msgstr "也许是最轻量级的C/C++集成开发环境。。。"
+
+#: ../src/ui.c:835
 msgid "An untitled file has been created."
 msgstr "一个无标题文档已经被创建。"
 
-#: ../src/ui.c:752
+#: ../src/ui.c:839
 msgid " has been saved."
 msgstr " 已经被保存。"
 
-#: ../src/ui.c:756
+#: ../src/ui.c:843
 msgid " has been opened."
 msgstr " 已经被打开。"
 
-#: ../src/ui.c:761
+#: ../src/ui.c:848
 msgid " has been created."
 msgstr " 已经被保存。"
 
-#: ../src/ui.c:765
+#: ../src/ui.c:852
 msgid " has been added to current project."
 msgstr " 已经被添加到工程。"
 
-#: ../src/ui.c:769
+#: ../src/ui.c:856
 msgid " has been created and added to current project."
 msgstr " 已经被创建并添加到工程。"
 
-#: ../src/ui.c:773
+#: ../src/ui.c:860
 msgid " has been removed from project."
 msgstr " 已经从工程中删除。"
 
-#: ../src/ui.c:791
+#: ../src/ui.c:863
+msgid "WARNING: "
+msgstr "警告: "
+
+#: ../src/ui.c:867
+msgid "ERROR: "
+msgstr "错误: "
+
+#: ../src/ui.c:886
 msgid "Open File"
 msgstr "打开文件"
 
-#: ../src/ui.c:802
+#: ../src/ui.c:897
 msgid "Codefox project"
 msgstr "Codefox工程"
 
-#: ../src/ui.c:808
+#: ../src/ui.c:903
 msgid "Save File"
 msgstr "保存文件"
 
-#: ../src/ui.c:1082
+#: ../src/ui.c:1197
 #, c-format
 msgid " Line: %d\tColumn: %d"
 msgstr " 行：%d\t列：%d"
 
-#: ../src/ui.c:1100 ../src/ui.c:1102
+#: ../src/ui.c:1217 ../src/ui.c:1219
 #, c-format
 msgid " Mode: %s"
 msgstr " 模式：%s"
 
-#: ../src/ui.c:1100
+#: ../src/ui.c:1217
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: ../src/ui.c:1102
+#: ../src/ui.c:1219
 msgid "Insert"
 msgstr "插入"
 
-#: ../src/ui.c:1327
+#: ../src/ui.c:1445
 msgid "Add local file"
 msgstr "打开本地文件"
 
-#: ../src/ui.c:1328
+#: ../src/ui.c:1446
 msgid "Create empty file"
 msgstr "创建新标签"
 
-#: ../src/ui.c:1329
+#: ../src/ui.c:1447
 msgid "Delete this item"
 msgstr "删除文件"
 
-#: ../src/ui.c:1801
+#: ../src/ui.c:1898
 #, c-format
 msgid "%s has been modified, save to file?"
 msgstr "%s 已经被修改，是否保存？"
+
+#~ msgid " at "
+#~ msgstr " at "
+
+#~ msgid "No locals."
+#~ msgstr "无局部变量。"
+
+#~ msgid " in "
+#~ msgstr " in "
 
 #~ msgid "Cut selected code"
 #~ msgstr "剪切"

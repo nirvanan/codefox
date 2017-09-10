@@ -20,11 +20,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include <gtk/gtk.h>
+#include <glib/gi18n-lib.h>
 #include "symbol.h"
 #include "highlighting.h"
 #include "editor.h"
 #include "ui.h"
 #include "project.h"
+#include "env.h"
 
 #define MAX_LINE_LENTH 1000
 
@@ -40,6 +47,223 @@ GList *function_list;
 GList *variable_list;
 GList *struct_list;
 GList *class_list;
+
+static void
+symbol_clear_class(gpointer ptr);
+
+static void
+symbol_clear_struct(gpointer ptr);
+
+static void
+symbol_clear_namespace(gpointer ptr);
+
+static void
+symbol_clear_function(gpointer ptr);
+
+static void
+symbol_clear_variable(gpointer ptr);
+
+static void
+symbol_clear_class(gpointer ptr)
+{
+	GList *iterator;
+	CSymbolClass *class_ptr = (CSymbolClass *) ptr;
+
+	g_assert (class_ptr->metaclass == META_TYPE_CLASS);
+
+	g_debug ("clear c:%s\n", class_ptr->name);
+
+	for (iterator = class_ptr->public_member_list; iterator; iterator = iterator->next) {
+		CSymbolMeta *meta_ptr;
+
+		meta_ptr = (CSymbolMeta *) iterator->data;
+		switch (meta_ptr->metaclass) {
+			case META_TYPE_BASE:
+				symbol_clear_variable ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_FUNCTION:
+				symbol_clear_function ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_CLASS:
+				symbol_clear_class ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_STRUCT:
+				symbol_clear_struct ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_NAMESPACE:
+				symbol_clear_namespace ((gpointer *) meta_ptr);
+				break;
+		}
+	}
+	g_list_free (class_ptr->public_member_list);
+	g_list_free_full (class_ptr->public_function_list, g_free);
+
+	g_free (ptr);
+}
+
+static void
+symbol_clear_struct(gpointer ptr)
+{
+	GList *iterator;
+	CSymbolStruct *struct_ptr = (CSymbolStruct *) ptr;
+
+	g_assert (struct_ptr->metaclass == META_TYPE_STRUCT);
+
+	g_debug ("clear s:%s\n", struct_ptr->name);
+
+	for (iterator = struct_ptr->member_list; iterator; iterator = iterator->next) {
+		CSymbolMeta *meta_ptr;
+
+		meta_ptr = (CSymbolMeta *) iterator->data;
+		switch (meta_ptr->metaclass) {
+			case META_TYPE_BASE:
+				symbol_clear_variable ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_FUNCTION:
+				symbol_clear_function ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_CLASS:
+				symbol_clear_class ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_STRUCT:
+				symbol_clear_struct ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_NAMESPACE:
+				symbol_clear_namespace ((gpointer *) meta_ptr);
+				break;
+		}
+	}
+	g_list_free (struct_ptr->member_list);
+	g_list_free_full (struct_ptr->function_list, g_free);
+
+	g_free (ptr);
+}
+
+static void
+symbol_clear_namespace(gpointer ptr)
+{
+	GList *iterator;
+	CSymbolNamespace *namespace_ptr = (CSymbolNamespace *) ptr;
+
+	g_assert (namespace_ptr->metaclass == META_TYPE_NAMESPACE);
+
+	g_debug ("clear n:%s\n", namespace_ptr->name);
+
+	for (iterator = namespace_ptr->member_list; iterator; iterator = iterator->next) {
+		CSymbolMeta *meta_ptr;
+
+		meta_ptr = (CSymbolMeta *) iterator->data;
+		switch (meta_ptr->metaclass) {
+			case META_TYPE_BASE:
+				symbol_clear_variable ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_FUNCTION:
+				symbol_clear_function ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_CLASS:
+				symbol_clear_class ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_STRUCT:
+				symbol_clear_struct ((gpointer *) meta_ptr);
+				break;
+			case META_TYPE_NAMESPACE:
+				symbol_clear_namespace ((gpointer *) meta_ptr);
+				break;
+		}
+	}
+	g_list_free (namespace_ptr->member_list);
+	g_list_free_full (namespace_ptr->function_list, g_free);
+
+	g_free (ptr);
+}
+
+static void
+symbol_clear_function (gpointer ptr)
+{
+	CSymbolFunction *function_ptr = (CSymbolFunction *) ptr;
+
+	g_debug ("clear f:%s:%s\n", function_ptr->name, function_ptr->sign);
+
+	g_free (ptr);
+}
+
+static void
+symbol_clear_variable (gpointer ptr)
+{
+	CSymbolVariable *variable_ptr = (CSymbolVariable *) ptr;
+
+	g_debug ("clear v:%s:%s\n", variable_ptr->type, variable_ptr->name);
+
+	g_free (ptr);
+}
+
+static void
+symbol_debug_dump (gpointer *ptr, gint level)
+{
+	gchar line[MAX_LINE_LENTH + 1];
+	CSymbolMeta *meta_ptr = (CSymbolMeta *) ptr;
+	gint i;
+	
+	for (i = 0; i < level; i++) {
+		line[i] = '\t';
+	}
+	line[i] = '\0';
+
+	switch (meta_ptr->metaclass) {
+		case META_TYPE_BASE: {
+			CSymbolVariable *variable_ptr = (CSymbolVariable *) ptr;
+
+			g_debug ("%sv:%s:%s\n", line, variable_ptr->type, variable_ptr->name);
+			break;
+		}
+		case META_TYPE_FUNCTION: {
+			CSymbolFunction *function_ptr = (CSymbolFunction *) ptr;
+
+			g_debug ("%sf:%s:%s\n", line, function_ptr->name, function_ptr->sign);
+			break;
+		}
+		case META_TYPE_STRUCT: {
+			CSymbolStruct *struct_ptr = (CSymbolStruct *) ptr;
+			GList *iterator;
+
+			g_debug ("%ss:%s\n", line, struct_ptr->name);
+			for (iterator = struct_ptr->member_list; iterator; iterator = iterator->next) {
+				symbol_debug_dump (iterator->data, level + 1);
+			}
+			for (iterator = struct_ptr->function_list; iterator; iterator = iterator->next) {
+				symbol_debug_dump (iterator->data, level + 1);
+			}
+			break;
+		}
+	}			
+}
+
+static void
+symbol_debug()
+{
+	GList *iterator;
+
+	g_debug("dump class\n");
+	for (iterator = class_list; iterator; iterator = iterator->next) {
+		symbol_debug_dump (iterator->data, 1);
+	}
+	g_debug("dump struct\n");
+	for (iterator = struct_list; iterator; iterator = iterator->next) {
+		symbol_debug_dump (iterator->data, 1);
+	}
+	g_debug("dump namespace\n");
+	for (iterator = namespace_list; iterator; iterator = iterator->next) {
+		symbol_debug_dump (iterator->data, 1);
+	}
+	g_debug("dump function\n");
+	for (iterator = function_list; iterator; iterator = iterator->next) {
+		symbol_debug_dump (iterator->data, 1);
+	}
+	g_debug("dump variable\n");
+	for (iterator = variable_list; iterator; iterator = iterator->next) {
+		symbol_debug_dump (iterator->data, 1);
+	}
+}
 
 static CSymbolClass *
 symbol_find_class (const gchar *name)
@@ -145,6 +369,7 @@ symbol_parse_line (const gchar *line)
 			if (class_ptr == NULL) {
 				class_ptr = (CSymbolClass *) g_malloc (sizeof (CSymbolClass));
 				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				class_ptr->metaclass = META_TYPE_CLASS;
 				class_ptr->public_member_list = NULL;
 				class_ptr->public_function_list = NULL;
 				class_ptr->public_member_list = g_list_append (class_ptr->public_member_list, 
@@ -165,6 +390,7 @@ symbol_parse_line (const gchar *line)
 			if (struct_ptr == NULL) {
 				struct_ptr = (CSymbolStruct *) g_malloc (sizeof (CSymbolStruct));
 				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				struct_ptr->metaclass = META_TYPE_STRUCT;
 				struct_ptr->member_list = NULL;
 				struct_ptr->function_list = NULL;
 				struct_ptr->member_list = g_list_append (struct_ptr->member_list, 
@@ -185,6 +411,7 @@ symbol_parse_line (const gchar *line)
 			if (namespace_ptr == NULL) {
 				namespace_ptr = (CSymbolNamespace *) g_malloc (sizeof (CSymbolNamespace));
 				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				namespace_ptr->metaclass = META_TYPE_NAMESPACE;
 				namespace_ptr->member_list = NULL;
 				namespace_ptr->function_list = NULL;
 				namespace_ptr->member_list = g_list_append (namespace_ptr->member_list, 
@@ -203,8 +430,13 @@ symbol_parse_line (const gchar *line)
 		
 		token[0] = 0;
 		symbol_read_token (line, token, &offset, &ftoffset);
-		if (token[0] == 0)
+		if (token[0] == 0) {
+			g_free (name);
+			g_free (type);
+			g_free (token);
+
 			return ;
+		}
 
 		if (token[0] == 't') {
 			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENTH);
@@ -216,6 +448,7 @@ symbol_parse_line (const gchar *line)
 
 		function_ptr = (CSymbolFunction *) g_malloc (sizeof (CSymbolFunction));
 		g_strlcpy (function_ptr->name, name, MAX_TYPENAME_LENTH);
+		function_ptr->metaclass = META_TYPE_FUNCTION;
 		function_ptr->sign[0] = 0;
 
 		function_list = g_list_append (function_list, function_ptr);
@@ -239,6 +472,7 @@ symbol_parse_line (const gchar *line)
 			if (class_ptr == NULL) {
 				class_ptr = (CSymbolClass *) g_malloc (sizeof (CSymbolClass));
 				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				class_ptr->metaclass = META_TYPE_CLASS;
 				class_ptr->public_member_list = NULL;
 				class_ptr->public_function_list = NULL;
 				class_ptr->public_function_list = g_list_append (class_ptr->public_function_list, 
@@ -259,6 +493,7 @@ symbol_parse_line (const gchar *line)
 			if (struct_ptr == NULL) {
 				struct_ptr = (CSymbolStruct *) g_malloc (sizeof (CSymbolStruct));
 				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				struct_ptr->metaclass = META_TYPE_STRUCT;
 				struct_ptr->member_list = NULL;
 				struct_ptr->function_list = NULL;
 				struct_ptr->function_list = g_list_append (struct_ptr->function_list, 
@@ -279,6 +514,7 @@ symbol_parse_line (const gchar *line)
 			if (namespace_ptr == NULL) {
 				namespace_ptr = (CSymbolNamespace *) g_malloc (sizeof (CSymbolNamespace));
 				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				namespace_ptr->metaclass = META_TYPE_NAMESPACE;
 				namespace_ptr->member_list = NULL;
 				namespace_ptr->function_list = NULL;
 				namespace_ptr->function_list = g_list_append (namespace_ptr->function_list, 
@@ -302,7 +538,7 @@ symbol_parse_line (const gchar *line)
 		if (token[0] == 's' && token[1] == 'i')
 			offset -= strlen (token) + 1;
 
-		if (token[0])
+		if (strlen (token) > 2 && token[0] == 's' && token[1] == 'i')
 			g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENTH);
 		else
 			function_ptr->sign[0] = 0;
@@ -336,24 +572,33 @@ symbol_clear ()
 	GList *iterator;
 	GList *iterator2;
 
+	/*
 	for (iterator = class_list; iterator; iterator = iterator->next) {
 		CSymbolClass *class_ptr;
 
 		class_ptr = (CSymbolClass *) iterator->data;
 		g_list_free_full (class_ptr->public_member_list, g_free);
+		g_list_free_full (class_ptr->public_function_list, g_free);
 	}
 	g_list_free_full (class_list, g_free);
+	*/
+	g_list_free_full (class_list, symbol_clear_class);
 	class_list = NULL;
 	
+	/*
 	for (iterator = struct_list; iterator; iterator = iterator->next) {
 		CSymbolStruct *struct_ptr;
 		
 		struct_ptr = (CSymbolStruct *) iterator->data;
 		g_list_free_full (struct_ptr->member_list, g_free);
+		g_list_free_full (struct_ptr->function_list, g_free);
 	}
 	g_list_free_full (struct_list, g_free);
+	*/
+	g_list_free_full (struct_list, symbol_clear_struct);
 	struct_list = NULL;
 	
+	/*
 	for (iterator = namespace_list; iterator; iterator = iterator->next){
 		CSymbolNamespace *namespace_ptr;
 		
@@ -361,16 +606,18 @@ symbol_clear ()
 		g_list_free_full (namespace_ptr->member_list, g_free);
 	}
 	g_list_free_full (namespace_list, g_free);
+	*/
+	g_list_free_full (namespace_list, symbol_clear_namespace);
 	namespace_list = NULL;
 
-	g_list_free_full (function_list, g_free);
+	g_list_free_full (function_list, symbol_clear_function);
 	function_list = NULL;
 
-	g_list_free (variable_list);
+	g_list_free_full (variable_list, symbol_clear_variable);
 	variable_list = NULL;
 }
 
-static
+void
 symbol_init ()
 {
 	class_list = NULL;
@@ -380,7 +627,7 @@ symbol_init ()
 	variable_list = NULL;
 }
 
-gpointer 
+gboolean 
 symbol_parse (gpointer data)
 {
 	gchar *project_path;
@@ -391,18 +638,28 @@ symbol_parse (gpointer data)
 	gint NOUSED;
 	gchar *NOUSED2;
 
-	symbol_init ();
-	while (1) {
-		g_usleep (500000);
+	if (!env_prog_exist (ENV_PROG_CTAGS) || !env_prog_exist (ENV_PROG_CSCOPE)) {
+		g_warning ("ctags or cscope not found.");
+
+		return FALSE;
+	}
+	symbol_clear ();
+	if (1) {
+		//g_usleep (500000);
 
 		project_path = project_current_path ();
 
 		if (project_path == NULL)
-			continue;
+			return TRUE;
 
 		NOUSED = chdir (project_path);
 		system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
 		ctags = fopen ("tags", "r");
+		if (ctags == NULL) {
+			g_warning ("can't open tag file, you might want to check whether ctags is installed.");
+			ui_status_entry_new (FILE_OP_WARNING, _("can't open tag file, please check whether ctags is installed."));
+			return FALSE;
+		}
 
 		line = (gchar *) g_malloc (MAX_LINE_LENTH);
 
@@ -416,11 +673,15 @@ symbol_parse (gpointer data)
 			symbol_parse_line (line);
 		}
 
+		//symbol_debug ();
+
 		g_free (line);
 		fclose (ctags);
 
 		system ("cscope -b");
 	}
+
+	return TRUE;
 }
 
 void
@@ -434,6 +695,7 @@ symbol_function_get_sign (const gchar *name, GList **sign)
 		f = iterator->data;
 		if (g_strcmp0 (f->name, name) == 0) {
 			*sign = g_list_append (*sign, f->sign);
+			printf("%s(%s)\n", f->name, f->sign);
 		}
 	}
 }
@@ -550,6 +812,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 	output = (gchar *) g_malloc (MAX_LINE_LENTH);
 	last_line = (gchar *) g_malloc (MAX_LINE_LENTH);
 	type = (gchar *) g_malloc (MAX_TYPENAME_LENTH);
+	filepath = (gchar *) g_malloc (MAX_LINE_LENTH);
 
 	if (ui_have_editor ()) {
 		const gchar *code;
@@ -557,7 +820,6 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		code = ui_current_editor_code ();
 
 		if (code != NULL) {
-			filepath = (gchar *) g_malloc (MAX_LINE_LENTH);
 			g_strlcpy (filepath, project_path, MAX_LINE_LENTH);
 			g_strlcat (filepath, "/", MAX_LINE_LENTH);
 			g_strlcat (filepath, ".symbol.", MAX_LINE_LENTH);
@@ -568,6 +830,8 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 				g_strlcat (filepath, "cpp", MAX_LINE_LENTH);
 
 			misc_set_file_content (filepath, code);
+
+			g_free (code);
 		}
 	}
 

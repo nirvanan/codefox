@@ -46,10 +46,16 @@ typedef struct {
 } CBreakPointTag;
 
 typedef struct {
+	const gchar *filepath;
+	gint line;
+} CBreakPointNode;
+
+typedef struct {
 	GtkWidget *label_box;
 	GtkWidget *label_name;
 	GtkWidget *close_button;
 	GtkWidget *scroll;
+	GtkWidget *event_scroll;
 	GtkWidget *textview;
 	GtkWidget *lineno;
 	GtkWidget *linebox;
@@ -64,6 +70,7 @@ typedef struct {
 	CEditHistory *edit_history;
 	gint current_matched;
 	gint total_matched;
+	gint next_modify_omit;
 } CEditor;
 
 CEditor *
@@ -89,6 +96,9 @@ ceditor_set_path (CEditor *editor, gchar *filepath);
 
 void
 ceditor_show (CEditor *editor);
+
+void
+ceditor_recover_breakpoint (CEditor *editor);
 
 gchar *
 ceditor_get_text (CEditor *editor);

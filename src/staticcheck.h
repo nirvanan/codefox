@@ -29,7 +29,7 @@
 #include "editor.h"
 #include "ui.h"
 
-gpointer 
+gboolean
 static_check (gpointer data);
 
 #endif

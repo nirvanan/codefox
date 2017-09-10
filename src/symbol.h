@@ -25,47 +25,63 @@
 
 #include <gtk/gtk.h>
 
+#define SYMBOL_DEBUG 0
+
 #define MAX_TYPENAME_LENTH 255
 #define MAX_VARNAME_LENTH 255
 #define MAX_SIGN_LENTH 2550
 
 typedef enum {
 	META_TYPE_BASE,
+	META_TYPE_FUNCTION,
 	META_TYPE_STRUCT,
-	META_TYPE_CLASS
+	META_TYPE_CLASS,
+	META_TYPE_NAMESPACE
 } CMetaType;
 
 typedef struct {
+	CMetaType metaclass;
+	gint unuse;
+} CSymbolMeta;
+
+typedef struct {
+	CMetaType metaclass;
 	gchar name[MAX_TYPENAME_LENTH + 1];
 	GList *public_member_list;
 	GList *public_function_list;
 } CSymbolClass;
 
 typedef struct {
+	CMetaType metaclass;
 	gchar name[MAX_TYPENAME_LENTH + 1];
 	GList *member_list;
 	GList *function_list;
 } CSymbolStruct;
 	
 typedef struct {
+	CMetaType metaclass;
 	gchar name[MAX_TYPENAME_LENTH + 1];
 	GList *member_list;
 	GList *function_list;
 } CSymbolNamespace;
 
 typedef struct {
+	CMetaType metaclass;
 	gchar name[MAX_TYPENAME_LENTH + 1];
 	gchar sign[MAX_SIGN_LENTH + 1];
 } CSymbolFunction;
 
 typedef struct {
+	CMetaType metaclass;
 	gchar type[MAX_TYPENAME_LENTH + 1];
 	gchar name[MAX_VARNAME_LENTH + 1];
-	gint metaclass;
 } CSymbolVariable;
 
-gpointer 
+gboolean 
 symbol_parse (gpointer data);
+
+void
+symbol_init ();
 
 void
 symbol_function_get_sign (const gchar *name, GList **sign);

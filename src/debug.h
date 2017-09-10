@@ -60,10 +60,10 @@ debug_current_stack (GList **stack);
 void
 debug_expression_value (const gchar *expression, gchar *value);
 
-gpointer 
-debug_monitor (gpointer data);
-
 void
 debug_stop ();
+
+gboolean 
+debug_monitor (gpointer data);
 
 #endif

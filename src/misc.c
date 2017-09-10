@@ -29,11 +29,12 @@
 #include <glib/gi18n-lib.h>
 
 #include "misc.h"
+#include "env.h"
 
 /* FIXME: ... */
 #define BROWSER_PATH "/usr/bin/firefox"
 
-#define HOME_PAGE "http://lee75.brinkster.net"
+#define HOME_PAGE "https://github.com/nirvanan/Codefox"
 #define MAX_COMMAND_LENGTH 200
 
 /* Open homepage using default browser. */
@@ -115,6 +116,8 @@ time_get_now (gchar *src)
 	se = g_date_time_get_second (time);
 	
 	g_sprintf (src, "%.2d:%.2d:%.2d: ", hr, mi, se);
+
+	g_date_time_unref (time);
 }
 
 /* Touch. */
@@ -175,16 +178,7 @@ misc_get_line_end (const gchar *line, gint *offset)
 gboolean
 misc_file_exist (const gchar *filepath)
 {
-	FILE *f;
-	gboolean exist;
-
-	f = g_fopen (filepath, "r");
-	exist = (f != NULL);
-
-	if (f != NULL)
-		fclose (f);
-
-	return exist;
+	return filepath && strlen(filepath) && g_file_test(filepath, G_FILE_TEST_EXISTS);
 }
 
 void
@@ -192,38 +186,16 @@ misc_exec_file (const gchar *filepath)
 {
 	gchar *command;
 
+	if (!env_prog_exist (ENV_PROG_XTERM)) {
+		g_warning ("xterm not found.");
+
+		return;
+	}
 	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH);
 	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
 	system (command);
+	
+	g_free (command);
 }
 
-void
-misc_parse_gdb_bt_line (const gchar *output, const gboolean first, gchar *frame_name, gchar *frame_args,
-						gchar *file_line, gint *offset)
-{
-	gint i;
-
-	while (!g_str_has_prefix (output + *offset, "  "))
-		(*offset)++;
-	(*offset) += 2;
-
-	if (!first) {
-		while (!g_str_has_prefix (output + *offset, _(" in ")))
-			(*offset)++;
-		(*offset) += 4;
-	}
-
-	sscanf (output + *offset, "%s", frame_name);
-	(*offset) += strlen (frame_name) + 1;
-	i = 0;
-	while (!g_str_has_prefix (output + *offset, _(" at "))) {
-		frame_args[i] = output[(*offset)];
-		(*offset)++;
-		i++;
-	}
-	frame_args[i] = 0;
-	(*offset) += strlen (_(" at "));
-	sscanf (output + (*offset), "%s", file_line);
-	(*offset) += strlen (file_line) + 1;
-}

@@ -34,12 +34,15 @@
 #include "prefix.h"
 #include "project.h"
 #include "search.h"
+#include "highlighting.h"
+#include "env.h"
 
 void
 start_timer()
 {
-	g_thread_new ("static", static_check, NULL);
-	g_thread_new ("symbol", symbol_parse, NULL);
+	g_timeout_add (500, static_check, NULL);
+	g_timeout_add (500, symbol_parse, NULL);
+	//g_timeout_add (200, highlight_parse, NULL);
 }
 
 int
@@ -54,7 +57,9 @@ main (int argc, char *argv[])
 
 	project_path_init ();
 	project_mutex_init ();
+	env_init ();
 	ui_init ();
+	symbol_init ();
 	start_timer ();
 
 	/* Main loop. */

@@ -178,22 +178,24 @@ edit_history_action (CEditHistory *edit_history, GtkTextBuffer *buffer, const gb
 		text = gtk_text_buffer_get_text (buffer, &start, &end, TRUE);
 		alt_step = edit_step_new (FALSE, edit_step->offset, -1, text);
 
-		g_signal_handlers_block_by_func (buffer, on_editor_delete2, NULL);
-		g_signal_handlers_block_by_func (buffer, on_editor_delete, NULL);
+		//g_signal_handlers_block_by_func (buffer, on_editor_delete2, NULL);
+		//g_signal_handlers_block_by_func (buffer, on_editor_delete, NULL);
 		gtk_text_buffer_delete (buffer, &start, &end);
-		g_signal_handlers_unblock_by_func (buffer, on_editor_delete2, NULL);
-		g_signal_handlers_unblock_by_func (buffer, on_editor_delete, NULL);
-		edit_history_rehighlighting (buffer, edit_step->offset, 0);
+		//g_signal_handlers_unblock_by_func (buffer, on_editor_delete2, NULL);
+		//g_signal_handlers_unblock_by_func (buffer, on_editor_delete, NULL);
+		//edit_history_rehighlighting (buffer, edit_step->offset, 0);
+		
+		g_free (text);
 	}
 	else {
 		alt_step = edit_step_new (TRUE, edit_step->offset, strlen (edit_step->deleted), NULL);
 
 		gtk_text_buffer_get_iter_at_offset (buffer, &start, edit_step->offset);
 
-		g_signal_handlers_block_by_func (buffer, on_editor_insert, NULL);
+		//g_signal_handlers_block_by_func (buffer, on_editor_insert, NULL);
 		gtk_text_buffer_insert (buffer, &start, edit_step->deleted, -1);
-		g_signal_handlers_unblock_by_func (buffer, on_editor_insert, NULL);
-		edit_history_rehighlighting (buffer, edit_step->offset, strlen (edit_step->deleted));
+		//g_signal_handlers_unblock_by_func (buffer, on_editor_insert, NULL);
+		//edit_history_rehighlighting (buffer, edit_step->offset, strlen (edit_step->deleted));
 	}
 
 	if (undo) {

@@ -65,11 +65,16 @@ search_state_update ()
 
 	token = ui_search_entry_get_text ();
 
-	if (code[0] == 0 || token[0] == 0)
+	if (code[0] == 0 || token[0] == 0) {
+		g_free (code);
+
 		return ;
+	}
 
 	matched = search_kmp_nth (code, token, -1);
 	ui_current_editor_search_init (matched);
+
+	g_free (code);
 }
 
 void
@@ -155,6 +160,7 @@ save_save_current_code (GtkWidget *widget, gpointer user_data)
 	ui_status_entry_new (FILE_OP_SAVE, filepath);
 
 	g_free (filepath);
+	g_free (code);
 }
 
 void
@@ -171,6 +177,8 @@ saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 		misc_set_file_content (filepath, code);
 		ui_save_code_post (filepath);
 		ui_status_entry_new (FILE_OP_SAVE, filepath);
+
+		g_free (code);
 	}
 
 	g_free (filepath);
@@ -218,7 +226,7 @@ format_format_code (GtkWidget *widget, gpointer user_data)
 void
 on_close_page (GtkButton *button, gpointer user_data)
 {
-	ui_current_editor_close ();
+	ui_editor_close (button);
 	ui_undo_redo_widgets_update ();
 }
 
@@ -322,8 +330,6 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 	gint end_line;
 	gint offset;
 
-	ui_hightlight_on_insert (textbuffer, location, &end_line);
-
 	offset = gtk_text_iter_get_offset (location);
 	ui_current_editor_step_add (TRUE, offset - len, len, NULL);
 
@@ -333,9 +339,12 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 			linecount++;
 		}
 
+	ui_highlight_on_insert (textbuffer, location, linecount, &end_line);
+
 	if ((text[0] == '\n' || text[0] == '}' || text[0] == '{') && len == 1)
 		autoindent_apply (textbuffer, location, end_line, end_line);
 
+	ui_tip_window_destory ();
 	if (text[0] == '(' && len == 1) {
 		gchar *line;
 		GList *sign;
@@ -347,7 +356,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 		while (! CHAR (line[strlen (line) - 1]) && ! DIGIT (line[strlen (line) - 1]))
 			line[strlen (line) - 1] = 0;
 		i = strlen (line) - 1;
-		while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.')
+		while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.' && ! SPACE (line[i]))
 			i--;
 		i++;
 
@@ -361,18 +370,17 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 		g_free (line);
 	}
 
-	if (text[0] == ')' && len == 1)
-		ui_tip_window_destory ();
-
 	if ((text[0] == '.' || text[0] == '>' || text[0] == ':') && len == 1) {
 		gchar *line;
 		GList *funs;
 		GList *vars;
 		gint i;
+		gint line_offset;
 
 		line = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 		ui_current_editor_line (line, end_line);
-		line[strlen (line) - 1] = 0;
+		line_offset = gtk_text_iter_get_line_offset (location);
+		line[line_offset - 1] = 0;
 
 		if ((line[strlen (line) - 1] == '-' && text[0] == '>') ||
 			(line[strlen (line) - 1] == ':' && text[0] == ':') ||
@@ -426,7 +434,7 @@ void
 on_editor_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 				  GtkTextIter *end, gpointer user_data)
 {
-	ui_hightlight_on_delete (textbuffer, start, end);
+	ui_highlight_on_delete (textbuffer, start, end);
 
 	ui_current_editor_set_dirty ();
 	
@@ -453,6 +461,8 @@ on_editor_delete2 (GtkTextBuffer *textbuffer, GtkTextIter *start,
 
 	ui_current_editor_step_add (FALSE, offset, -1, text);
 	ui_undo_redo_widgets_update ();
+
+	g_free (text);
 }
 
 void
@@ -473,6 +483,7 @@ on_cursor_change (GtkTextView *text_view, GtkMovementStep step,
                   gpointer user_data)
 {
 	ui_current_editor_update_cursor ();
+	ui_tip_window_destory ();
 }
 
 void
@@ -480,6 +491,7 @@ on_textview_clicked (GtkTextBuffer *textbuffer, GtkTextIter *location,
 					 GtkTextMark *mark, gpointer user_data)
 {
 	ui_current_editor_update_cursor ();
+	//ui_tip_window_destory ();
 }
 
 void
@@ -510,6 +522,9 @@ new_project_show_dialog (GtkWidget *widget, gpointer user_data)
 		ui_enable_build_widgets ();
 		ui_enable_settings_widgets ();
 		ui_disable_open_project_widgets ();
+
+		ui_set_window_title (project_name);
+		ui_set_project_label (project_name);
 	}
 	ui_new_project_dialog_destory ();
 
@@ -536,7 +551,6 @@ on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
 	gchar *filepath;
 	gint isfile;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	ui_filetree_current_path (&filepath, &isfile);
 
 	if (isfile) {
@@ -549,12 +563,13 @@ on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
 
 		if (!exist) {
 			filesize = misc_get_file_size (filepath);
-			code_buf = (gchar *) g_malloc (filesize + EXTRA_LENGTH);
 			misc_get_file_content (filepath, &code_buf);
 			ui_editor_new_with_text (filepath, code_buf);
 
 			g_free (code_buf);
 		}
+		else
+			ui_show_editor_by_path (filepath);
 	}
 
 	g_free (filepath);
@@ -709,6 +724,9 @@ on_open_project (GtkWidget *widget, gpointer user_data)
 		ui_enable_settings_widgets ();
 		ui_disable_open_project_widgets ();
 
+		ui_set_window_title (project_name);
+		ui_set_project_label (project_name);
+
 		g_free (project_root);
 	}
 
@@ -830,7 +848,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 	if (g_strcmp0 (action, DEBUG_WIDGET_START) == 0) {
 		gchar *project_name;
-		GList *breakpoint_desc_list;
+		GList *breakpoint_desc_list = NULL;
 
 		project_path = project_current_path ();
 		project_name = project_current_name ();
@@ -838,13 +856,16 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		debug_startup (project_path, project_name);
 		debug_connect (project_path, project_name);
 
+		if (!debug_is_active ()) {
+			ui_status_entry_new (FILE_OP_WARNING, _("failed to start or conect to debug process."));
+			return ;
+		}
 		breakpoint_desc_list = NULL;
 		ui_breakpoint_tags_get (&breakpoint_desc_list);
 		debug_breakpoints_insert (breakpoint_desc_list);
 		g_list_free_full (breakpoint_desc_list, g_free);
 
 		debug_command_exec ("c", NULL, NULL);
-
 	}
 	else if (g_strcmp0 (action, DEBUG_WIDGET_NEXT) == 0)
 		debug_command_exec ("n", NULL, NULL);
@@ -909,7 +930,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		g_free (code_buf);
 	}
 	ui_select_editor_with_path (filepath);
-	ui_debug_ptr_add (NULL, line);
+	ui_debug_ptr_add (filepath, line);
 	ui_debug_view_clear ();
 
 	output_list = NULL;
@@ -965,7 +986,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		ui_disable_project_widgets ();
 		ui_enable_debug_widgets ();
 
-		g_thread_new ("monitor", debug_monitor, NULL);
+		g_timeout_add (200, debug_monitor, NULL);
 	}
 
 	g_free (name);
@@ -1040,13 +1061,18 @@ on_search_clicked (GtkWidget *widget, gpointer user_data)
 	token = ui_search_entry_get_text ();
 	len = strlen (token);
 
-	if (code[0] == 0 || token[0] == 0 || next == -1)
+	if (code[0] == 0 || token[0] == 0 || next == -1) {
+		g_free (code);
+
 		return ;
+	}
 
 	offset = search_kmp_nth (code, token, next);
 
 	if (offset != -1)
 		ui_current_editor_select_range (offset, len);
+
+	g_free (code);
 }
 
 void
