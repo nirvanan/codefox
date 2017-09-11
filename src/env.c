@@ -39,10 +39,11 @@ env_check_external_prog(const gchar *prog)
 	gchar cmd[MAX_LINE_LENTH + 1];
 	FILE *pi;
 
-	g_snprintf (cmd, MAX_LINE_LENTH + 1, "which %s", prog);
+	g_snprintf (cmd, MAX_LINE_LENTH + 1, "which %s\n", prog);
 	pi = popen (cmd, "r");
 
 	/* One line is enough. */
+	line[0] = '\0';
 	fgets (line, MAX_LINE_LENTH, pi);
 
 	pclose (pi);
