@@ -593,7 +593,6 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 	}
 
 	filename = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	ui_create_file_dialog_info (filename);
 	ui_filetree_current_path (&filepath, NULL);
 	fold = ui_filetree_row_second_level ();
@@ -607,7 +606,6 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 		ui_error_dialog_new (message);
 
 		g_free (filename);
-		g_free (filepath);
 		return ;
 	}
 
@@ -616,7 +614,6 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 	ui_create_file_dialog_destory ();
 
 	g_free (filename);
-	g_free (filepath);
 }
 
 void
@@ -634,7 +631,6 @@ on_open_file_clicked (GtkWidget *widget, gpointer user_data)
 
 	if (g_strcmp0 (local_file, "NULL") != 0) {
 		filename = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-		filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 		ui_filetree_current_path (&filepath, NULL);
 
 		offset = misc_get_file_name_in_path (local_file);
@@ -655,8 +651,8 @@ on_open_file_clicked (GtkWidget *widget, gpointer user_data)
 		}
 
 		g_free (filename);
-		g_free (filepath);
 	}
+	g_free (local_file);
 }
 
 void
@@ -669,7 +665,6 @@ on_delete_file_clicked (GtkWidget *widget, gpointer user_data)
 	gchar *message;
 	gint response;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
 	ui_filetree_current_path (&filepath, NULL);
 	fold = ui_filetree_row_second_level ();
 
@@ -688,8 +683,6 @@ on_delete_file_clicked (GtkWidget *widget, gpointer user_data)
 			ui_status_entry_new (6, filepath + offset + 1);
 		}
 	}
-
-	g_free (filepath);
 }
 
 void

@@ -1503,7 +1503,6 @@ ui_filetree_menu_popup ()
 void
 ui_filetree_current_path(gchar **path, gint *isfile)
 {
-	(*path)[0] = 0;
 	filetree_get_current_store (GTK_TREE_VIEW (window->filetree), NULL, path, isfile, NULL);
 }
 
