@@ -27,9 +27,9 @@
 
 #define SYMBOL_DEBUG 0
 
-#define MAX_TYPENAME_LENTH 255
-#define MAX_VARNAME_LENTH 255
-#define MAX_SIGN_LENTH 2550
+#define MAX_TYPENAME_LENGTH 255
+#define MAX_VARNAME_LENGTH 255
+#define MAX_SIGN_LENGTH 2550
 
 typedef enum {
 	META_TYPE_BASE,
@@ -46,35 +46,35 @@ typedef struct {
 
 typedef struct {
 	CMetaType metaclass;
-	gchar name[MAX_TYPENAME_LENTH + 1];
+	gchar name[MAX_TYPENAME_LENGTH + 1];
 	GList *public_member_list;
 	GList *public_function_list;
 } CSymbolClass;
 
 typedef struct {
 	CMetaType metaclass;
-	gchar name[MAX_TYPENAME_LENTH + 1];
+	gchar name[MAX_TYPENAME_LENGTH + 1];
 	GList *member_list;
 	GList *function_list;
 } CSymbolStruct;
 	
 typedef struct {
 	CMetaType metaclass;
-	gchar name[MAX_TYPENAME_LENTH + 1];
+	gchar name[MAX_TYPENAME_LENGTH + 1];
 	GList *member_list;
 	GList *function_list;
 } CSymbolNamespace;
 
 typedef struct {
 	CMetaType metaclass;
-	gchar name[MAX_TYPENAME_LENTH + 1];
-	gchar sign[MAX_SIGN_LENTH + 1];
+	gchar name[MAX_TYPENAME_LENGTH + 1];
+	gchar sign[MAX_SIGN_LENGTH + 1];
 } CSymbolFunction;
 
 typedef struct {
 	CMetaType metaclass;
-	gchar type[MAX_TYPENAME_LENTH + 1];
-	gchar name[MAX_VARNAME_LENTH + 1];
+	gchar type[MAX_TYPENAME_LENGTH + 1];
+	gchar name[MAX_VARNAME_LENGTH + 1];
 } CSymbolVariable;
 
 gboolean 

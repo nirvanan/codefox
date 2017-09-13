@@ -230,7 +230,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 					tag = CODE_TAG_CONSTANT;
 				else if (lex[0] == '#')
 					tag = CODE_TAG_PREPROCESSOR;
-				else if (CHAR (lex[0]) && lex_len <= MAX_KEYWORD_LENTH && highlight_is_keyword (lex))
+				else if (CHAR (lex[0]) && lex_len <= MAX_KEYWORD_LENGTH && highlight_is_keyword (lex))
 					tag = CODE_TAG_KEYWORD;
 			}
 

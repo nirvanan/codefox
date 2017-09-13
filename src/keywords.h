@@ -23,8 +23,9 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
-#define MAX_KEYWORD_LENTH 16
+#define MAX_KEYWORD_LENGTH 16
 
+/* All C/C++ keywords. */
 gchar *keywords[] = 
 {
 	"asm", "auto", "bad_cast",

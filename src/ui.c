@@ -43,7 +43,7 @@
 
 #define TIME_BUF_SIZE 100
 #define MESSAGE_BUF_SIZE 1000
-#define NAX_TIP_LENTH 10000
+#define NAX_TIP_LENGTH 10000
 
 #define LOGO_SIZE 160
 
@@ -694,7 +694,7 @@ ui_init()
 
 	member_menu = (CMemberMenu *) g_malloc (sizeof(CMemberMenu));
 	member_menu->active = FALSE;
-	member_menu->prefix = (gchar *) g_malloc (NAX_TIP_LENTH);
+	member_menu->prefix = (gchar *) g_malloc (NAX_TIP_LENGTH);
 	member_menu->prefix[0] = 0;
 	member_menu->item_list = NULL;
 	
@@ -1665,13 +1665,13 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 	GList *iterator;
 	
 
-	full = (gchar *) g_malloc (NAX_TIP_LENTH);
+	full = (gchar *) g_malloc (NAX_TIP_LENGTH);
 	full[0] = 0;
 	for (iterator = signs; iterator; iterator = iterator->next) {
-		g_strlcat (full, name, NAX_TIP_LENTH);
-		g_strlcat (full, " : ", NAX_TIP_LENTH);
-		g_strlcat (full, (gchar *) iterator->data, NAX_TIP_LENTH);
-		g_strlcat (full, "\n", NAX_TIP_LENTH);
+		g_strlcat (full, name, NAX_TIP_LENGTH);
+		g_strlcat (full, " : ", NAX_TIP_LENGTH);
+		g_strlcat (full, (gchar *) iterator->data, NAX_TIP_LENGTH);
+		g_strlcat (full, "\n", NAX_TIP_LENGTH);
 	}
 	full[strlen (full) - 1] = 0;
 

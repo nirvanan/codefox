@@ -29,7 +29,7 @@
 #include "misc.h"
 #include "limits.h"
 
-#define MAX_MAKEFILE_LENTH 100000
+#define MAX_MAKEFILE_LENGTH 100000
 #define DIR_MODE 0777
 
 static gchar *default_projects_root;
@@ -383,47 +383,47 @@ project_generate_makefile(CProject *project)
 	gchar *makefile_buf;
 
 	makefile_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
-	makefile_buf = (gchar *) g_malloc (MAX_MAKEFILE_LENTH);
+	makefile_buf = (gchar *) g_malloc (MAX_MAKEFILE_LENGTH);
 	g_strlcpy (makefile_path, project->project_path, MAX_FILEPATH_LENGTH);
 	g_strlcat (makefile_path, "/Makefile", MAX_FILEPATH_LENGTH);
 
 	if (project->project_type == PROJECT_C)
-		g_strlcpy (makefile_buf, "CC=gcc\n", MAX_MAKEFILE_LENTH);
+		g_strlcpy (makefile_buf, "CC=gcc\n", MAX_MAKEFILE_LENGTH);
 	else
-		g_strlcpy (makefile_buf, "CC=g++\n", MAX_MAKEFILE_LENTH);
+		g_strlcpy (makefile_buf, "CC=g++\n", MAX_MAKEFILE_LENGTH);
 
-	g_strlcat (makefile_buf, "PROG_NAME=", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, project->project_name, MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\nINCS=$(wildcard *.h)\n", MAX_MAKEFILE_LENTH);
+	g_strlcat (makefile_buf, "PROG_NAME=", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, project->project_name, MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "\nINCS=$(wildcard *.h)\n", MAX_MAKEFILE_LENGTH);
 
 	if (project->project_type == PROJECT_C)
-		g_strlcat (makefile_buf, "SRCS=$(wildcard *.c)\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "SRCS=$(wildcard *.c)\n", MAX_MAKEFILE_LENGTH);
 	else
-		g_strlcat (makefile_buf, "SRCS=$(wildcard *.cpp *.cxx *.C *.cc *.c++)\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "SRCS=$(wildcard *.cpp *.cxx *.C *.cc *.c++)\n", MAX_MAKEFILE_LENGTH);
 
-	g_strlcat (makefile_buf, "DEFAULT_OPTS=-g -Wall\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "OPTS=", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, project->opts, MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\nOBJS=$(patsubst %c, %o, $(SRCS))\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "LIBS=", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, project->libs, MAX_MAKEFILE_LENTH);
+	g_strlcat (makefile_buf, "DEFAULT_OPTS=-g -Wall\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "OPTS=", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, project->opts, MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "\nOBJS=$(patsubst %c, %o, $(SRCS))\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "LIBS=", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, project->libs, MAX_MAKEFILE_LENGTH);
 	if (strlen (project->libs) > 0) {
-		g_strlcat (makefile_buf, "\nCFLAGS=`pkg-config --cflags ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENTH);
-		g_strlcat (makefile_buf, "LDFLAGS=`pkg-config --libs ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "\nCFLAGS=`pkg-config --cflags ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENGTH);
+		g_strlcat (makefile_buf, "LDFLAGS=`pkg-config --libs ${LIBS}` $(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENGTH);
 	}
 	else {
-		g_strlcat (makefile_buf, "\nCFLAGS=$(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENTH);
-		g_strlcat (makefile_buf, "LDFLAGS=$(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENTH);
+		g_strlcat (makefile_buf, "\nCFLAGS=$(DEFAULT_OPTS) $(OPTS)\n", MAX_MAKEFILE_LENGTH);
+		g_strlcat (makefile_buf, "LDFLAGS=$(DEFAULT_OPTS) $(OPTS)\n\n", MAX_MAKEFILE_LENGTH);
 	}
-	g_strlcat (makefile_buf, "all: ${PROG_NAME}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "${PROG_NAME}:${OBJS}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\t${CC} -o ${PROG_NAME} ${OBJS} ${LDFLAGS}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "${OBJS}:${INCS}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, ".c.o:\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\t${CC} -c $<   ${CFLAGS}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "clean:\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "\trm -f *.o   ${PROG_NAME}\n", MAX_MAKEFILE_LENTH);
-	g_strlcat (makefile_buf, "rebuild: clean all\n", MAX_MAKEFILE_LENTH);
+	g_strlcat (makefile_buf, "all: ${PROG_NAME}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "${PROG_NAME}:${OBJS}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "\t${CC} -o ${PROG_NAME} ${OBJS} ${LDFLAGS}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "${OBJS}:${INCS}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, ".c.o:\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "\t${CC} -c $<   ${CFLAGS}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "clean:\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "\trm -f *.o   ${PROG_NAME}\n", MAX_MAKEFILE_LENGTH);
+	g_strlcat (makefile_buf, "rebuild: clean all\n", MAX_MAKEFILE_LENGTH);
 
 	misc_set_file_content (makefile_path, makefile_buf);
 

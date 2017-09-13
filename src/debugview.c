@@ -31,7 +31,7 @@
 #include "debugview.h"
 #include "callback.h"
 
-#define MAX_CELL_LENTH 1000
+#define MAX_CELL_LENGTH 1000
 
 static void debug_view_localtree_init (CDebugView *debug_view);
 static void debug_view_calltree_init (CDebugView *debug_view);
@@ -205,7 +205,7 @@ debugview_watchtree_cell_change (CDebugView *debug_view, const gchar *path_strin
 	GtkTreeIter iter;
 	gchar *old_text;
 
-	old_text = (gchar *) g_malloc (MAX_CELL_LENTH);
+	old_text = (gchar *) g_malloc (MAX_CELL_LENGTH);
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
 	gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store), &iter, path_string);
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &old_text, -1);
@@ -228,7 +228,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 	GtkTreeIter iter;
 	gchar *line;
 
-	line = (gchar *) g_malloc (MAX_CELL_LENTH);
+	line = (gchar *) g_malloc (MAX_CELL_LENGTH);
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
 	gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store), &iter, "0");
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
@@ -241,7 +241,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 
 	*list = g_list_append (*list, (gpointer) line);
 	while (gtk_tree_model_iter_next (GTK_TREE_MODEL (store), &iter)) {
-		line = (gchar *) g_malloc (MAX_CELL_LENTH);
+		line = (gchar *) g_malloc (MAX_CELL_LENGTH);
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
 
 		if (line[0] == 0) {
@@ -264,7 +264,7 @@ debugview_watchtree_set_all (CDebugView *debug_view, GList *list)
 	gchar *path;
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
-	path = (gchar *) g_malloc (MAX_CELL_LENTH);
+	path = (gchar *) g_malloc (MAX_CELL_LENGTH);
 	row = 0;
 	for (iterator = (GSList *) list; iterator; iterator = iterator->next) {
 		gchar *value;

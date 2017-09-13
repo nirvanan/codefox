@@ -355,8 +355,8 @@ symbol_parse_line (const gchar *line)
 		CSymbolVariable *variable_ptr;
 
 		variable_ptr = (CSymbolVariable *) g_malloc (sizeof (CSymbolVariable));
-		g_strlcpy (variable_ptr->type, "base", MAX_VARNAME_LENTH);
-		g_strlcpy (variable_ptr->name, name, MAX_TYPENAME_LENTH);
+		g_strlcpy (variable_ptr->type, "base", MAX_VARNAME_LENGTH);
+		g_strlcpy (variable_ptr->name, name, MAX_TYPENAME_LENGTH);
 		variable_ptr->metaclass = META_TYPE_BASE;
 
 		token[0] = 0;
@@ -367,7 +367,7 @@ symbol_parse_line (const gchar *line)
 			class_ptr = symbol_find_class (token + ftoffset);
 			if (class_ptr == NULL) {
 				class_ptr = (CSymbolClass *) g_malloc (sizeof (CSymbolClass));
-				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				class_ptr->metaclass = META_TYPE_CLASS;
 				class_ptr->public_member_list = NULL;
 				class_ptr->public_function_list = NULL;
@@ -388,7 +388,7 @@ symbol_parse_line (const gchar *line)
 
 			if (struct_ptr == NULL) {
 				struct_ptr = (CSymbolStruct *) g_malloc (sizeof (CSymbolStruct));
-				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				struct_ptr->metaclass = META_TYPE_STRUCT;
 				struct_ptr->member_list = NULL;
 				struct_ptr->function_list = NULL;
@@ -409,7 +409,7 @@ symbol_parse_line (const gchar *line)
 
 			if (namespace_ptr == NULL) {
 				namespace_ptr = (CSymbolNamespace *) g_malloc (sizeof (CSymbolNamespace));
-				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				namespace_ptr->metaclass = META_TYPE_NAMESPACE;
 				namespace_ptr->member_list = NULL;
 				namespace_ptr->function_list = NULL;
@@ -438,7 +438,7 @@ symbol_parse_line (const gchar *line)
 		}
 
 		if (token[0] == 't') {
-			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENTH);
+			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENGTH);
 			variable_ptr->metaclass = (token[8] == 'c')? META_TYPE_CLASS: META_TYPE_STRUCT;
 		}
 	}
@@ -446,7 +446,7 @@ symbol_parse_line (const gchar *line)
 		CSymbolFunction *function_ptr;
 
 		function_ptr = (CSymbolFunction *) g_malloc (sizeof (CSymbolFunction));
-		g_strlcpy (function_ptr->name, name, MAX_TYPENAME_LENTH);
+		g_strlcpy (function_ptr->name, name, MAX_TYPENAME_LENGTH);
 		function_ptr->metaclass = META_TYPE_FUNCTION;
 		function_ptr->sign[0] = 0;
 
@@ -454,7 +454,7 @@ symbol_parse_line (const gchar *line)
 
 		if (!line[offset] || (line[offset] == 's' && line[offset + 1] == 'i')) {
 			if (line[offset])
-				g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENTH);
+				g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENGTH);
 
 			g_free (name);
 			g_free (type);
@@ -470,7 +470,7 @@ symbol_parse_line (const gchar *line)
 			class_ptr = symbol_find_class (token + ftoffset);
 			if (class_ptr == NULL) {
 				class_ptr = (CSymbolClass *) g_malloc (sizeof (CSymbolClass));
-				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (class_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				class_ptr->metaclass = META_TYPE_CLASS;
 				class_ptr->public_member_list = NULL;
 				class_ptr->public_function_list = NULL;
@@ -491,7 +491,7 @@ symbol_parse_line (const gchar *line)
 
 			if (struct_ptr == NULL) {
 				struct_ptr = (CSymbolStruct *) g_malloc (sizeof (CSymbolStruct));
-				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (struct_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				struct_ptr->metaclass = META_TYPE_STRUCT;
 				struct_ptr->member_list = NULL;
 				struct_ptr->function_list = NULL;
@@ -512,7 +512,7 @@ symbol_parse_line (const gchar *line)
 
 			if (namespace_ptr == NULL) {
 				namespace_ptr = (CSymbolNamespace *) g_malloc (sizeof (CSymbolNamespace));
-				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENTH);
+				g_strlcpy (namespace_ptr->name, token + ftoffset, MAX_TYPENAME_LENGTH);
 				namespace_ptr->metaclass = META_TYPE_NAMESPACE;
 				namespace_ptr->member_list = NULL;
 				namespace_ptr->function_list = NULL;
@@ -538,7 +538,7 @@ symbol_parse_line (const gchar *line)
 			offset -= strlen (token) + 1;
 
 		if (strlen (token) > 2 && token[0] == 's' && token[1] == 'i')
-			g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENTH);
+			g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENGTH);
 		else
 			function_ptr->sign[0] = 0;
 	}
@@ -546,14 +546,14 @@ symbol_parse_line (const gchar *line)
 		CSymbolVariable *variable_ptr;
 
 		variable_ptr = (CSymbolVariable *) g_malloc (sizeof (CSymbolVariable));
-		g_strlcpy (variable_ptr->type, "base", MAX_VARNAME_LENTH);
-		g_strlcpy (variable_ptr->name, name, MAX_TYPENAME_LENTH);
+		g_strlcpy (variable_ptr->type, "base", MAX_VARNAME_LENGTH);
+		g_strlcpy (variable_ptr->name, name, MAX_TYPENAME_LENGTH);
 		variable_ptr->metaclass = META_TYPE_BASE;
 
 		if (line[offset] == 't') {
 			token[0] = 0;
 			symbol_read_token (line, token, &offset, &ftoffset);
-			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENTH);
+			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENGTH);
 			variable_ptr->metaclass = (token[8] == 'c'? META_TYPE_CLASS: META_TYPE_STRUCT);
 
 		}
@@ -810,7 +810,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 	command = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	output = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	last_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
-	type = (gchar *) g_malloc (MAX_TYPENAME_LENTH);
+	type = (gchar *) g_malloc (MAX_TYPENAME_LENGTH);
 	filepath = (gchar *) g_malloc (MAX_LINE_LENGTH);
 
 	if (ui_have_editor ()) {
