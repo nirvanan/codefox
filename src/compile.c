@@ -29,11 +29,9 @@
 #include <glib.h>
 #include "compile.h"
 #include "env.h"
+#include "limits.h"
 
-#define MAX_LINE_LENTH 1000
-#define MAX_RESULT_LENTH 100000
-
-static gchar buffer[MAX_RESULT_LENTH + 1];
+static gchar buffer[MAX_RESULT_LENGTH + 1];
 static gboolean done;
 static gint offset;
 static GMutex compile_mutex;
@@ -56,13 +54,13 @@ compile_compile (gpointer data)
 	fflush (stdin);
 	NOUSE = chdir (path);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	pi = popen ("make 2>&1", "r");
 
-	while (fgets (line, MAX_LINE_LENTH, pi)) {
+	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_mutex_lock (&compile_mutex);
 
-		g_strlcat (buffer, line, MAX_RESULT_LENTH);
+		g_strlcat (buffer, line, MAX_RESULT_LENGTH);
 		g_mutex_unlock (&compile_mutex);
 	}
 
@@ -87,13 +85,13 @@ compile_clear (gpointer data)
 	fflush (stdin);
 	NOUSE = chdir (path);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	pi = popen ("make clean 2>&1", "r");
 
-	while (fgets (line, MAX_LINE_LENTH, pi)) {
+	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_mutex_lock (&compile_mutex);
 
-		g_strlcat (buffer, line, MAX_RESULT_LENTH);
+		g_strlcat (buffer, line, MAX_RESULT_LENGTH);
 		g_mutex_unlock (&compile_mutex);
 	}
 
@@ -167,21 +165,21 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 
 	fflush (stdin);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENTH);
-	command = (gchar *) g_malloc (MAX_LINE_LENTH);
-	g_strlcpy (command, type? "g++ -S -Wall ": "gcc -S -Wall ", MAX_LINE_LENTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	command = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	g_strlcpy (command, type? "g++ -S -Wall ": "gcc -S -Wall ", MAX_LINE_LENGTH);
 	if (strlen (libs) > 0) {
-		g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENTH);
-		g_strlcat (command, libs, MAX_LINE_LENTH);
-		g_strlcat (command, "` ", MAX_LINE_LENTH);
+		g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENGTH);
+		g_strlcat (command, libs, MAX_LINE_LENGTH);
+		g_strlcat (command, "` ", MAX_LINE_LENGTH);
 	}
-	g_strlcat (command, filepath, MAX_LINE_LENTH);
-	g_strlcat (command, " 2>&1", MAX_LINE_LENTH);
+	g_strlcat (command, filepath, MAX_LINE_LENGTH);
+	g_strlcat (command, " 2>&1", MAX_LINE_LENGTH);
 
 	pi = popen (command, "r");
 	output[0] = 0;
-	while (fgets (line, MAX_LINE_LENTH, pi))
-		g_strlcat (output, line, MAX_RESULT_LENTH);
+	while (fgets (line, MAX_LINE_LENGTH, pi))
+		g_strlcat (output, line, MAX_RESULT_LENGTH);
 
 	g_free (line);
 	g_free (command);

@@ -30,8 +30,7 @@
 
 #include "filetree.h"
 #include "ui.h"
-
-#define MAX_FILEPATH_LENTH 1000
+#include "limits.h"
 
 typedef struct 
 {
@@ -263,10 +262,10 @@ filetree_project_init (GtkTreeView *tree, const gchar *project_name, const gchar
 {
 	gchar *root_dir;
 
-	root_dir = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	g_strlcpy (root_dir, project_dir, MAX_FILEPATH_LENTH);
-	g_strlcat (root_dir, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (root_dir, project_name, MAX_FILEPATH_LENTH);
+	root_dir = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	g_strlcpy (root_dir, project_dir, MAX_FILEPATH_LENGTH);
+	g_strlcat (root_dir, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (root_dir, project_name, MAX_FILEPATH_LENGTH);
 	filetree_append (tree, NULL, 0, project_name, project_dir);
 	filetree_append_to_default (tree, 0, _("header"), root_dir);
 	filetree_append_to_default (tree, 0, _("source"), root_dir);
@@ -287,11 +286,11 @@ filetree_append_to_current (GtkTreeView *tree, const gchar *filename, const gint
 	treeselection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(tree));
 	gtk_tree_selection_get_selected (treeselection, NULL, &iter);
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, FILEPATH, &filepath, -1);
-	g_strlcat (filepath, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (filepath, filename, MAX_FILEPATH_LENTH);
+	g_strlcat (filepath, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 	filetree_append (GTK_TREE_VIEW (tree), &iter, isfile, filename, filepath);
 }
 
@@ -363,8 +362,8 @@ filetree_append_to_second_level (GtkTreeView *tree, gint row, const gchar *filen
 	}
 
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, FILEPATH, &filepath, -1);
-	g_strlcat (filepath, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (filepath, filename, MAX_FILEPATH_LENTH);
+	g_strlcat (filepath, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 	filetree_append (GTK_TREE_VIEW (tree), &iter, isfile, filename, filepath);
 	
 	g_free (filepath);

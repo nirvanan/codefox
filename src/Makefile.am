@@ -41,4 +41,5 @@ codefox_SOURCES = autoindent.c \
 	search.c \
 	search.h \
 	env.c \
-	env.h
+	env.h \
+	limits.h

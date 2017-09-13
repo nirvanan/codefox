@@ -32,8 +32,7 @@
 #include "ui.h"
 #include "project.h"
 #include "env.h"
-
-#define MAX_LINE_LENTH 1000
+#include "limits.h"
 
 #define CHAR(c) ((c >= 'a' && c <= 'z') || \
  (c >= 'A' && c <= 'Z') || c == '#' || c == '_')
@@ -200,7 +199,7 @@ symbol_clear_variable (gpointer ptr)
 static void
 symbol_debug_dump (gpointer *ptr, gint level)
 {
-	gchar line[MAX_LINE_LENTH + 1];
+	gchar line[MAX_LINE_LENGTH + 1];
 	CSymbolMeta *meta_ptr = (CSymbolMeta *) ptr;
 	gint i;
 	
@@ -339,9 +338,9 @@ symbol_parse_line (const gchar *line)
 	CSymbolStruct *struct_ptr;
 	CSymbolNamespace *namespace_ptr;
 
-	name = (gchar *) g_malloc (MAX_LINE_LENTH);
-	type = (gchar *) g_malloc (MAX_LINE_LENTH);
-	token = (gchar *) g_malloc (MAX_LINE_LENTH);
+	name = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	type = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	token = (gchar *) g_malloc (MAX_LINE_LENGTH);
 
 	sscanf(line, "%s", name);
 	offset = 0;
@@ -661,14 +660,14 @@ symbol_parse (gpointer data)
 			return FALSE;
 		}
 
-		line = (gchar *) g_malloc (MAX_LINE_LENTH);
+		line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 
 		for (i = 0; i < 6; i++)
-			NOUSED2 = fgets (line, MAX_LINE_LENTH, ctags);
+			NOUSED2 = fgets (line, MAX_LINE_LENGTH, ctags);
 
 		symbol_clear ();
 
-		while (fgets (line, MAX_LINE_LENTH, ctags)) {
+		while (fgets (line, MAX_LINE_LENGTH, ctags)) {
 			line[strlen (line) - 1] = 0;
 			symbol_parse_line (line);
 		}
@@ -808,11 +807,11 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 	if (project_path == NULL)
 		return ;
 	
-	command = (gchar *) g_malloc (MAX_LINE_LENTH);
-	output = (gchar *) g_malloc (MAX_LINE_LENTH);
-	last_line = (gchar *) g_malloc (MAX_LINE_LENTH);
+	command = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	output = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	last_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	type = (gchar *) g_malloc (MAX_TYPENAME_LENTH);
-	filepath = (gchar *) g_malloc (MAX_LINE_LENTH);
+	filepath = (gchar *) g_malloc (MAX_LINE_LENGTH);
 
 	if (ui_have_editor ()) {
 		const gchar *code;
@@ -820,14 +819,14 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		code = ui_current_editor_code ();
 
 		if (code != NULL) {
-			g_strlcpy (filepath, project_path, MAX_LINE_LENTH);
-			g_strlcat (filepath, "/", MAX_LINE_LENTH);
-			g_strlcat (filepath, ".symbol.", MAX_LINE_LENTH);
+			g_strlcpy (filepath, project_path, MAX_LINE_LENGTH);
+			g_strlcat (filepath, "/", MAX_LINE_LENGTH);
+			g_strlcat (filepath, ".symbol.", MAX_LINE_LENGTH);
 
 			if (project_get_type () == PROJECT_C)
-				g_strlcat (filepath, "c", MAX_LINE_LENTH);
+				g_strlcat (filepath, "c", MAX_LINE_LENGTH);
 			else
-				g_strlcat (filepath, "cpp", MAX_LINE_LENTH);
+				g_strlcat (filepath, "cpp", MAX_LINE_LENGTH);
 
 			misc_set_file_content (filepath, code);
 
@@ -835,15 +834,15 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		}
 	}
 
-	g_strlcpy (command, "cscope -L0 ", MAX_LINE_LENTH);
-	g_strlcat (command, name, MAX_LINE_LENTH);
-	g_strlcat (command, " ", MAX_LINE_LENTH);
-	g_strlcat (command, filepath, MAX_LINE_LENTH);
+	g_strlcpy (command, "cscope -L0 ", MAX_LINE_LENGTH);
+	g_strlcat (command, name, MAX_LINE_LENGTH);
+	g_strlcat (command, " ", MAX_LINE_LENGTH);
+	g_strlcat (command, filepath, MAX_LINE_LENGTH);
 
 	pipe_file = popen (command, "r");
 	last_line[0] = 0;
 	type[0] = 0;
-	while (fgets (output, MAX_LINE_LENTH, pipe_file)) {
+	while (fgets (output, MAX_LINE_LENGTH, pipe_file)) {
 		gint i;
 		gint symbol_lineno;
 
@@ -863,7 +862,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		while (output[i] != ' ')
 			i++;
 		i++;
-		g_strlcpy (last_line, output + i, MAX_LINE_LENTH);
+		g_strlcpy (last_line, output + i, MAX_LINE_LENGTH);
 		last_line[strlen (last_line) - 1] = 0;
 
 		symbol_get_type (last_line, name, isptr, type);

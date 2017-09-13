@@ -31,8 +31,8 @@
 
 #include "editor.h"
 #include "callback.h"
+#include "limits.h"
 
-#define MAX_LINE_LENTH 1000
 #define MAX_LINE_NUMBER_LENGTH 20
 
 static GList *breakpoint_list;
@@ -107,8 +107,8 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	
 	new_editor->label_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 	new_editor->label_name = gtk_label_new (label + len + 1);
-	new_editor->filepath = g_malloc (MAX_LINE_LENTH);
-	g_strlcpy (new_editor->filepath, label, MAX_LINE_LENTH);
+	new_editor->filepath = g_malloc (MAX_LINE_LENGTH);
+	g_strlcpy (new_editor->filepath, label, MAX_LINE_LENGTH);
 	new_editor->close_button = gtk_button_new ();
 	close_image = gtk_image_new_from_stock (GTK_STOCK_CLOSE,
 											GTK_ICON_SIZE_MENU);
@@ -569,7 +569,7 @@ ceditor_get_line (CEditor *editor, gchar *line, const gint lineno)
 	gtk_text_buffer_get_iter_at_line (buffer, &end, lineno);
 	gtk_text_iter_forward_to_line_end (&end);
 	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
-	g_strlcpy (line, text, MAX_LINE_LENTH);
+	g_strlcpy (line, text, MAX_LINE_LENGTH);
 
 	g_free (text);
 }
@@ -770,7 +770,7 @@ ceditor_breakpoint_tags_get (CEditor *editor, GList **list)
 		gchar *breakpoint_desc;
 		
 		breakpoint = (CBreakPointTag *) iterator->data;
-		breakpoint_desc = (gchar *) g_malloc (MAX_LINE_LENTH);
+		breakpoint_desc = (gchar *) g_malloc (MAX_LINE_LENGTH);
 		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
 
 		*list = g_list_append (*list, (gpointer) breakpoint_desc);

@@ -21,12 +21,12 @@
  */
 
 #include "env.h"
+#include "limits.h"
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
-#define MAX_LINE_LENTH 1000
 #define MAX_ENV_ARRAY_SIZE 1000
 
 /* External programs. */
@@ -35,16 +35,16 @@ static gboolean env_extern_prog[MAX_ENV_ARRAY_SIZE + 1];
 static gboolean
 env_check_external_prog(const gchar *prog)
 {
-	gchar line[MAX_LINE_LENTH + 1];
-	gchar cmd[MAX_LINE_LENTH + 1];
+	gchar line[MAX_LINE_LENGTH + 1];
+	gchar cmd[MAX_LINE_LENGTH + 1];
 	FILE *pi;
 
-	g_snprintf (cmd, MAX_LINE_LENTH + 1, "which %s\n", prog);
+	g_snprintf (cmd, MAX_LINE_LENGTH + 1, "which %s\n", prog);
 	pi = popen (cmd, "r");
 
 	/* One line is enough. */
 	line[0] = '\0';
-	fgets (line, MAX_LINE_LENTH, pi);
+	fgets (line, MAX_LINE_LENGTH, pi);
 
 	pclose (pi);
 

@@ -27,8 +27,8 @@
 
 #include "project.h"
 #include "misc.h"
+#include "limits.h"
 
-#define MAX_PATH_LENTH 1000
 #define MAX_MAKEFILE_LENTH 100000
 #define DIR_MODE 0777
 
@@ -47,9 +47,9 @@ project_path_init ()
 {
 	gboolean suc;
 
-	default_projects_root = (gchar *) malloc(MAX_PATH_LENTH);
-	g_strlcpy (default_projects_root, g_getenv("HOME"), MAX_PATH_LENTH);
-	g_strlcat (default_projects_root, "/Projects", MAX_PATH_LENTH);
+	default_projects_root = (gchar *) malloc(MAX_FILEPATH_LENGTH);
+	g_strlcpy (default_projects_root, g_getenv("HOME"), MAX_FILEPATH_LENGTH);
+	g_strlcat (default_projects_root, "/Projects", MAX_FILEPATH_LENGTH);
 	suc = g_mkdir (default_projects_root, DIR_MODE);
 
 	if (suc == 0)
@@ -59,14 +59,14 @@ project_path_init ()
 static void
 project_init (CProject *project)
 {
-	project->project_name = (gchar *) g_malloc (MAX_PATH_LENTH);
-	project->project_path = (gchar *) g_malloc (MAX_PATH_LENTH);
+	project->project_name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	project->project_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project->header_list = NULL;
 	project->source_list = NULL;
 	project->resource_list = NULL;
-	project->libs = (gchar *) g_malloc (MAX_PATH_LENTH);
+	project->libs = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project->libs[0] = 0;
-	project->opts = (gchar *) g_malloc (MAX_PATH_LENTH);
+	project->opts = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project->opts[0] = 0;
 }
 
@@ -79,10 +79,10 @@ project_new(const gchar *project_name, const gchar *project_dir, const project_t
 
 	new_project = (CProject *) g_malloc (sizeof (CProject));
 	project_init (new_project);
-	g_strlcpy (new_project->project_name, project_name, MAX_PATH_LENTH);
-	g_strlcpy (new_project->project_path, project_dir == NULL? default_projects_root: project_dir, MAX_PATH_LENTH);
-	g_strlcat (new_project->project_path, "/", MAX_PATH_LENTH);
-	g_strlcat (new_project->project_path, project_name, MAX_PATH_LENTH);
+	g_strlcpy (new_project->project_name, project_name, MAX_FILEPATH_LENGTH);
+	g_strlcpy (new_project->project_path, project_dir == NULL? default_projects_root: project_dir, MAX_FILEPATH_LENGTH);
+	g_strlcat (new_project->project_path, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (new_project->project_path, project_name, MAX_FILEPATH_LENGTH);
 	new_project->project_type = project_type;
 	suc = g_mkdir (new_project->project_path, DIR_MODE);
 	project_save_xml(new_project);
@@ -152,9 +152,9 @@ project_save_xml(CProject *project)
 	xmlNewChild(root_node, NULL, BAD_CAST ("LIBS"), BAD_CAST (project->libs));
 	xmlNewChild(root_node, NULL, BAD_CAST ("OPTS"), BAD_CAST (project->opts));
 
-	xml_path = (gchar *) g_malloc (MAX_PATH_LENTH);
-	g_strlcpy (xml_path, project->project_path, MAX_PATH_LENTH);
-	g_strlcat (xml_path, "/project.cfp", MAX_PATH_LENTH);
+	xml_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	g_strlcpy (xml_path, project->project_path, MAX_FILEPATH_LENGTH);
+	g_strlcat (xml_path, "/project.cfp", MAX_FILEPATH_LENGTH);
 	xmlSaveFormatFileEnc(xml_path, doc, "UTF-8", 1);
 
 	xmlFreeDoc(doc);
@@ -176,12 +176,12 @@ project_load_xml(CProject *project, const gchar *xml_file)
 
 	doc = xmlReadFile(xml_file, "UTF-8", 0);
 	root_node = xmlDocGetRootElement(doc);
-	type = (gchar *) g_malloc (MAX_PATH_LENTH);
+	type = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	child = root_node->children;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (type, tmp_c, MAX_PATH_LENTH);
+	g_strlcpy (type, tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 	project->project_type = (g_strcmp0(type, "C++") == 0);
 
@@ -189,14 +189,14 @@ project_load_xml(CProject *project, const gchar *xml_file)
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->project_name, tmp_c, MAX_PATH_LENTH);
+	g_strlcpy (project->project_name, tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->project_path, tmp_c, MAX_PATH_LENTH);
+	g_strlcpy (project->project_path, tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
@@ -207,9 +207,9 @@ project_load_xml(CProject *project, const gchar *xml_file)
 
 		if (node->type != XML_ELEMENT_NODE)
 			continue;
-		new_header = (gchar *) g_malloc (MAX_PATH_LENTH);
+		new_header = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_header, tmp_c, MAX_PATH_LENTH);
+		g_strlcpy (new_header, tmp_c, MAX_FILEPATH_LENGTH);
 		project->header_list = g_list_append (project->header_list, (gpointer) new_header);
 		xmlFree (tmp_c);
 	}
@@ -222,9 +222,9 @@ project_load_xml(CProject *project, const gchar *xml_file)
 
 		if (node->type != XML_ELEMENT_NODE)
 			continue;
-		new_source = (gchar *) g_malloc (MAX_PATH_LENTH);
+		new_source = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_source, tmp_c, MAX_PATH_LENTH);
+		g_strlcpy (new_source, tmp_c, MAX_FILEPATH_LENGTH);
 		project->source_list = g_list_append (project->source_list, (gpointer) new_source);
 		xmlFree (tmp_c);
 	}
@@ -237,9 +237,9 @@ project_load_xml(CProject *project, const gchar *xml_file)
 
 		if (node->type != XML_ELEMENT_NODE)
 			continue;
-		new_resource = (gchar *) g_malloc (MAX_PATH_LENTH);
+		new_resource = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_resource, tmp_c, MAX_PATH_LENTH);
+		g_strlcpy (new_resource, tmp_c, MAX_FILEPATH_LENGTH);
 		project->resource_list = g_list_append (project->resource_list, (gpointer) new_resource);
 		xmlFree (tmp_c);
 	}
@@ -248,14 +248,14 @@ project_load_xml(CProject *project, const gchar *xml_file)
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->libs, tmp_c, MAX_PATH_LENTH);
+	g_strlcpy (project->libs, tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
 	while (child->type != XML_ELEMENT_NODE)
 		child = child->next;
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->opts, tmp_c, MAX_PATH_LENTH);
+	g_strlcpy (project->opts, tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	g_free (type);
@@ -274,10 +274,10 @@ project_create_empty (const gchar *filepath, const gchar *filename, const gint f
 	gchar *final_path;
 	gboolean suc;
 
-	final_path = (gchar *) g_malloc (MAX_PATH_LENTH);
-	g_strlcpy (final_path, filepath, MAX_PATH_LENTH);
-	g_strlcat (final_path, "/", MAX_PATH_LENTH);
-	g_strlcat (final_path, filename, MAX_PATH_LENTH);
+	final_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	g_strlcpy (final_path, filepath, MAX_FILEPATH_LENGTH);
+	g_strlcat (final_path, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (final_path, filename, MAX_FILEPATH_LENGTH);
 	suc = misc_create_file (final_path);
 
 	if (suc) {
@@ -304,10 +304,10 @@ project_add_file(const gchar *filepath, const gchar *filename, const gchar *loca
 	gchar *final_path;
 	gboolean suc;
 
-	final_path = (gchar *) g_malloc (MAX_PATH_LENTH);
-	g_strlcpy (final_path, filepath, MAX_PATH_LENTH);
-	g_strlcat (final_path, "/", MAX_PATH_LENTH);
-	g_strlcat (final_path, filename, MAX_PATH_LENTH);
+	final_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	g_strlcpy (final_path, filepath, MAX_FILEPATH_LENGTH);
+	g_strlcat (final_path, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (final_path, filename, MAX_FILEPATH_LENGTH);
 	suc = misc_copy_file (local_file, final_path);
 
 	if (suc) {
@@ -382,10 +382,10 @@ project_generate_makefile(CProject *project)
 	gchar *makefile_path;
 	gchar *makefile_buf;
 
-	makefile_path = (gchar *) g_malloc (MAX_PATH_LENTH);
+	makefile_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	makefile_buf = (gchar *) g_malloc (MAX_MAKEFILE_LENTH);
-	g_strlcpy (makefile_path, project->project_path, MAX_PATH_LENTH);
-	g_strlcat (makefile_path, "/Makefile", MAX_PATH_LENTH);
+	g_strlcpy (makefile_path, project->project_path, MAX_FILEPATH_LENGTH);
+	g_strlcat (makefile_path, "/Makefile", MAX_FILEPATH_LENGTH);
 
 	if (project->project_type == PROJECT_C)
 		g_strlcpy (makefile_buf, "CC=gcc\n", MAX_MAKEFILE_LENTH);
@@ -479,9 +479,9 @@ project_get_settings(gchar *libs, gchar *opts)
 	}
 	else {
 		if (libs != NULL)
-			g_strlcpy (libs, project->libs, MAX_PATH_LENTH);
+			g_strlcpy (libs, project->libs, MAX_FILEPATH_LENGTH);
 		if (opts != NULL)
-			g_strlcpy (opts, project->opts, MAX_PATH_LENTH);
+			g_strlcpy (opts, project->opts, MAX_FILEPATH_LENGTH);
 	}
 
 	g_mutex_unlock (&project_mutex);
@@ -494,8 +494,8 @@ project_set_settings(const gchar *libs, const gchar *opts)
 	if (project == NULL)
 		return ;
 
-	g_strlcpy (project->libs, libs, MAX_PATH_LENTH);
-	g_strlcpy (project->opts, opts, MAX_PATH_LENTH);
+	g_strlcpy (project->libs, libs, MAX_FILEPATH_LENGTH);
+	g_strlcpy (project->opts, opts, MAX_FILEPATH_LENGTH);
 
 	project_save_xml (project);
 	project_generate_makefile (project);

@@ -39,10 +39,10 @@
 #include "editorconfig.h"
 #include "project.h"
 #include "env.h"
+#include "limits.h"
 
 #define TIME_BUF_SIZE 100
 #define MESSAGE_BUF_SIZE 1000
-#define MAX_FILEPATH_LENTH 1000
 #define NAX_TIP_LENTH 10000
 
 #define LOGO_SIZE 160
@@ -410,7 +410,7 @@ ui_editorconfig_init ()
 static void
 ui_project_label_init ()
 {
-	gchar label[MAX_FILEPATH_LENTH];
+	gchar label[MAX_FILEPATH_LENGTH];
 
 	g_sprintf (label, "%s: %s", _("Project"), _("None"));
 	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
@@ -916,12 +916,12 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 		gchar *path;
 
 		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-		g_strlcpy (filepath, path, MAX_FILEPATH_LENTH);
+		g_strlcpy (filepath, path, MAX_FILEPATH_LENGTH);
 		
 		g_free (path);
 	}
 	else {
-		g_strlcpy (filepath, "NULL", MAX_FILEPATH_LENTH);
+		g_strlcpy (filepath, "NULL", MAX_FILEPATH_LENGTH);
 	}
 
 	gtk_widget_destroy (dialog);
@@ -1020,7 +1020,7 @@ ui_current_editor_filepath(gchar *filepath)
 	editor = ui_get_current_editor ();
 
 	if (editor != NULL)
-		g_strlcpy (filepath, editor->filepath, MAX_FILEPATH_LENTH);
+		g_strlcpy (filepath, editor->filepath, MAX_FILEPATH_LENGTH);
 	else
 		filepath[0] = 0;
 }
@@ -1211,7 +1211,7 @@ ui_current_editor_change_mode()
 	
 	editor = ui_get_current_editor ();
 	overwrite = gtk_text_view_get_overwrite (GTK_TEXT_VIEW (editor->textview));
-	label = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	label = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 
 	if (overwrite)
 		sprintf (label, _(" Mode: %s"), _("Overwrite"));
@@ -1396,8 +1396,8 @@ ui_project_settings_dialog_destory ()
 void
 ui_new_project_dialog_info (gchar *name, gchar *path, gint *type)
 {
-	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->name_entry)), MAX_FILEPATH_LENTH);
-	g_strlcpy (path, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->path_entry)), MAX_FILEPATH_LENTH);
+	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->name_entry)), MAX_FILEPATH_LENGTH);
+	g_strlcpy (path, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->path_entry)), MAX_FILEPATH_LENGTH);
 	(*type) = gtk_combo_box_get_active (GTK_COMBO_BOX (new_project_dialog->type_box));
 }
 
@@ -1405,14 +1405,14 @@ ui_new_project_dialog_info (gchar *name, gchar *path, gint *type)
 void
 ui_create_file_dialog_info (gchar *name)
 {
-	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (create_file_dialog->name_entry)), MAX_FILEPATH_LENTH);
+	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (create_file_dialog->name_entry)), MAX_FILEPATH_LENGTH);
 }
 
 void
 ui_project_settings_dialog_info (gchar *libs, gchar *opts)
 {
-	g_strlcpy (libs, gtk_entry_get_text (GTK_ENTRY (project_settings_dialog->libs_entry)), MAX_FILEPATH_LENTH);
-	g_strlcpy (opts, gtk_entry_get_text (GTK_ENTRY (project_settings_dialog->opts_entry)), MAX_FILEPATH_LENTH);
+	g_strlcpy (libs, gtk_entry_get_text (GTK_ENTRY (project_settings_dialog->libs_entry)), MAX_FILEPATH_LENGTH);
+	g_strlcpy (opts, gtk_entry_get_text (GTK_ENTRY (project_settings_dialog->opts_entry)), MAX_FILEPATH_LENGTH);
 }
 
 /* Start project operate state on toplevel window. */
@@ -1421,11 +1421,11 @@ ui_start_project (const gchar *project_name, const gchar *project_path)
 {
 	gchar *title;
 
-	title = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	title = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	filetree_project_init (window->filetree, project_name, project_path);
-	g_strlcat (title, project_name, MAX_FILEPATH_LENTH);
-	g_strlcat (title, " - ", MAX_FILEPATH_LENTH);
-	g_strlcpy (title, gtk_window_get_title (GTK_WINDOW (window->toplevel)), MAX_FILEPATH_LENTH);
+	g_strlcat (title, project_name, MAX_FILEPATH_LENGTH);
+	g_strlcat (title, " - ", MAX_FILEPATH_LENGTH);
+	g_strlcpy (title, gtk_window_get_title (GTK_WINDOW (window->toplevel)), MAX_FILEPATH_LENGTH);
 	
 	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
 
@@ -1471,8 +1471,8 @@ ui_filetree_menu_popup ()
 	gint isfile;
 	gint child;
 
-	name = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	filetree_get_current_store (GTK_TREE_VIEW (window->filetree), &name, &path, &isfile, &child);
 	gtk_widget_show(GTK_WIDGET (filetree_menu->add_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->create_item));
@@ -2342,7 +2342,7 @@ ui_current_editor_select_range (const gint offset, const gint len)
 void
 ui_set_window_title (const gchar *project_name)
 {
-	gchar title[MAX_FILEPATH_LENTH];
+	gchar title[MAX_FILEPATH_LENGTH];
 
 	g_sprintf (title, "Codefox - %s", project_name);
 	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
@@ -2351,7 +2351,7 @@ ui_set_window_title (const gchar *project_name)
 void
 ui_set_project_label (const gchar *project_name)
 {
-	gchar label[MAX_FILEPATH_LENTH];
+	gchar label[MAX_FILEPATH_LENGTH];
 
 	g_sprintf (label, "%s: %s", _("Project"), project_name);
 	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);

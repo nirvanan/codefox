@@ -26,11 +26,9 @@
 #include "ui.h"
 #include "project.h"
 #include "env.h"
+#include "limits.h"
 
 extern CWindow *window;
-
-#define MAX_RESULT_LENTH 100000
-#define MAX_LINE_LENTH 1000
 
 gboolean 
 static_check (gpointer data)
@@ -49,7 +47,7 @@ static_check (gpointer data)
 	gboolean warning;
 
 	project_path = NULL;
-	file_path = (gchar *) g_malloc (MAX_LINE_LENTH);
+	file_path = (gchar *) g_malloc (MAX_LINE_LENGTH);
 
 	if (1) {
 		//g_usleep (500000);
@@ -79,13 +77,13 @@ static_check (gpointer data)
 			}
 
 			project_type = project_get_type ();
-			libs = (gchar *) g_malloc (MAX_LINE_LENTH);
+			libs = (gchar *) g_malloc (MAX_LINE_LENGTH);
 			project_get_settings (libs, NULL);
-			code_path = (gchar *) g_malloc (MAX_LINE_LENTH);
-			g_strlcpy (code_path, project_path, MAX_LINE_LENTH);
-			g_strlcat (code_path, "/", MAX_LINE_LENTH);
-			g_strlcat (code_path, ".static.", MAX_LINE_LENTH);
-			g_strlcat (code_path, project_type? "cpp": "c", MAX_LINE_LENTH);
+			code_path = (gchar *) g_malloc (MAX_LINE_LENGTH);
+			g_strlcpy (code_path, project_path, MAX_LINE_LENGTH);
+			g_strlcat (code_path, "/", MAX_LINE_LENGTH);
+			g_strlcat (code_path, ".static.", MAX_LINE_LENGTH);
+			g_strlcat (code_path, project_type? "cpp": "c", MAX_LINE_LENGTH);
 			code = ui_current_editor_code ();
 
 			if (code == NULL) {
@@ -100,10 +98,10 @@ static_check (gpointer data)
 
 			g_free (code);
 
-			output = (gchar *) g_malloc (MAX_RESULT_LENTH);
+			output = (gchar *) g_malloc (MAX_RESULT_LENGTH);
 			compile_static_check (code_path, project_type, libs, output);
 
-			line = (gchar *) g_malloc (MAX_LINE_LENTH);
+			line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 			p = 0;
 			ui_current_editor_error_tag_clear ();
 
@@ -132,7 +130,7 @@ static_check (gpointer data)
 						continue;
 					}
 
-					code_line = (gchar *) g_malloc (MAX_LINE_LENTH);
+					code_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 					ui_current_editor_line (code_line, row - 1);
 					len = 0;
 					code_len = strlen(code_line);

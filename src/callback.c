@@ -41,10 +41,8 @@
 #include "project.h"
 #include "symbol.h"
 #include "search.h"
+#include "limits.h"
 
-#define MAX_FILEPATH_LENTH 1000
-#define MAX_RESULT_LENTH 100000
-#define MAX_LINE_LENTH 1000
 #define EXTRA_LENGTH 100
 
 extern CWindow *window;
@@ -103,7 +101,7 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 {
 	gchar *filepath;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (filepath, TRUE, FALSE, NULL);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -141,7 +139,7 @@ save_save_current_code (GtkWidget *widget, gpointer user_data)
 	gchar *filepath;
 	gchar *code;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_current_editor_filepath (filepath);
 
 	if (g_strcmp0 (filepath, _("Untitled")) == 0) {
@@ -169,7 +167,7 @@ saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 	gchar *filepath;
 	gchar *code;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (filepath, FALSE, FALSE, filepath);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -243,13 +241,13 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	gint error_no;
 	gint warning_no;
 	
-	line = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	line = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project_path = project_current_path ();
 	project_name = project_current_name ();
-	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENTH);
-	g_strlcat (exe_path, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENTH);
+	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
+	g_strlcat (exe_path, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
 
 	ui_compiletree_clear ();
 	ui_compiletree_apend (_("Start building."), 1);
@@ -299,12 +297,12 @@ run_run_executable (GtkWidget *widget, gpointer user_data)
 	gchar *project_name;
 	gchar *exe_path;
 
-	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project_path = project_current_path ();
 	project_name = project_current_name ();
-	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENTH);
-	g_strlcat (exe_path, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENTH);
+	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
+	g_strlcat (exe_path, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
 
 	misc_exec_file (exe_path);
 	g_free (exe_path);
@@ -350,7 +348,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 		GList *sign;
 		gint i;
 
-		line = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+		line = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		ui_current_editor_line (line, end_line);
 
 		while (! CHAR (line[strlen (line) - 1]) && ! DIGIT (line[strlen (line) - 1]))
@@ -377,7 +375,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 		gint i;
 		gint line_offset;
 
-		line = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+		line = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		ui_current_editor_line (line, end_line);
 		line_offset = gtk_text_iter_get_line_offset (location);
 		line[line_offset - 1] = 0;
@@ -509,11 +507,11 @@ new_project_show_dialog (GtkWidget *widget, gpointer user_data)
 	gint project_type;
 	gint response;
 
-	default_project_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	project_get_default_path (default_project_path, MAX_FILEPATH_LENTH);
+	default_project_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	project_get_default_path (default_project_path, MAX_FILEPATH_LENGTH);
 	response = ui_new_project_dialog_new (default_project_path);
-	project_name = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	project_path = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	project_name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	project_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 
 	if (response == 0) {
 		ui_new_project_dialog_info (project_name, project_path, &project_type);
@@ -592,7 +590,7 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 		return ;
 	}
 
-	filename = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filename = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_create_file_dialog_info (filename);
 	ui_filetree_current_path (&filepath, NULL);
 	fold = ui_filetree_row_second_level ();
@@ -626,16 +624,16 @@ on_open_file_clicked (GtkWidget *widget, gpointer user_data)
 	gboolean suc;
 	gint fold;
 
-	local_file = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	local_file = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (local_file, TRUE, FALSE, NULL);
 
 	if (g_strcmp0 (local_file, "NULL") != 0) {
-		filename = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+		filename = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 		ui_filetree_current_path (&filepath, NULL);
 
 		offset = misc_get_file_name_in_path (local_file);
 
-		g_strlcpy (filename, local_file + offset + 1, MAX_FILEPATH_LENTH);
+		g_strlcpy (filename, local_file + offset + 1, MAX_FILEPATH_LENGTH);
 		fold = ui_filetree_row_second_level ();
 		suc = project_add_file (filepath, filename, local_file, fold);
 
@@ -697,7 +695,7 @@ on_open_project (GtkWidget *widget, gpointer user_data)
 	GList *fold2;
 	GList *fold3;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (filepath, TRUE, TRUE, NULL);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -705,8 +703,8 @@ on_open_project (GtkWidget *widget, gpointer user_data)
 		project_get_file_lists (&fold1, &fold2, &fold3);
 		project_path = project_current_path ();
 		project_name = project_current_name ();
-		project_root = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-		g_strlcpy (project_root, project_path, MAX_FILEPATH_LENTH);
+		project_root = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+		g_strlcpy (project_root, project_path, MAX_FILEPATH_LENGTH);
 		offset = misc_get_file_name_in_path (project_path);
 		project_root[offset] = 0;
 		ui_start_project (project_name, project_root);
@@ -734,8 +732,8 @@ on_project_settings_clicked (GtkWidget *widget, gpointer user_data)
 	gchar *libs;
 	gchar *opts;
 
-	libs = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	opts = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	libs = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	opts = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project_get_settings (libs, opts);
 	response = ui_project_settings_dialog_new (libs, opts);
 
@@ -795,7 +793,7 @@ on_line_label_2clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 	if (bevent->type != GDK_2BUTTON_PRESS)
 		return ;
 
-	breakpoint_desc = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	breakpoint_desc = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_current_editor_breakpoint_update (bevent->x, bevent->y, breakpoint_desc);
 
 	if (debug_is_active ())
@@ -811,7 +809,7 @@ on_watchtree_edited (GtkCellRendererText *cell, gchar *path_string,
 	if (new_text[0] == 0)
 		return ;
 
-	value = (gchar *) g_malloc (MAX_LINE_LENTH);
+	value = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	debug_expression_value (new_text, value);
 	ui_watchtree_cell_change (path_string, new_text, value);
 
@@ -867,15 +865,15 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	else if (g_strcmp0 (action, DEBUG_WIDGET_CONTINUE) == 0)
 		debug_command_exec ("c", NULL, NULL);
 
-	filename = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
+	filename = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	debug_current_file_line (g_strcmp0 (action, DEBUG_WIDGET_START) == 0,
 							 filename, &line);
 
 	project_path = project_current_path ();
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENTH);
-	g_strlcpy (filepath, project_path, MAX_FILEPATH_LENTH);
-	g_strlcat (filepath, "/", MAX_FILEPATH_LENTH);
-	g_strlcat (filepath, filename, MAX_FILEPATH_LENTH);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	g_strlcpy (filepath, project_path, MAX_FILEPATH_LENGTH);
+	g_strlcat (filepath, "/", MAX_FILEPATH_LENGTH);
+	g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 
 	if (!misc_file_exist (filepath)) {
 		if (g_strcmp0 (action, DEBUG_WIDGET_START) == 0 ||
@@ -895,9 +893,9 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 			debug_command_exec ("finish", NULL, NULL);
 			debug_current_file_line (FALSE, filename, &line);
-			g_strlcpy (filepath, project_path, MAX_FILEPATH_LENTH);
-			g_strlcat (filepath, "/", MAX_FILEPATH_LENTH);
-			g_strlcat (filepath, filename, MAX_FILEPATH_LENTH);
+			g_strlcpy (filepath, project_path, MAX_FILEPATH_LENGTH);
+			g_strlcat (filepath, "/", MAX_FILEPATH_LENGTH);
+			g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 		}
 	}
 
@@ -928,14 +926,14 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 	output_list = NULL;
 	debug_current_locals (&output_list);
-	name = (gchar *) g_malloc (MAX_LINE_LENTH);
-	value = (gchar *) g_malloc (MAX_LINE_LENTH);
+	name = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	value = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	for (iterator = output_list; iterator; iterator = iterator->next) {
 		gchar *local;
 
 		local = (gchar *) iterator->data;
 		sscanf (local, "%s", name);
-		g_strlcpy (value, local + strlen (name) + 1, MAX_LINE_LENTH);
+		g_strlcpy (value, local + strlen (name) + 1, MAX_LINE_LENGTH);
 
 		ui_debug_view_locals_add (name, value);
 	}
@@ -944,15 +942,15 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	output_list = NULL;
 
 	debug_current_stack (&output_list);
-	frame_name = (gchar *) g_malloc (MAX_LINE_LENTH);
-	frame_args = (gchar *) g_malloc (MAX_LINE_LENTH);
-	file_line = (gchar *) g_malloc (MAX_LINE_LENTH);
+	frame_name = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	frame_args = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	file_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	for (iterator = output_list; iterator; iterator = iterator->next) {
 		gchar *line;
 
 		line = (gchar *) iterator->data;
 		sscanf (line, "%s %s", frame_name, file_line);
-		g_strlcpy (frame_args, line + strlen (frame_name)  + strlen (file_line) + 2, MAX_LINE_LENTH);
+		g_strlcpy (frame_args, line + strlen (frame_name)  + strlen (file_line) + 2, MAX_LINE_LENGTH);
 
 		ui_debug_view_stack_add (frame_name, frame_args, file_line);
 	}
@@ -966,7 +964,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		gchar *value;
 
 		line = (gchar *) iterator->data;
-		value = (gchar *) g_malloc (MAX_LINE_LENTH);
+		value = (gchar *) g_malloc (MAX_LINE_LENGTH);
 		debug_expression_value (line, value);
 		value_list = g_list_append (value_list, (gpointer) value);
 	}
