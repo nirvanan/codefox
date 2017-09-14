@@ -35,4 +35,7 @@
 /* Max time buffer length. */
 #define MAX_TIME_LENGTH 100
 
+/* Max option buffer length. */
+#define MAX_OPTION_LENGTH 1000
+
 #endif

@@ -555,7 +555,7 @@ ceditor_emit_close_signal (CEditor *editor)
 }
 
 void
-ceditor_get_line (CEditor *editor, gchar *line, const gint lineno)
+ceditor_get_line (CEditor *editor, gchar *line, const gint size, const gint lineno)
 {
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
@@ -567,7 +567,7 @@ ceditor_get_line (CEditor *editor, gchar *line, const gint lineno)
 	gtk_text_buffer_get_iter_at_line (buffer, &end, lineno);
 	gtk_text_iter_forward_to_line_end (&end);
 	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
-	g_strlcpy (line, text, MAX_LINE_LENGTH);
+	g_strlcpy (line, text, size);
 
 	g_free (text);
 }

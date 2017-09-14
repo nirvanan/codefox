@@ -100,8 +100,7 @@ misc_get_file_name_in_path(const gchar *filepath)
 	
 	/* FIXME: use glib! */
 	len = strlen (filepath);
-	for (i = len - 1; filepath[i] != '/'; i--)
-		;
+	for (i = len - 1; filepath[i] != '/'; i--);
 
 	return i;
 }

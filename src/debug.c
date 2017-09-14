@@ -79,7 +79,7 @@ debug_breakpoint_add (const gchar *breakpoint_desc)
 	gchar gdb_bp[MAX_FILEPATH_LENGTH + 1];
 
 	breakpoint = (CBreakPoint *) g_malloc (sizeof (CBreakPoint));
-	breakpoint->filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	breakpoint->filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	sscanf (breakpoint_desc, "%s %d", breakpoint->filepath, &(breakpoint->line));
 
 	breakpoint_list = g_list_append (breakpoint_list, (gpointer) breakpoint);
@@ -400,13 +400,13 @@ debug_is_active ()
 }
 
 void
-debug_current_file_line (const gboolean startup, gchar *filename, gint *line)
+debug_current_file_line (const gboolean startup, gchar *filename, const gint size, gint *line)
 {
 	gchar *output;
 	gint i;
 	gint j;
 
-	output = (gchar *) g_malloc (MAX_RESULT_LENGTH);
+	output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
 	debug_command_exec ("info line", NULL, output);
 
 	if (debug_conection_broken (output)) {
@@ -423,7 +423,7 @@ debug_current_file_line (const gboolean startup, gchar *filename, gint *line)
 			i++;
 		i += strlen (" at ");
 		j = 0;
-		while (output[i] && output[i] != ':') {
+		while (j < size - 1 && output[i] && output[i] != ':') {
 			filename[j] = output[i];
 			i++;
 			j++;
@@ -441,7 +441,7 @@ debug_current_file_line (const gboolean startup, gchar *filename, gint *line)
 			i++;
 		i++;
 		j = 0;
-		while (output[i] && output[i] != '\"') {
+		while (j < size - 1 && output[i] && output[i] != '\"') {
 			filename[j] = output[i];
 			j++;
 			i++;
@@ -505,33 +505,37 @@ debug_current_locals (GList **locals)
 }
 
 void
-debug_expression_value (const gchar *expression, gchar *value)
+debug_expression_value (const gchar *expression, gchar *value, const gint size)
 {
 	gchar *output;
 	gint i;
 
-	output = (gchar *) g_malloc (MAX_RESULT_LENGTH);
+	output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
 	debug_command_exec ("p", expression, output);
 
 	if (debug_conection_broken (output)) {
-		g_strlcpy (value, _("Can't get the value."), MAX_LINE_LENGTH);
+		g_strlcpy (value, _("Can't get the value."), size);
+
 		g_free (output);
 
-		return ;
+		return;
 	}
 
 	i = 0;
-	while (output[i] && !g_str_has_prefix (output + i, " = "))
+	while (output[i] && !g_str_has_prefix (output + i, " = ")) {
 		i++;
+	}
 	if (output[i] != 0) {
 		i += 3;
-		g_strlcpy (value, output + i, MAX_LINE_LENGTH);
+		g_strlcpy (value, output + i, size);
 
-		if (value[strlen (value) - 1] == '\n')
+		if (value[strlen (value) - 1] == '\n') {
 			value[strlen (value) - 1] = 0;
+		}
 	}
-	else
-		g_strlcpy (value, _("Can't get the value."), MAX_LINE_LENGTH);
+	else {
+		g_strlcpy (value, _("Can't get the value."), size);
+	}
 }
 
 static void

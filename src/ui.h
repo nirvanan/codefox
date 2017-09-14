@@ -175,73 +175,74 @@ typedef enum {
 } CNewProjectResponse;
 
 void
-ui_disable_save_widgets();
+ui_disable_save_widgets ();
 
 void
-ui_enable_save_widgets();
+ui_enable_save_widgets ();
 
 void
-ui_enable_project_widgets();
+ui_enable_project_widgets ();
 
 void
-ui_disable_project_widgets();
+ui_disable_project_widgets ();
 
 void
-ui_enable_build_widgets();
+ui_enable_build_widgets ();
 
 void
-ui_disable_build_widgets();
+ui_disable_build_widgets ();
 
 void
-ui_enable_debug_widgets();
+ui_enable_debug_widgets ();
 
 void
-ui_disable_debug_widgets();
+ui_disable_debug_widgets ();
 
 void
-ui_enable_open_project_widgets();
+ui_enable_open_project_widgets ();
 
 void
-ui_disable_open_project_widgets();
+ui_disable_open_project_widgets ();
 
 void
-ui_enable_settings_widgets();
+ui_enable_settings_widgets ();
 
 void
-ui_disable_settings_widgets();
+ui_disable_settings_widgets ();
 
 void
-ui_enable_undo_widgets();
+ui_enable_undo_widgets ();
 
 void
-ui_disable_undo_widgets();
+ui_disable_undo_widgets ();
 
 void
-ui_enable_redo_widgets();
+ui_enable_redo_widgets ();
 
 void
-ui_disable_redo_widgets();
+ui_disable_redo_widgets ();
 
 void
 ui_init ();
 
 void
-ui_about_dialog_new();
+ui_about_dialog_new ();
 
 void
-ui_editor_new();
+ui_editor_new ();
 
 void
-ui_editor_new_with_text(const gchar *filepath, const gchar *code_buf);
+ui_editor_new_with_text (const gchar *filepath, const gchar *code_buf);
 
 void
-ui_filetree_entry_new(gboolean is_file, gchar *filename, gchar *filepath);
+ui_filetree_entry_new (gboolean is_file, gchar *filename, gchar *filepath);
 
 void
-ui_status_entry_new(const gint op, const gchar *filepath);
+ui_status_entry_new (const gint op, const gchar *filepath);
 
 void
-ui_get_filepath_from_dialog(gchar *filepath, const gboolean open, const gboolean project, const gchar *default_path);
+ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean open,
+                             const gboolean project, const gchar *default_path);
 
 gboolean
 ui_have_editor();
@@ -311,10 +312,10 @@ void
 ui_project_settings_dialog_destory ();
 
 void
-ui_new_project_dialog_info(gchar *name, gchar *path, gint *type);
+ui_new_project_dialog_info (gchar *name, const gint name_size, gchar *path, const gint path_size, gint *type);
 
 void
-ui_create_file_dialog_info(gchar *name);
+ui_create_file_dialog_info(gchar *name, const gint size);
 
 void
 ui_project_settings_dialog_info (gchar *libs, gchar *opts);
@@ -353,7 +354,7 @@ void
 ui_append_files_to_second_level(const GList *list, const gint row);
 
 void
-ui_current_editor_line (gchar *line, const gint lineno);
+ui_current_editor_line (gchar *line, const gint size, const gint lineno);
 
 void
 ui_current_editor_error_tag_clear ();
@@ -499,5 +500,8 @@ ui_set_window_title (const gchar *project_name);
 
 void
 ui_set_project_label (const gchar *project_name);
+
+void
+ui_editor_close_by_path (const gchar *filepath);
 
 #endif

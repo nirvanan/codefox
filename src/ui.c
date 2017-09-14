@@ -377,7 +377,7 @@ ui_init_stock_items()
 		for (j = 0; j < G_N_ELEMENTS (icon_size); j++) {
 			pixbuf = gtk_icon_theme_load_icon (icon_theme, items[i].stock_id, icon_size[j], 0, &error);
 			if (!pixbuf) {
-			    g_warning (_("Couldn't load icon: %s."), error->message);
+			    g_warning (_("can't load icon: %s."), error->message);
 			    g_error_free (error);
 			} else {
 				GtkIconSource *source;
@@ -874,10 +874,11 @@ ui_status_entry_new(const gint op, const gchar *filepath)
 }
 
 /* Create a file choosing dialog and return the file path after user 
- * selected a localfile or typed a filename. 
+ * selected a local file or typed a filename. 
  */
 void
-ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolean project, const gchar *default_path)
+ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean open,
+                             const gboolean project, const gchar *default_path)
 {
 	GtkWidget *dialog;
 
@@ -892,7 +893,7 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 		if (project) {
 			GtkFileFilter* filter;
 
-			filter = gtk_file_filter_new();
+			filter = gtk_file_filter_new ();
 		    gtk_file_filter_set_name (filter, _("Codefox project"));
 		    gtk_file_filter_add_pattern(filter,"*.cfp");
 		    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog),filter);
@@ -915,12 +916,12 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 		gchar *path;
 
 		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-		g_strlcpy (filepath, path, MAX_FILEPATH_LENGTH);
+		g_strlcpy (filepath, path, size);
 		
 		g_free (path);
 	}
 	else {
-		g_strlcpy (filepath, "NULL", MAX_FILEPATH_LENGTH);
+		g_strlcpy (filepath, "NULL", size);
 	}
 
 	gtk_widget_destroy (dialog);
@@ -928,14 +929,14 @@ ui_get_filepath_from_dialog (gchar *filepath, const gboolean open, const gboolea
 
 /* Check there is still editors in notebook. */
 gboolean
-ui_have_editor()
+ui_have_editor ()
 {
 	return ui_get_current_editor() != NULL;
 }
 
 /* Find editor with associated filepath. */
 gboolean
-ui_find_editor(const gchar *filepath)
+ui_find_editor (const gchar *filepath)
 {
 	GList * iterator;
 
@@ -1093,7 +1094,6 @@ ui_emit_close_signal()
 		
 		return ;
 	}
-
 	
 	ceditor_emit_close_signal (editor);
 }
@@ -1393,18 +1393,18 @@ ui_project_settings_dialog_destory ()
 
 /* Get project info from new_project_dialog. */
 void
-ui_new_project_dialog_info (gchar *name, gchar *path, gint *type)
+ui_new_project_dialog_info (gchar *name, const gint name_size, gchar *path, const gint path_size, gint *type)
 {
-	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->name_entry)), MAX_FILEPATH_LENGTH);
-	g_strlcpy (path, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->path_entry)), MAX_FILEPATH_LENGTH);
+	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->name_entry)), name_size);
+	g_strlcpy (path, gtk_entry_get_text (GTK_ENTRY (new_project_dialog->path_entry)), path_size);
 	(*type) = gtk_combo_box_get_active (GTK_COMBO_BOX (new_project_dialog->type_box));
 }
 
 /* Get project info from new_project_dialog. */
 void
-ui_create_file_dialog_info (gchar *name)
+ui_create_file_dialog_info (gchar *name, const gint size)
 {
-	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (create_file_dialog->name_entry)), MAX_FILEPATH_LENGTH);
+	g_strlcpy (name, gtk_entry_get_text (GTK_ENTRY (create_file_dialog->name_entry)), size);
 }
 
 void
@@ -1418,17 +1418,14 @@ ui_project_settings_dialog_info (gchar *libs, gchar *opts)
 void
 ui_start_project (const gchar *project_name, const gchar *project_path)
 {
-	gchar *title;
+	gchar title[MAX_FILEPATH_LENGTH + 1];
 
-	title = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	filetree_project_init (GTK_TREE_VIEW (window->filetree), project_name, project_path);
 	g_strlcat (title, project_name, MAX_FILEPATH_LENGTH);
 	g_strlcat (title, " - ", MAX_FILEPATH_LENGTH);
 	g_strlcpy (title, gtk_window_get_title (GTK_WINDOW (window->toplevel)), MAX_FILEPATH_LENGTH);
 	
 	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
-
-	g_free (title);
 }
 
 /* Create a popup menu for filetree. */
@@ -1601,7 +1598,7 @@ ui_append_files_to_second_level(const GList *list, const gint row)
 	}
 
 void
-ui_current_editor_line (gchar *line, const gint lineno)
+ui_current_editor_line (gchar *line, const gint size, const gint lineno)
 {
 	CEditor *editor;
 
@@ -1611,7 +1608,7 @@ ui_current_editor_line (gchar *line, const gint lineno)
 		return ;
 	}
 
-	ceditor_get_line (editor, line, lineno);
+	ceditor_get_line (editor, line, size, lineno);
 }
 
 void
@@ -1808,7 +1805,7 @@ ui_member_menu_item_filter ()
 	item_showed = 0;
 	for (iterator = member_menu->item_list; iterator; iterator = iterator->next) {
 		GtkWidget *item;
-		gchar *label;
+		const gchar *label;
 
 		item = (GtkWidget *) iterator->data;
 		label = gtk_menu_item_get_label (GTK_MENU_ITEM (item));
@@ -2354,4 +2351,21 @@ ui_set_project_label (const gchar *project_name)
 
 	g_snprintf (label, MAX_FILEPATH_LENGTH, "%s: %s", _("Project"), project_name);
 	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
+}
+
+void
+ui_editor_close_by_path (const gchar *filepath)
+{
+	CEditor *editor;
+
+	editor = ui_get_editor (filepath);
+
+	if (editor == NULL) {
+		return;
+	}
+
+	if (ceditor_get_dirty (editor)) {
+		ceditor_set_dirty (editor, 0);
+	}
+	ceditor_emit_close_signal (editor);
 }

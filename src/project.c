@@ -265,9 +265,9 @@ project_load_xml(CProject *project, const gchar *xml_file)
 }
 
 void
-project_get_default_path (gchar *buf, gint len)
+project_get_default_path (gchar *buf, const gint size)
 {
-	g_strlcpy (buf, default_projects_root, len);
+	g_strlcpy (buf, default_projects_root, size);
 }
 
 gboolean
@@ -471,7 +471,7 @@ project_get_file_lists(GList **header_list, GList **source_list, GList **resourc
 }
 
 void
-project_get_settings(gchar *libs, gchar *opts)
+project_get_settings(gchar *libs, const gint libs_size, gchar *opts, const gint opts_size)
 {
 	g_mutex_lock (&project_mutex);
 
@@ -480,10 +480,12 @@ project_get_settings(gchar *libs, gchar *opts)
 		opts[0] = 0;
 	}
 	else {
-		if (libs != NULL)
-			g_strlcpy (libs, project->libs, MAX_FILEPATH_LENGTH);
-		if (opts != NULL)
-			g_strlcpy (opts, project->opts, MAX_FILEPATH_LENGTH);
+		if (libs != NULL) {
+			g_strlcpy (libs, project->libs, libs_size);
+		}
+		if (opts != NULL) {
+			g_strlcpy (opts, project->opts, opts_size);
+		}
 	}
 
 	g_mutex_unlock (&project_mutex);

@@ -78,8 +78,8 @@ static_check (gpointer data)
 			}
 
 			project_type = project_get_type ();
-			libs = (gchar *) g_malloc (MAX_LINE_LENGTH);
-			project_get_settings (libs, NULL);
+			libs = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+			project_get_settings (libs, MAX_LINE_LENGTH, NULL, 0);
 			code_path = (gchar *) g_malloc (MAX_LINE_LENGTH);
 			g_strlcpy (code_path, project_path, MAX_LINE_LENGTH);
 			g_strlcat (code_path, "/", MAX_LINE_LENGTH);
@@ -131,8 +131,8 @@ static_check (gpointer data)
 						continue;
 					}
 
-					code_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
-					ui_current_editor_line (code_line, row - 1);
+					code_line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+					ui_current_editor_line (code_line, MAX_LINE_LENGTH, row - 1);
 					len = 0;
 					code_len = strlen(code_line);
 					while (column - 1 + len >= 0 && column - 1 + len < code_len 

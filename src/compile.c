@@ -54,12 +54,17 @@ compile_compile (gpointer data)
 	fflush (stdin);
 	NOUSE = chdir (path);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make 2>&1", "r");
+
+	if (pi == NULL) {
+		g_error ("can't open pipe for make.");
+		
+		return NULL;
+	}
 
 	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_mutex_lock (&compile_mutex);
-
 		g_strlcat (buffer, line, MAX_RESULT_LENGTH);
 		g_mutex_unlock (&compile_mutex);
 	}
@@ -87,8 +92,14 @@ compile_clear (gpointer data)
 	fflush (stdin);
 	NOUSE = chdir (path);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make clean 2>&1", "r");
+
+	if (pi == NULL) {
+		g_error ("can't open pipe for make.");
+		
+		return NULL;
+	}
 
 	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_mutex_lock (&compile_mutex);
@@ -154,10 +165,12 @@ compile_current_project (const gchar *path, const gboolean compile)
 	done = FALSE;
 	offset = 0;
 
-	if (compile)
+	if (compile) {
 		g_thread_new ("compile", compile_compile, (gpointer) path);
-	else
+	}
+	else {
 		g_thread_new ("clear", compile_clear, (gpointer) path);
+	}
 }
 
 void
@@ -169,8 +182,8 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 
 	fflush (stdin);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
-	command = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	command = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	g_strlcpy (command, type? "g++ -S -Wall ": "gcc -S -Wall ", MAX_LINE_LENGTH);
 	if (strlen (libs) > 0) {
 		g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENGTH);
@@ -180,13 +193,21 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 	g_strlcat (command, filepath, MAX_LINE_LENGTH);
 	g_strlcat (command, " 2>&1", MAX_LINE_LENGTH);
 
-	pi = popen (command, "r");
+
 	output[0] = 0;
+
+	pi = popen (command, "r");
+
+	if (pi == NULL) {
+		g_error ("can't open pipe for make.");
+		
+		return;
+	}
 	while (fgets (line, MAX_LINE_LENGTH, pi))
 		g_strlcat (output, line, MAX_RESULT_LENGTH);
 
-	g_free (line);
-	g_free (command);
+	g_free ((gpointer) line);
+	g_free ((gpointer) command);
 
 	pclose (pi);
 }
@@ -196,22 +217,27 @@ compile_is_error (gchar *output)
 {
 	/* Check whether output is an error message. */
 	gint i, j;
-	gchar tag[100];
+	gchar tag[MAX_LINE_LENGTH + 1];
 	
-	if (strlen (output) <= 0)
+	if (strlen (output) <= 0) {
 		return 0;
+	}
 		
-	for (i = 0; i < strlen (output) - 5; i++)
-		if (output[i] == ' ')
+	for (i = 0; i < strlen (output) - 5; i++) {
+		if (output[i] == ' ') {
 			break;
-	
+		}
+	}
+
 	i++;
-	for (j = 0; j < 3; j++)
+	for (j = 0; j < 3; j++) {
 		tag[j] = output[i + j];
+	}
 	tag[3] = 0;
 
-	if (g_strcmp0 (tag, _("err")) == 0 || g_strcmp0 (tag, _("fat")) == 0)
+	if (g_strcmp0 (tag, _("err")) == 0 || g_strcmp0 (tag, _("fat")) == 0) {
 		return 1;
+	}
 	
 	return 0;
 }
@@ -221,22 +247,26 @@ compile_is_warning (gchar *output)
 {
 	/* check whether output is an warning message. */
 	gint i, j;
-	gchar tag[100];
+	gchar tag[MAX_LINE_LENGTH + 1];
 	
 	if (strlen (output) <= 0)
 		return 0;
 		
-	for (i = 0; i < strlen (output) - 5; i++)
-		if (output[i] == ' ')
+	for (i = 0; i < strlen (output) - 5; i++) {
+		if (output[i] == ' ') {
 			break;
+		}
+	}
 	
 	i++;
-	for (j = 0; j < 3; j++)
+	for (j = 0; j < 3; j++) {
 		tag[j] = output[i + j];
+	}
 	tag[3] = 0;
 
-	if (g_strcmp0 (tag, _("war")) == 0)
+	if (g_strcmp0 (tag, _("war")) == 0) {
 		return 1;
+	}
 	
 	return 0;
 }
@@ -248,8 +278,9 @@ compile_get_location (const gchar *line, gint *row, gint *column)
 	gint i;
 
 	i = 0;
-	while (line[i] && line[i] != ':')
+	while (line[i] && line[i] != ':') {
 		i++;
+	}
 	i++;
 
 	(*row) = 0;

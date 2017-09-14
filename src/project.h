@@ -56,7 +56,7 @@ CProject *
 project_new_from_xml(const gchar *xml_file);
 
 void
-project_get_default_path (gchar *buf, gint len);
+project_get_default_path (gchar *buf, const gint size);
 
 gboolean
 project_create_empty (const gchar *filepath, const gchar *filename, const gint file_type);
@@ -77,7 +77,7 @@ void
 project_get_file_lists(GList **header_list, GList **source_list, GList **resource_list);
 
 void
-project_get_settings(gchar *libs, gchar *opts);
+project_get_settings(gchar *libs, const gint libs_size, gchar *opts, const gint opts_size);
 
 void
 project_set_settings(const gchar *libs, const gchar *opts);

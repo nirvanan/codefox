@@ -119,7 +119,7 @@ void
 ceditor_emit_close_signal (CEditor *editor);
 
 void
-ceditor_get_line (CEditor *editor, gchar *line, const gint lineno);
+ceditor_get_line (CEditor *editor, gchar *line, const gint size, const gint lineno);
 
 void
 ceditor_error_tag_clear(CEditor *editor);

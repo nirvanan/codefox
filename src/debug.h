@@ -49,7 +49,7 @@ void
 debug_connect (const gchar *project_path, const gchar *project_name);
 
 void
-debug_current_file_line (const gboolean startup, gchar *filename, gint *line);
+debug_current_file_line (const gboolean startup, gchar *filename, const gint size, gint *line);
 
 void
 debug_current_locals (GList **locals);
@@ -58,7 +58,7 @@ void
 debug_current_stack (GList **stack);
 
 void
-debug_expression_value (const gchar *expression, gchar *value);
+debug_expression_value (const gchar *expression, gchar *value, const gint size);
 
 void
 debug_stop ();
