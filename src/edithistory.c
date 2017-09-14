@@ -20,6 +20,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+
 #include "edithistory.h"
 #include "callback.h"
 #include "highlighting.h"
@@ -78,9 +80,9 @@ static void
 edit_step_free (CEditStep *edit_step)
 {
 	if (!edit_step->insert)
-		g_free (edit_step->deleted);
+		g_free ((gpointer) edit_step->deleted);
 	g_date_time_unref (edit_step->add_time);
-	g_free (edit_step);
+	g_free ((gpointer) edit_step);
 }
 
 void
@@ -113,7 +115,7 @@ edit_history_step_add (CEditHistory *edit_history, const gboolean insert,
 				new_text = (gchar *) g_malloc (new_text_len + 1);
 				g_strlcpy (new_text, text, new_text_len + 1);
 				g_strlcat (new_text, edit_step->deleted, new_text_len + 1);
-				g_free (edit_step->deleted);
+				g_free ((gpointer) edit_step->deleted);
 				edit_step->deleted = new_text;
 				edit_step->offset = offset;
 
@@ -185,7 +187,7 @@ edit_history_action (CEditHistory *edit_history, GtkTextBuffer *buffer, const gb
 		//g_signal_handlers_unblock_by_func (buffer, on_editor_delete, NULL);
 		//edit_history_rehighlighting (buffer, edit_step->offset, 0);
 		
-		g_free (text);
+		g_free ((gpointer) text);
 	}
 	else {
 		alt_step = edit_step_new (TRUE, edit_step->offset, strlen (edit_step->deleted), NULL);

@@ -20,6 +20,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+
 #include "search.h"
 
 static void search_kmp_scheme (const gchar *token, const gint len, gint *scheme);

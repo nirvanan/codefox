@@ -218,7 +218,7 @@ debugview_watchtree_cell_change (CDebugView *debug_view, const gchar *path_strin
 		gtk_list_store_set(store, &iter, 0, "", 1, "", -1);
 	}
 
-	g_free (old_text);
+	g_free ((gpointer) old_text);
 }
 
 void
@@ -234,7 +234,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
 
 	if (line[0] == 0) {
-		g_free (line);
+		g_free ((gpointer) line);
 
 		return ;
 	}
@@ -245,7 +245,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
 
 		if (line[0] == 0) {
-			g_free (line);
+			g_free ((gpointer) line);
 
 			return ;
 		}
@@ -264,18 +264,19 @@ debugview_watchtree_set_all (CDebugView *debug_view, GList *list)
 	gchar *path;
 
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
-	path = (gchar *) g_malloc (MAX_CELL_LENGTH);
+	path = (gchar *) g_malloc (MAX_CELL_LENGTH + 1);
 	row = 0;
 	for (iterator = (GSList *) list; iterator; iterator = iterator->next) {
 		gchar *value;
 
 		value = (gchar *) iterator->data;
-		g_sprintf (path, "%d", row);
-		printf ("%s\n", value);
+		g_snprintf (path, MAX_CELL_LENGTH, "%d", row);
 		gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store), &iter, path);
 		gtk_list_store_set (store, &iter, 1, value, -1);
 		row++;
 	}
+
+	g_free ((gpointer) path);
 }
 
 void

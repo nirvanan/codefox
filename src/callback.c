@@ -64,7 +64,7 @@ search_state_update ()
 	token = ui_search_entry_get_text ();
 
 	if (code[0] == 0 || token[0] == 0) {
-		g_free (code);
+		g_free ((gpointer) code);
 
 		return ;
 	}
@@ -72,7 +72,7 @@ search_state_update ()
 	matched = search_kmp_nth (code, token, -1);
 	ui_current_editor_search_init (matched);
 
-	g_free (code);
+	g_free ((gpointer) code);
 }
 
 void
@@ -121,7 +121,7 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 			name_offset = misc_get_file_name_in_path (filepath);
 			ui_status_entry_new (FILE_OP_OPEN, filepath);
 
-			g_free (code_buf);
+			g_free ((gpointer) code_buf);
 		}
 	}
 
@@ -130,7 +130,7 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 
 	search_state_update ();
 
-	g_free (filepath);
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -146,7 +146,7 @@ save_save_current_code (GtkWidget *widget, gpointer user_data)
 		ui_get_filepath_from_dialog (filepath, FALSE, FALSE, _("Untitled"));
 
 		if (g_strcmp0 (filepath, "NULL") == 0) {
-			g_free (filepath);
+			g_free ((gpointer) filepath);
 
 			return ;
 		}
@@ -157,8 +157,8 @@ save_save_current_code (GtkWidget *widget, gpointer user_data)
 	ui_save_code_post (filepath);
 	ui_status_entry_new (FILE_OP_SAVE, filepath);
 
-	g_free (filepath);
-	g_free (code);
+	g_free ((gpointer) filepath);
+	g_free ((gpointer) code);
 }
 
 void
@@ -176,10 +176,10 @@ saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 		ui_save_code_post (filepath);
 		ui_status_entry_new (FILE_OP_SAVE, filepath);
 
-		g_free (code);
+		g_free ((gpointer) code);
 	}
 
-	g_free (filepath);
+	g_free ((gpointer) filepath);
 }
 
 
@@ -286,8 +286,8 @@ build_compile (GtkWidget *widget, gpointer user_data)
 		ui_enable_build_widgets ();
 	}
 
-	g_free (line);
-	g_free (exe_path);
+	g_free ((gpointer) line);
+	g_free ((gpointer) exe_path);
 }	
 
 void
@@ -305,7 +305,7 @@ run_run_executable (GtkWidget *widget, gpointer user_data)
 	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
 
 	misc_exec_file (exe_path);
-	g_free (exe_path);
+	g_free ((gpointer) exe_path);
 }
 
 void
@@ -365,7 +365,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 			ui_function_autocomplete (line + i, sign);
 
 		g_list_free (sign);
-		g_free (line);
+		g_free ((gpointer) line);
 	}
 
 	if ((text[0] == '.' || text[0] == '>' || text[0] == ':') && len == 1) {
@@ -412,7 +412,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 			g_list_free (vars);
 		}
 
-		g_free (line);
+		g_free ((gpointer) line);
 	}
 
 	if ((CHAR (text[0]) || DIGIT (text[0])) && len == 1 &&
@@ -460,7 +460,7 @@ on_editor_delete2 (GtkTextBuffer *textbuffer, GtkTextIter *start,
 	ui_current_editor_step_add (FALSE, offset, -1, text);
 	ui_undo_redo_widgets_update ();
 
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 void
@@ -527,7 +527,7 @@ new_project_show_dialog (GtkWidget *widget, gpointer user_data)
 	ui_new_project_dialog_destory ();
 
 
-	g_free (default_project_path);
+	g_free ((gpointer) default_project_path);
 }
 
 void
@@ -540,6 +540,9 @@ on_filetree_clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 		return ;
 
 	ui_filetree_menu_popup ();
+
+	void
+			ui_filetree_menu_popup ();
 }
 
 void
@@ -564,13 +567,13 @@ on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
 			misc_get_file_content (filepath, &code_buf);
 			ui_editor_new_with_text (filepath, code_buf);
 
-			g_free (code_buf);
+			g_free ((gpointer) code_buf);
 		}
 		else
 			ui_show_editor_by_path (filepath);
 	}
 
-	g_free (filepath);
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -603,7 +606,7 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 		ui_create_file_dialog_destory ();
 		ui_error_dialog_new (message);
 
-		g_free (filename);
+		g_free ((gpointer) filename);
 		return ;
 	}
 
@@ -611,7 +614,7 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 	ui_status_entry_new (5, filename);
 	ui_create_file_dialog_destory ();
 
-	g_free (filename);
+	g_free ((gpointer) filename);
 }
 
 void
@@ -648,9 +651,9 @@ on_open_file_clicked (GtkWidget *widget, gpointer user_data)
 			ui_status_entry_new (4, filename);
 		}
 
-		g_free (filename);
+		g_free ((gpointer) filename);
 	}
-	g_free (local_file);
+	g_free ((gpointer) local_file);
 }
 
 void
@@ -718,11 +721,11 @@ on_open_project (GtkWidget *widget, gpointer user_data)
 		ui_set_window_title (project_name);
 		ui_set_project_label (project_name);
 
-		g_free (project_root);
+		g_free ((gpointer) project_root);
 	}
 
 
-	g_free (filepath);
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -740,16 +743,16 @@ on_project_settings_clicked (GtkWidget *widget, gpointer user_data)
 	if (response) {
 		ui_project_settings_dialog_destory ();
 
-		g_free (libs);
-		g_free (opts);
+		g_free ((gpointer) libs);
+		g_free ((gpointer) opts);
 		return ;
 	}
 
 	ui_project_settings_dialog_info (libs, opts);
 	project_set_settings (libs, opts);
 	ui_project_settings_dialog_destory ();
-	g_free (libs);
-	g_free (opts);
+	g_free ((gpointer) libs);
+	g_free ((gpointer) opts);
 }
 
 void
@@ -813,7 +816,7 @@ on_watchtree_edited (GtkCellRendererText *cell, gchar *path_string,
 	debug_expression_value (new_text, value);
 	ui_watchtree_cell_change (path_string, new_text, value);
 
-	g_free (value);
+	g_free ((gpointer) value);
 }
 
 void
@@ -882,8 +885,8 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 			ui_debug_view_clear ();
 			ui_debug_ptr_remove ();
 
-			g_free (filename);
-			g_free (filepath);
+			g_free ((gpointer) filename);
+			g_free ((gpointer) filepath);
 
 			return ;
 		}
@@ -902,8 +905,8 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	if (!misc_file_exist (filepath) || filename[0] == 0) {
 		debug_command_exec ("c", NULL, NULL);
 
-		g_free (filename);
-		g_free (filepath);
+		g_free ((gpointer) filename);
+		g_free ((gpointer) filepath);
 
 		return ;
 	}
@@ -918,7 +921,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		misc_get_file_content (filepath, &code_buf);
 		ui_editor_new_with_text (filepath, code_buf);
 
-		g_free (code_buf);
+		g_free ((gpointer) code_buf);
 	}
 	ui_select_editor_with_path (filepath);
 	ui_debug_ptr_add (filepath, line);
@@ -980,13 +983,13 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		g_timeout_add (200, debug_monitor, NULL);
 	}
 
-	g_free (name);
-	g_free (value);
-	g_free (frame_name);
-	g_free (frame_args);
-	g_free (file_line);
-	g_free (filename);
-	g_free (filepath);
+	g_free ((gpointer) name);
+	g_free ((gpointer) value);
+	g_free ((gpointer) frame_name);
+	g_free ((gpointer) frame_args);
+	g_free ((gpointer) file_line);
+	g_free ((gpointer) filename);
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -1053,7 +1056,7 @@ on_search_clicked (GtkWidget *widget, gpointer user_data)
 	len = strlen (token);
 
 	if (code[0] == 0 || token[0] == 0 || next == -1) {
-		g_free (code);
+		g_free ((gpointer) code);
 
 		return ;
 	}
@@ -1063,7 +1066,7 @@ on_search_clicked (GtkWidget *widget, gpointer user_data)
 	if (offset != -1)
 		ui_current_editor_select_range (offset, len);
 
-	g_free (code);
+	g_free ((gpointer) code);
 }
 
 void

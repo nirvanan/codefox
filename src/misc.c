@@ -21,6 +21,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -30,10 +31,10 @@
 
 #include "misc.h"
 #include "env.h"
+#include "limits.h"
 
 /* FIXME: ... */
 #define BROWSER_PATH "/usr/bin/firefox"
-
 #define HOME_PAGE "https://github.com/nirvanan/Codefox"
 #define MAX_COMMAND_LENGTH 200
 
@@ -43,12 +44,14 @@ void
 misc_open_homepage()
 {
 	gchar *command;
+	gint UNUSED;
 
-	command = (gchar *) g_malloc(MAX_COMMAND_LENGTH);
+	command = (gchar *) g_malloc(MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, BROWSER_PATH, MAX_COMMAND_LENGTH);
+	g_strlcat (command, " ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, HOME_PAGE, MAX_COMMAND_LENGTH);
 
-	system("/usr/bin/firefox lee75.brinkster.com");
+	UNUSED = system(command);
 
 	g_free (command);
 }
@@ -105,7 +108,7 @@ misc_get_file_name_in_path(const gchar *filepath)
 
 /* Get current time and copy to src. */
 void 
-time_get_now (gchar *src)
+misc_time_get_now (gchar *src)
 {
 	GDateTime *time;
 	gint hr, mi, se;
@@ -115,7 +118,7 @@ time_get_now (gchar *src)
 	mi = g_date_time_get_minute (time);
 	se = g_date_time_get_second (time);
 	
-	g_sprintf (src, "%.2d:%.2d:%.2d: ", hr, mi, se);
+	g_snprintf (src, MAX_TIME_LENGTH, "%.2d:%.2d:%.2d: ", hr, mi, se);
 
 	g_date_time_unref (time);
 }
@@ -185,6 +188,7 @@ void
 misc_exec_file (const gchar *filepath)
 {
 	gchar *command;
+	gint UNUSED;
 
 	if (!env_prog_exist (ENV_PROG_XTERM)) {
 		g_warning ("xterm not found.");
@@ -194,7 +198,7 @@ misc_exec_file (const gchar *filepath)
 	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH);
 	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
-	system (command);
+	UNUSED = system (command);
 	
 	g_free (command);
 }

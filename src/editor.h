@@ -40,13 +40,13 @@ typedef struct Notation
 } CNotation;
 
 typedef struct {
-	const gchar *filepath;
+	gchar *filepath;
 	gint line;
 	GtkWidget *icon;
 } CBreakPointTag;
 
 typedef struct {
-	const gchar *filepath;
+	gchar *filepath;
 	gint line;
 } CBreakPointNode;
 
@@ -83,7 +83,7 @@ void
 ceditor_remove (CEditor *editor);
 
 void
-ceditor_save_path (CEditor *editor, gchar *filepath);
+ceditor_save_path (CEditor *editor, const gchar *filepath);
 
 void
 ceditor_set_dirty (CEditor *editor, gboolean dirty);
@@ -92,7 +92,7 @@ gboolean
 ceditor_get_dirty (CEditor *editor);
 
 void
-ceditor_set_path (CEditor *editor, gchar *filepath);
+ceditor_set_path (CEditor *editor, const gchar *filepath);
 
 void
 ceditor_show (CEditor *editor);
@@ -172,6 +172,6 @@ gint
 ceditor_search_next (CEditor *editor, const gboolean pre);
 
 void
-ceditor_select_range (CEditor *editor, const gint offset, const len);
+ceditor_select_range (CEditor *editor, const gint offset, const gint len);
 
 #endif

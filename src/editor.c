@@ -85,7 +85,7 @@ ceditor_set_tabs (GtkWidget *textview)
 static void
 ceditor_line_label_set_font (CEditor *editor)
 {
-	CEditorConfig *editor_config;
+	const CEditorConfig *editor_config;
 
 	editor_config = editorconfig_config_get ();
 	gtk_widget_override_font (editor->lineno, editor_config->pfd);
@@ -156,7 +156,7 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	gtk_container_add (GTK_CONTAINER (new_editor->scroll), new_editor->textview);
 	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->scroll, 1, 1, 0);
 	gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW (new_editor->event_scroll),
-										gtk_scrolled_window_get_vadjustment (new_editor->scroll));
+										gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (new_editor->scroll)));
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (new_editor->event_scroll), GTK_POLICY_NEVER, GTK_POLICY_EXTERNAL);
 
 	new_editor->notationlist = NULL;
@@ -278,7 +278,7 @@ ceditor_remove (CEditor *editor)
 }
 
 void
-ceditor_save_path (CEditor *editor, gchar *filepath)
+ceditor_save_path (CEditor *editor, const gchar *filepath)
 {
 	/* Save current code to filepath. */
 	gchar *text;
@@ -301,12 +301,12 @@ ceditor_save_path (CEditor *editor, gchar *filepath)
 void
 ceditor_set_dirty (CEditor *editor, gboolean dirty)
 {
+	gchar *label;
+	
 	/* If an opened file has been modified, set the dirty bit. */
 	if (editor->dirty == dirty)
 		return ;
-	
-	gchar *label;
-	
+
 	editor->dirty = dirty;
 	label = (gchar *) gtk_label_get_text (GTK_LABEL (editor->label_name));
 	if (!dirty)	
@@ -315,8 +315,8 @@ ceditor_set_dirty (CEditor *editor, gboolean dirty)
 	{
 		gchar *temp;
 
-		temp = g_malloc (1024);
-		g_strlcpy (temp + 1, label, 1023);
+		temp = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
+		g_strlcpy (temp + 1, label, MAX_FILEPATH_LENGTH);
 		temp[0] = '*';
 		gtk_label_set_text (GTK_LABEL (editor->label_name), temp);
 		g_free (temp);
@@ -330,14 +330,12 @@ ceditor_get_dirty (CEditor *editor)
 }
 
 void
-ceditor_set_path (CEditor *editor, gchar *filepath)
+ceditor_set_path (CEditor *editor, const gchar *filepath)
 {
-
-	strcpy (editor->filepath, filepath);
-	
 	gint len;
 	gint i;
 	
+	g_strlcpy (editor->filepath, filepath, MAX_FILEPATH_LENGTH);
 	len = strlen (filepath);
 	for (i = len - 1; filepath[i] != '/'; i--)
 		;
@@ -405,9 +403,9 @@ ceditor_append_line_label (CEditor *editor, gint lines)
 		g_strlcat (text, "\n", label_len);
 	for (i = 1; i <= lines; i++)
 	{
-		gchar line[MAX_LINE_NUMBER_LENGTH + 2];
+		gchar line[MAX_LINE_NUMBER_LENGTH + 1];
 		
-		sprintf (line, "%d\n", i + editor->linecount);
+		g_snprintf (line, MAX_LINE_NUMBER_LENGTH, "%d\n", i + editor->linecount);
 		g_strlcat (text, line, label_len);
 	}
 	len = strlen (text);
@@ -728,7 +726,7 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 		icon = ceditor_breakpoint_tag_add (editor, line);
 		breakpoint->icon = icon;
 
-		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
+		g_snprintf (breakpoint_desc, MAX_FILEPATH_LENGTH, "%s %d", breakpoint->filepath, breakpoint->line);
 
 		ceditor_add_global_breakpoint (editor->filepath, line);
 	}
@@ -736,7 +734,7 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 		editor->breakpoint_list = g_list_remove (editor->breakpoint_list, (gpointer) breakpoint);
 		ceditor_breakpoint_tag_remove (editor, breakpoint->icon);
 
-		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
+		g_snprintf (breakpoint_desc, MAX_FILEPATH_LENGTH, "%s %d", breakpoint->filepath, breakpoint->line);
 
 		ceditor_remove_global_breakpoint (editor->filepath, line);
 		
@@ -771,7 +769,7 @@ ceditor_breakpoint_tags_get (CEditor *editor, GList **list)
 		
 		breakpoint = (CBreakPointTag *) iterator->data;
 		breakpoint_desc = (gchar *) g_malloc (MAX_LINE_LENGTH);
-		g_sprintf (breakpoint_desc, "%s %d", breakpoint->filepath, breakpoint->line);
+		g_snprintf (breakpoint_desc, MAX_FILEPATH_LENGTH, "%s %d", breakpoint->filepath, breakpoint->line);
 
 		*list = g_list_append (*list, (gpointer) breakpoint_desc);
 	}
@@ -878,7 +876,7 @@ ceditor_search_next (CEditor *editor, const gboolean pre)
 }
 
 void
-ceditor_select_range (CEditor *editor, const gint offset, const len)
+ceditor_select_range (CEditor *editor, const gint offset, const int len)
 {
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;

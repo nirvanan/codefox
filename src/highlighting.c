@@ -33,7 +33,7 @@ static gchar lex[MAX_LEX_SIZE];
 void 
 highlight_register (GtkTextBuffer *buffer)
 {  
-	CEditorConfig *editor_config;
+	const CEditorConfig *editor_config;
 
 	editor_config = editorconfig_config_get ();
 
@@ -43,7 +43,7 @@ highlight_register (GtkTextBuffer *buffer)
 void
 highlight_replace (GtkTextBuffer *buffer)
 {
-	CEditorConfig *editor_config;
+	const CEditorConfig *editor_config;
 
 	editor_config = editorconfig_config_get ();
 	tag_replace_tags (buffer, editor_config);
@@ -254,7 +254,7 @@ highlight_set_tab (GtkTextView *textview)
 	PangoLayout *layout;
 	gchar *tab_string;
 	gint width, height;
-	CEditorConfig *config;
+	const CEditorConfig *config;
 
 	config = editorconfig_config_get ();
 	tab_string = g_strnfill (4, ' ');

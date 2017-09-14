@@ -26,11 +26,11 @@
 #include <gtk/gtk.h>
 
 typedef struct {
-	GdkColor keyword_color;
-	GdkColor string_color;
-	GdkColor constant_color;
-	GdkColor comment_color;
-	GdkColor preprocessor_color;
+	GdkRGBA keyword_color;
+	GdkRGBA string_color;
+	GdkRGBA constant_color;
+	GdkRGBA comment_color;
+	GdkRGBA preprocessor_color;
 } CCodeColorStyle;
 
 typedef struct {

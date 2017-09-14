@@ -23,6 +23,7 @@
 #include "staticcheck.h"
 #include "compile.h"
 #include "highlighting.h"
+#include "misc.h"
 #include "ui.h"
 #include "project.h"
 #include "env.h"

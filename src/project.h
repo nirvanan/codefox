@@ -50,7 +50,7 @@ void
 project_path_init();
 
 CProject *
-project_new(const gchar *project_name, const gchar *project_dir, const project_type);
+project_new(const gchar *project_name, const gchar *project_dir, const CProjectType project_type);
 
 CProject *
 project_new_from_xml(const gchar *xml_file);

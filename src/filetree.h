@@ -40,16 +40,18 @@ typedef enum {
 	LEVEL_SECOND = -2
 } CFileTreeLevel;
 
+/*
 void
-filetree_read_project (GtkTreeView *tree, gchar *file);
+filetree_read_project (GtkTreeView *tree, const gchar *file);
+*/
 
 void
 filetree_append (GtkTreeView *tree, GtkTreeIter *father, 
-				 gboolean file, gchar *filename, gchar *filepath);
+				 gboolean file, const gchar *filename, const gchar *filepath);
 
 void
 filetree_append_to_default (GtkTreeView *tree, gboolean file,
-							gchar *filename, gchar *filepath);
+							const gchar *filename, const gchar *filepath);
 
 void
 filetree_get_current_store (GtkTreeView *tree, gchar **filename,
@@ -60,26 +62,35 @@ filetree_foreach_select (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
                       gpointer data);
 
 void
-filetree_set_select (GtkTreeView *tree, gchar *filepath);
+filetree_set_select (GtkTreeView *tree, const gchar *filepath);
 
 gboolean
 filetree_foreach_remove (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                       gpointer data);
 
 void
-filetree_remove (GtkTreeView *tree, gchar *filepath);
+filetree_remove (GtkTreeView *tree, const gchar *filepath);
 
 void
-filetree_set_selected_path (GtkTreeView *tree, gchar *filepath,
-							gchar *oldpath);
+filetree_set_selected_path (GtkTreeView *tree, const gchar *filepath,
+							const gchar *oldpath);
 
 void
 filetree_init (GtkTreeView *tree);
 
 void
+filetree_project_init (GtkTreeView *tree, const gchar *project_name, const gchar *project_dir);
+
+void
 filetree_append_to_current (GtkTreeView *tree, const gchar *filename, const gint isfile);
+
+void
+filetree_select_second_level (GtkTreeView *tree, const gint row);
 
 gint
 filetree_get_row_second_level (GtkTreeView *tree);
+
+void
+filetree_append_to_second_level (GtkTreeView *tree, gint row, const gchar *filename, const gint isfile);
 
 #endif

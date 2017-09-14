@@ -22,6 +22,7 @@
 
 #include <fcntl.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -30,6 +31,7 @@
 #include <glib/gi18n-lib.h>
 
 #include "debug.h"
+#include "ui.h"
 #include "misc.h"
 #include "env.h"
 #include "limits.h"
@@ -74,6 +76,7 @@ static void
 debug_breakpoint_add (const gchar *breakpoint_desc)
 {
 	CBreakPoint *breakpoint;
+	gchar gdb_bp[MAX_FILEPATH_LENGTH + 1];
 
 	breakpoint = (CBreakPoint *) g_malloc (sizeof (CBreakPoint));
 	breakpoint->filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
@@ -81,12 +84,12 @@ debug_breakpoint_add (const gchar *breakpoint_desc)
 
 	breakpoint_list = g_list_append (breakpoint_list, (gpointer) breakpoint);
 
-	g_sprintf (breakpoint_desc, "%s:%d", breakpoint->filepath, breakpoint->line);
-	debug_command_exec ("b", breakpoint_desc, NULL);
+	g_snprintf (gdb_bp, MAX_FILEPATH_LENGTH, "%s:%d", breakpoint->filepath, breakpoint->line);
+	debug_command_exec ("b", gdb_bp, NULL);
 }
 
 static gboolean 
-debug_conection_broken (const gchar *NOUSE)
+debug_conection_broken (const gchar *UNUSED)
 {
 	return !target_pid || kill (target_pid, 0) != 0
 		   || !gdb_pid || kill (gdb_pid, 0) != 0
@@ -97,11 +100,12 @@ static void
 debug_skip_startup_output ()
 {
 	gchar *line = (gchar *) g_malloc (MAX_LINE_LENGTH * sizeof (gchar));
+	gchar *UNUSED;
 
-	while (1) {
+	for (;;) {
 		line[0] = 0;
 		errno = 0;
-		fgets (line, MAX_LINE_LENGTH, out_file);
+		UNUSED = fgets (line, MAX_LINE_LENGTH, out_file);
 		if (errno == EAGAIN) {
 			continue;
 		}
@@ -116,7 +120,7 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 	gchar *exe_path;
 	gchar *line;
 	FILE *pipe_file;
-	gint NOUSE;
+	gint UNUSED;
 
 	if (!env_prog_exist (ENV_PROG_XTERM) || !env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
 		g_warning ("xterm gdb or gdbserver not found.");
@@ -138,8 +142,8 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 		execlp ("xterm", "xterm", "-e", "gdbserver", GDB_SERVER_PORT_ARG, exe_path, NULL);
 	}
 
-	NOUSE = pipe (fd1);
-	NOUSE = pipe (fd2);
+	UNUSED = pipe (fd1);
+	UNUSED = pipe (fd2);
 
 	gdb_pid = fork ();
 	if (gdb_pid == 0) {
@@ -184,7 +188,8 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 	g_free (line);
 }
 
-static debug_parse_mi_line (gchar *line)
+static void
+debug_parse_mi_line (gchar *line)
 {
 	gchar *temp = (gchar *)g_malloc (MAX_LINE_LENGTH * sizeof (gchar));
 	gint i;
@@ -238,7 +243,8 @@ void
 debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 {
 	gchar *line;
-	gint NOUSE;
+	gint UNUSED;
+	gchar *UNUSED2;
 	gint start;
 
 	g_mutex_lock (&debug_mutex);
@@ -250,12 +256,12 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 
 	fflush (out_file);
 
-	NOUSE = write (fd1[1], command, strlen (command));
+	UNUSED = write (fd1[1], command, strlen (command));
 	if (para != NULL) {
-		NOUSE = write (fd1[1], " ", 1);
-		NOUSE = write (fd1[1], para, strlen (para));
+		UNUSED = write (fd1[1], " ", 1);
+		UNUSED = write (fd1[1], para, strlen (para));
 	}
-	NOUSE = write (fd1[1], "\n", 1);
+	UNUSED = write (fd1[1], "\n", 1);
 
 	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
 	line[0] = 0;
@@ -266,7 +272,7 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 	while (1) {
 		line[0] = 0;
 		errno = 0;
-		fgets (line, MAX_LINE_LENGTH, out_file);
+		UNUSED2 = fgets (line, MAX_LINE_LENGTH, out_file);
 		if (errno == EAGAIN) {
 			continue;
 		}
@@ -365,7 +371,7 @@ debug_breakpoint_update (gchar *breakpoint_desc)
 			g_free (breakpoint->filepath);
 			g_free (breakpoint);
 
-			g_sprintf (breakpoint_desc, "%s:%d", filepath, line);
+			g_snprintf (breakpoint_desc, MAX_FILEPATH_LENGTH, "%s:%d", filepath, line);
 
 			debug_command_exec ("clear", breakpoint_desc, NULL);
 
@@ -453,7 +459,7 @@ debug_current_locals (GList **locals)
 	gint i;
 	gint j;
 
-	output = (gchar *) g_malloc (MAX_RESULT_LENGTH);
+	output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
 	debug_command_exec ("info locals", NULL, output);
 
 	if (debug_conection_broken (output)) {
@@ -467,14 +473,14 @@ debug_current_locals (GList **locals)
 		gchar *name;
 		gchar *value;
 
-		name = (gchar *) g_malloc (MAX_LINE_LENGTH);
-		value = (gchar *) g_malloc (MAX_LINE_LENGTH);
+		name = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+		value = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 		i = 0;
 
 		while (output[i] != 0) {
 			gchar *local;
 
-			local = (gchar *) g_malloc (MAX_LINE_LENGTH);
+			local = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 			sscanf (output + i, "%s", name);
 			i += strlen (name) + 3;
 			j = 0;
@@ -486,7 +492,7 @@ debug_current_locals (GList **locals)
 			value[j] = 0;
 			i += strlen (value) + 1;
 
-			g_sprintf (local, "%s %s", name, value);
+			g_snprintf (local, MAX_LINE_LENGTH, "%s %s", name, value);
 
 			*locals = g_list_append (*locals, (gpointer) local);
 		}
@@ -604,17 +610,17 @@ debug_current_stack (GList **stack)
 		i++;
 	}
 
-	frame_name = (gchar *) g_malloc (MAX_LINE_LENGTH);
-	frame_args = (gchar *) g_malloc (MAX_LINE_LENGTH);
-	file_line = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	frame_name = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	frame_args = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	file_line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	debug_parse_gdb_bt_line (output, TRUE, frame_name, frame_args, file_line, &i);
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH);
-	g_sprintf (line, "%s %s %s", frame_name, file_line, frame_args);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	g_snprintf (line, MAX_LINE_LENGTH, "%s %s %s", frame_name, file_line, frame_args);
 	*stack = g_list_append (*stack, (gpointer) line);
 	while (output[i]) {
 		debug_parse_gdb_bt_line (output, FALSE, frame_name, frame_args, file_line, &i);
 		line = (gchar *) g_malloc (MAX_LINE_LENGTH);
-		g_sprintf (line, "%s %s %s", frame_name, file_line, frame_args);
+		g_snprintf (line, MAX_LINE_LENGTH, "%s %s %s", frame_name, file_line, frame_args);
 
 		*stack = g_list_append (*stack, (gpointer) line);
 	}

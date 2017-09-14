@@ -32,4 +32,7 @@
 /* Max result buffer size. */
 #define MAX_RESULT_LENGTH 100000
 
+/* Max time buffer length. */
+#define MAX_TIME_LENGTH 100
+
 #endif

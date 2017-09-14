@@ -20,6 +20,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <string.h>
+
 #include "env.h"
 #include "limits.h"
 
@@ -37,6 +39,7 @@ env_check_external_prog(const gchar *prog)
 {
 	gchar line[MAX_LINE_LENGTH + 1];
 	gchar cmd[MAX_LINE_LENGTH + 1];
+	gchar *UNUSED;
 	FILE *pi;
 
 	g_snprintf (cmd, MAX_LINE_LENGTH + 1, "which %s\n", prog);
@@ -44,7 +47,7 @@ env_check_external_prog(const gchar *prog)
 
 	/* One line is enough. */
 	line[0] = '\0';
-	fgets (line, MAX_LINE_LENGTH, pi);
+	UNUSED = fgets (line, MAX_LINE_LENGTH, pi);
 
 	pclose (pi);
 

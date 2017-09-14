@@ -23,31 +23,31 @@
 #include "tag.h"
 
 void
-tag_create_tags (GtkTextBuffer *textbuffer, CEditorConfig *config)
+tag_create_tags (GtkTextBuffer *textbuffer, const CEditorConfig *config)
 {
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_NONE,
 								"font-desc", config->pfd,
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_PREPROCESSOR,
 								"font-desc", config->pfd,
-								"foreground-gdk", &(config->code_color->preprocessor_color),
+								"foreground-rgba", &(config->code_color->preprocessor_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_KEYWORD,
 								"weight", PANGO_WEIGHT_BOLD,
 								"font-desc", config->pfd,
-								"foreground-gdk", &(config->code_color->keyword_color),
+								"foreground-rgba", &(config->code_color->keyword_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_CONSTANT,
 								"font-desc", config->pfd,
-								"foreground-gdk", &(config->code_color->constant_color),
+								"foreground-rgba", &(config->code_color->constant_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_STRING,
 								"font-desc", config->pfd,
-								"foreground-gdk", &(config->code_color->string_color),
+								"foreground-rgba", &(config->code_color->string_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_COMMENT,
 								"font-desc", config->pfd,
-								"foreground-gdk", &(config->code_color->comment_color),
+								"foreground-rgba", &(config->code_color->comment_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_WARNING,
 								"underline", PANGO_UNDERLINE_SINGLE,
@@ -59,7 +59,7 @@ tag_create_tags (GtkTextBuffer *textbuffer, CEditorConfig *config)
 }
 
 void
-tag_replace_tags (GtkTextBuffer *textbuffer, CEditorConfig *config)
+tag_replace_tags (GtkTextBuffer *textbuffer, const CEditorConfig *config)
 {
 	GtkTextTagTable *tag_table;
 	GtkTextTag *tag;
@@ -68,18 +68,18 @@ tag_replace_tags (GtkTextBuffer *textbuffer, CEditorConfig *config)
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_NONE);
 	g_object_set (tag, "font-desc", config->pfd, NULL);
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_PREPROCESSOR);
-	g_object_set (tag, "font-desc", config->pfd, "foreground-gdk", 
+	g_object_set (tag, "font-desc", config->pfd, "foreground-rgba", 
 				  &(config->code_color->preprocessor_color), NULL);
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_KEYWORD);
 	g_object_set (tag, "weight", PANGO_WEIGHT_BOLD, "font-desc", config->pfd,
-				  "foreground-gdk", &(config->code_color->keyword_color), NULL);
+				  "foreground-rgba", &(config->code_color->keyword_color), NULL);
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_CONSTANT);
-	g_object_set (tag, "font-desc", config->pfd, "foreground-gdk", 
+	g_object_set (tag, "font-desc", config->pfd, "foreground-rgba", 
 				  &(config->code_color->constant_color), NULL);
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_STRING);
-	g_object_set (tag, "font-desc", config->pfd, "foreground-gdk",
+	g_object_set (tag, "font-desc", config->pfd, "foreground-rgba",
 				  &(config->code_color->string_color), NULL);
 	tag = gtk_text_tag_table_lookup (tag_table, CODE_TAG_COMMENT);
-	g_object_set (tag, "font-desc", config->pfd, "foreground-gdk", 
+	g_object_set (tag, "font-desc", config->pfd, "foreground-rgba", 
 				  &(config->code_color->comment_color), NULL);
 }

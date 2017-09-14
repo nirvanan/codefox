@@ -21,6 +21,8 @@
  */
 
 #include <glib.h>
+#include <glib/gstdio.h>
+#include <string.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -72,7 +74,7 @@ project_init (CProject *project)
 
 /* Create a new project. */
 CProject *
-project_new(const gchar *project_name, const gchar *project_dir, const project_type)
+project_new(const gchar *project_name, const gchar *project_dir, const CProjectType project_type)
 {
 	CProject *new_project;
 	gboolean suc;

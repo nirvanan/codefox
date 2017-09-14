@@ -37,9 +37,9 @@
 #define CODE_TAG_ERROR "error"
 
 void
-tag_create_tags (GtkTextBuffer *textbuffer, CEditorConfig *config);
+tag_create_tags (GtkTextBuffer *textbuffer, const CEditorConfig *config);
 
 void
-tag_replace_tags (GtkTextBuffer *textbuffer, CEditorConfig *config);
+tag_replace_tags (GtkTextBuffer *textbuffer, const CEditorConfig *config);
 
 #endif

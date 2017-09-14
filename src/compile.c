@@ -47,7 +47,7 @@ compile_compile (gpointer data)
 	if (!env_prog_exist (ENV_PROG_MAKE)) {
 		g_warning ("make not found.");
 
-		return;
+		return NULL;
 	}
 
 	path = (const gchar *) data;
@@ -71,6 +71,8 @@ compile_compile (gpointer data)
 	g_free (line);
 
 	pclose (pi);
+
+	return NULL;
 }
 
 static gpointer 
@@ -102,6 +104,8 @@ compile_clear (gpointer data)
 	g_free (line);
 
 	pclose (pi);
+
+	return NULL;
 }
 
 gboolean

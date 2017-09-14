@@ -323,6 +323,9 @@ void
 ui_start_project(const gchar *project_name, const gchar *project_path);
 
 void
+ui_filetree_menu_popup ();
+
+void
 ui_filetree_current_path(gchar **path, gint *isfile);
 
 void
@@ -345,6 +348,9 @@ ui_compiletree_apend (const gchar *line, gint is_message);
 
 void
 ui_compiletree_clear ();
+
+void
+ui_append_files_to_second_level(const GList *list, const gint row);
 
 void
 ui_current_editor_line (gchar *line, const gint lineno);
@@ -383,7 +389,7 @@ const gchar *
 ui_member_menu_prefix ();
 
 void
-ui_editor_close (GtkButton *button);
+ui_editor_close (GtkWidget *button);
 
 void
 ui_current_editor_close ();

@@ -31,7 +31,7 @@
 #include "callback.h"
 #include "ui.h"
 #include "filetree.h"
-#include "time.h"
+#include "misc.h"
 #include "staticcheck.h"
 #include "symbol.h"
 #include "prefix.h"
@@ -41,9 +41,8 @@
 #include "env.h"
 #include "limits.h"
 
-#define TIME_BUF_SIZE 100
 #define MESSAGE_BUF_SIZE 1000
-#define NAX_TIP_LENGTH 10000
+#define MAX_TIP_LENGTH 10000
 
 #define LOGO_SIZE 160
 
@@ -325,8 +324,8 @@ ui_toolpad_init(CWindow *window)
 	gtk_tree_view_set_model (GTK_TREE_VIEW (window->statustree), GTK_TREE_MODEL (store));
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(window->statustree));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
-	time = g_malloc (100);
-	time_get_now (time);
+	time = g_malloc (MAX_TIME_LENGTH + 1);
+	misc_time_get_now (time);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
 	welcome_text = g_malloc (MESSAGE_BUF_SIZE);
@@ -410,9 +409,9 @@ ui_editorconfig_init ()
 static void
 ui_project_label_init ()
 {
-	gchar label[MAX_FILEPATH_LENGTH];
+	gchar label[MAX_FILEPATH_LENGTH + 1];
 
-	g_sprintf (label, "%s: %s", _("Project"), _("None"));
+	g_snprintf (label, MAX_FILEPATH_LENGTH, "%s: %s", _("Project"), _("None"));
 	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
 }
 
@@ -694,7 +693,7 @@ ui_init()
 
 	member_menu = (CMemberMenu *) g_malloc (sizeof(CMemberMenu));
 	member_menu->active = FALSE;
-	member_menu->prefix = (gchar *) g_malloc (NAX_TIP_LENGTH);
+	member_menu->prefix = (gchar *) g_malloc (MAX_TIP_LENGTH);
 	member_menu->prefix[0] = 0;
 	member_menu->item_list = NULL;
 	
@@ -824,9 +823,9 @@ ui_status_entry_new(const gint op, const gchar *filepath)
 	gchar *message_buf;
 	gchar *time_buf;
 
-	time_buf = g_malloc (TIME_BUF_SIZE);
+	time_buf = (gchar *) g_malloc (MAX_TIME_LENGTH + 1);
 	message_buf = g_malloc(MESSAGE_BUF_SIZE);
-	time_get_now (time_buf);
+	misc_time_get_now (time_buf);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
 
@@ -1063,7 +1062,7 @@ ui_save_code_post(const gchar *filepath)
 		ceditor_set_dirty (editor, 0);
 	filetree_set_selected_path (GTK_TREE_VIEW (window->filetree),
 								filepath,
-								editor->filepath);
+								(const gchar *) editor->filepath);
 	ceditor_set_path (editor, filepath);
 }
 
@@ -1422,7 +1421,7 @@ ui_start_project (const gchar *project_name, const gchar *project_path)
 	gchar *title;
 
 	title = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
-	filetree_project_init (window->filetree, project_name, project_path);
+	filetree_project_init (GTK_TREE_VIEW (window->filetree), project_name, project_path);
 	g_strlcat (title, project_name, MAX_FILEPATH_LENGTH);
 	g_strlcat (title, " - ", MAX_FILEPATH_LENGTH);
 	g_strlcpy (title, gtk_window_get_title (GTK_WINDOW (window->toplevel)), MAX_FILEPATH_LENGTH);
@@ -1585,9 +1584,9 @@ void
 ui_append_files_to_second_level(const GList *list, const gint row)
 {
 	
-	GList * iterator;
+	GList *iterator;
 
-	for (iterator = list; iterator; iterator = iterator->next) {
+	for (iterator = (GList *) list; iterator; iterator = iterator->next) {
 		gchar *filepath;
 		gint offset;
 
@@ -1665,13 +1664,13 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 	GList *iterator;
 	
 
-	full = (gchar *) g_malloc (NAX_TIP_LENGTH);
+	full = (gchar *) g_malloc (MAX_TIP_LENGTH);
 	full[0] = 0;
-	for (iterator = signs; iterator; iterator = iterator->next) {
-		g_strlcat (full, name, NAX_TIP_LENGTH);
-		g_strlcat (full, " : ", NAX_TIP_LENGTH);
-		g_strlcat (full, (gchar *) iterator->data, NAX_TIP_LENGTH);
-		g_strlcat (full, "\n", NAX_TIP_LENGTH);
+	for (iterator = (GList *) signs; iterator; iterator = iterator->next) {
+		g_strlcat (full, name, MAX_TIP_LENGTH);
+		g_strlcat (full, " : ", MAX_TIP_LENGTH);
+		g_strlcat (full, (gchar *) iterator->data, MAX_TIP_LENGTH);
+		g_strlcat (full, "\n", MAX_TIP_LENGTH);
 	}
 	full[strlen (full) - 1] = 0;
 
@@ -1706,7 +1705,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 
 	member_menu->menu = (GObject *) gtk_menu_new ();
 	pfd = pango_font_description_from_string ("monospace");
-	for (iterator = funs; iterator; iterator = iterator->next) {
+	for (iterator = (GList *) funs; iterator; iterator = iterator->next) {
 		GtkWidget *item;
 		GtkWidget *stock;
 
@@ -1722,7 +1721,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		gtk_widget_show (item);
 		member_menu->item_list = g_list_append (member_menu->item_list, item);
 	}
-	for (iterator = vars; iterator; iterator = iterator->next) {
+	for (iterator = (GList *) vars; iterator; iterator = iterator->next) {
 		GtkWidget *item;
 		GtkWidget *stock;
 
@@ -1858,7 +1857,7 @@ ui_member_menu_prefix ()
 }
 
 static CEditor *
-ui_get_editor_by_button(GtkButton *button)
+ui_get_editor_by_button(GtkWidget *button)
 {
 	GList *iterator;
 	
@@ -1874,7 +1873,7 @@ ui_get_editor_by_button(GtkButton *button)
 }
 
 void
-ui_editor_close (GtkButton *button)
+ui_editor_close (GtkWidget *button)
 {
 	CEditor *editor;
 	gint n_page;
@@ -2342,17 +2341,17 @@ ui_current_editor_select_range (const gint offset, const gint len)
 void
 ui_set_window_title (const gchar *project_name)
 {
-	gchar title[MAX_FILEPATH_LENGTH];
+	gchar title[MAX_FILEPATH_LENGTH + 1];
 
-	g_sprintf (title, "Codefox - %s", project_name);
+	g_snprintf (title, MAX_FILEPATH_LENGTH, "Codefox - %s", project_name);
 	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
 }
 
 void
 ui_set_project_label (const gchar *project_name)
 {
-	gchar label[MAX_FILEPATH_LENGTH];
+	gchar label[MAX_FILEPATH_LENGTH + 1];
 
-	g_sprintf (label, "%s: %s", _("Project"), project_name);
+	g_snprintf (label, MAX_FILEPATH_LENGTH, "%s: %s", _("Project"), project_name);
 	gtk_label_set_label (GTK_LABEL (window->projectlabel), label);
 }

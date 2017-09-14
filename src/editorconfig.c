@@ -38,11 +38,11 @@ editorconfig_default_config_new ()
 
 	color_style = default_config->code_color;
 
-	NOUSE = gdk_color_parse ("#4CA81D", &(color_style->keyword_color));
-	NOUSE = gdk_color_parse ("#C05800", &(color_style->string_color));
-	NOUSE = gdk_color_parse ("#A020F0", &(color_style->constant_color));
-	NOUSE = gdk_color_parse ("#888376", &(color_style->comment_color));
-	NOUSE = gdk_color_parse ("#BF4040", &(color_style->preprocessor_color));
+	NOUSE = gdk_rgba_parse (&(color_style->keyword_color), "#4CA81D");
+	NOUSE = gdk_rgba_parse (&(color_style->string_color), "#C05800");
+	NOUSE = gdk_rgba_parse (&(color_style->constant_color), "#A020F0");
+	NOUSE = gdk_rgba_parse (&(color_style->comment_color), "#888376");
+	NOUSE = gdk_rgba_parse (&(color_style->preprocessor_color), "#BF4040");
 }
 
 void
@@ -64,11 +64,11 @@ editorconfig_config_get ()
 }
 
 static void
-editorconfig_gdkcolor_from_gdkrgba (GdkColor *color, const GdkRGBA *rgba)
+editorconfig_update_from_gdkrgba (GdkRGBA *color, const GdkRGBA *rgba)
 {
-	color->red = (guint16) (rgba->red * 65535);
-	color->green = (guint16) (rgba->green * 65535);
-	color->blue = (guint16) (rgba->blue * 65535);
+	color->red = rgba->red;
+	color->green = rgba->green;
+	color->blue = rgba->blue;
 }
 
 void
@@ -77,9 +77,9 @@ editorconfig_config_update (const gchar *font, GdkRGBA *keyword_color,
 							GdkRGBA *comment_color, GdkRGBA *preprocessor_color)
 {
 	user_config->pfd = pango_font_description_from_string (font);
-	editorconfig_gdkcolor_from_gdkrgba (&(user_config->code_color->keyword_color), keyword_color);
-	editorconfig_gdkcolor_from_gdkrgba (&(user_config->code_color->string_color), string_color);
-	editorconfig_gdkcolor_from_gdkrgba (&(user_config->code_color->constant_color), constant_color);
-	editorconfig_gdkcolor_from_gdkrgba (&(user_config->code_color->comment_color), comment_color);
-	editorconfig_gdkcolor_from_gdkrgba (&(user_config->code_color->preprocessor_color), preprocessor_color);
+	editorconfig_update_from_gdkrgba (&(user_config->code_color->keyword_color), keyword_color);
+	editorconfig_update_from_gdkrgba (&(user_config->code_color->string_color), string_color);
+	editorconfig_update_from_gdkrgba (&(user_config->code_color->constant_color), constant_color);
+	editorconfig_update_from_gdkrgba (&(user_config->code_color->comment_color), comment_color);
+	editorconfig_update_from_gdkrgba (&(user_config->code_color->preprocessor_color), preprocessor_color);
 }
