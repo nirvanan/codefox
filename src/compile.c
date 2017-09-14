@@ -121,7 +121,7 @@ compile_done ()
 }
 
 void
-compile_getline (gchar *line)
+compile_getline (gchar *line, const gint size)
 {
 	gint i;
 
@@ -133,10 +133,10 @@ compile_getline (gchar *line)
 		line[0] = 0;
 		g_mutex_unlock (&compile_mutex);
 
-		return ;
+		return;
 	}
 
-	while (buffer[i] && buffer[i] != '\n') {
+	while (i - offset < size - 1 && buffer[i] && buffer[i] != '\n') {
 		line[i - offset] = buffer[i];
 		i++;
 	}

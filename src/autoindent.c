@@ -55,7 +55,9 @@ c[2] == 'i' && c[3] == 'l' && c[4] == 'e' && \
 #define NEST(c) \
 (FOR (c) || IF (c) || ELSE (c) || WHILE (c) || CASE (c))
 
-gint *block;
+#define MAX_BLOCK_SIZE 1000
+
+gint block[MAX_BLOCK_SIZE];
 gint block_size;
 
 static gint
@@ -76,37 +78,39 @@ autoindent_bracket_match (GtkTextBuffer *buffer, gint line, gint offset)
 	text = gtk_text_buffer_get_text (buffer, &start, &location, 1);
 	
 	len = strlen (text);
-	for (i = len - 1; i >= 0; i--)
-	{
-		if (text[i] == '{' && text[i + 1] != '\'')
+	for (i = len - 1; i >= 0; i--) {
+		if (text[i] == '{' && text[i + 1] != '\'') {
 			stack--;
-		else if (text[i] == '}' && text[i + 1] != '\'')
+		}
+		else if (text[i] == '}' && text[i + 1] != '\'') {
 			stack++;
-		else if (text[i] == '\n')
+		}
+		else if (text[i] == '\n') {
 			matched_line--;
+		}
 		
-		if (stack == 0)
-		{
+		if (stack == 0) {
 			find = 1;
+
 			break;
 		}
 	}
 	
-	for ( ; i >= 0 && text[i] != '\n'; i--)
-		;
-	for (i = i + 1; text[i] == '\t'; i++, tabs++)
-		;
+	for ( ; i >= 0 && text[i] != '\n'; i--);
+	for (i = i + 1; text[i] == '\t'; i++, tabs++);
 	
-	g_free (text);
+	g_free ((gpointer) text);
 
-	if (find)
+	if (find) {
 		return tabs;
-	else
+	}
+	else {
 		return -1;
+	}
 }
 
 static gint
-autoindent_if_else_match (GtkTextBuffer *buffer, gint line, gint offset)
+autoindent_if_else_match (GtkTextBuffer *buffer, const gint line, const gint offset)
 {
 	GtkTextIter location, start;
 	gchar *text;
@@ -123,122 +127,148 @@ autoindent_if_else_match (GtkTextBuffer *buffer, gint line, gint offset)
 	text = gtk_text_buffer_get_text (buffer, &start, &location, 1);
 	
 	len = strlen (text);
-	for (i = len - 1; i >= 0; i--)
-	{
-		if (IF (((gchar *)text + i)))
+	for (i = len - 1; i >= 0; i--) {
+		if (IF (((gchar *)text + i))) {
 			stack--;
-		else if (ELSE (((gchar *)text + i)))
+		}
+		else if (ELSE (((gchar *)text + i))) {
 			stack++;
-		else if (text[i] == '\n')
+		}
+		else if (text[i] == '\n') {
 			matched_line--;
+		}
 		
-		if (stack == 0)
-		{
+		if (stack == 0) {
 			find = 1;
+
 			break;
 		}
 	}
 	
-	for ( ; i >= 0 && text[i] != '\n'; i--)
-		;
-	for (i = i + 1; text[i] == '\t'; i++, tabs++)
-		;
+	for ( ; i >= 0 && text[i] != '\n'; i--);
+	for (i = i + 1; text[i] == '\t'; i++, tabs++);
 	
-	g_free (text);
+	g_free ((gpointer) text);
 
-	if (find)
+	if (find) {
 		return tabs;
-	else
+	}
+	else {
 		return -1;
+	}
 }
 
 static gint
-autoindent_get_nspaces (gchar *line1, gchar *line2)
+autoindent_get_nspaces (const gchar *line1, const gchar *line2)
 {
 	gint i;
 	gint num = 0;
 	
-	for (i = 0; line1[i]; i++)
-		if (line1[i] == ' ')
+	for (i = 0; line1[i]; i++) {
+		if (line1[i] == ' ') {
 			num++;
-		else if (line1[i] != '\t')
+		}
+		else if (line1[i] != '\t') {
 			break;
-	for (i = 0; line2[i]; i++)
-		if (line2[i] == ' ')
+		}
+	}
+	for (i = 0; line2[i]; i++) {
+		if (line2[i] == ' ') {
 			num--;
-		else if (line2[i] != '\t')
+		}
+		else if (line2[i] != '\t') {
 			break;
+		}
+	}
 			
 	return num;
 }
 
 static gint
-autoindent_get_ntabs (GtkTextBuffer *buffer, gchar *line1,
-					  gchar* line2, gint line, gint format)
+autoindent_get_ntabs (GtkTextBuffer *buffer, const gchar *line1,
+					  const gchar* line2, const gint line, const gint format)
 {
 	gint num1 = 0, num2 = 0;
 	gint i, j;
 	gint matched_tabs;
 	gint ntabs = 0;
 	
-	for (i = 0; line1[i]; i++)
-		if (line1[i] == '\t')
+	for (i = 0; line1[i]; i++) {
+		if (line1[i] == '\t') {
 			num1++;
-		else if(line1[i] != ' ')
+		}
+		else if(line1[i] != ' ') {
 			break;
-	for (j = 0; line2[j]; j++)
-		if (line2[j] == '\t')
+		}
+	}
+	for (j = 0; line2[j]; j++) {
+		if (line2[j] == '\t') {
 			num2++;
-		else if(line2[j] != ' ')
+		}
+		else if(line2[j] != ' ') {
 			break;
+		}
+	}
 	
-	if (format)
-	{
+	if (format) {
 		gint len = strlen (line2);
 		
 		if ((line2[j] == '{' && line2[j + 1] != '\'') ||
-			(line2[len - 1] == '{'))
+			(line2[len - 1] == '{')) {
+			if (block_size >= MAX_BLOCK_SIZE) {
+				g_warning ("too many nested blocks.");
+
+				return 0;
+			}
 			block[block_size++] = j;
-		else if (line2[j] == '}' && line2[j + 1] != '\'')
+		}
+		else if (line2[j] == '}' && line2[j + 1] != '\'') {
+			if (block_size <= 0) {
+				return 0;
+			}
 			block_size--;
+		}
 		else if (!NEST (((gchar *)line1 + i)) && !NEST (((gchar *)line1 + i)) &&
 				 line1[i] != '{' && line1[i + 1] != '\'' && line2[j] != '}' &&
-				 line2[j + 1] != '\'')
+				 line2[j + 1] != '\'') {
 			return block[block_size - 1]  + 1 - num2;
+		}
 	}
-	if (line2[j] == '}' && line2[j + 1] != '\'')
-	{
+	if (line2[j] == '}' && line2[j + 1] != '\'') {
 		matched_tabs = autoindent_bracket_match (buffer, line, j);
-		if (matched_tabs != -1)
+		if (matched_tabs != -1) {
 			return matched_tabs - num2;
+		}
 	}
 	
-	if (ELSE (((gchar *)line2 + j)))
-	{
+	if (ELSE (((gchar *)line2 + j))) {
 		matched_tabs = autoindent_if_else_match (buffer, line, j);
 		
-		if (matched_tabs != -1)
+		if (matched_tabs != -1) {
 			return matched_tabs - num2;
+		}
 	}
 	
 	if (line1[i] == '{' && line2[j] != '}' && line1[i + 1] != '\'' &&
-		line2[j + 1] != '\'')
+		line2[j + 1] != '\'') {
 		num1++;
+	}
 		
-	else if (NEST (((gchar *)line1 + i)) && line2[j] != '{' && line2[j + 1] != '\'')
+	else if (NEST (((gchar *)line1 + i)) && line2[j] != '{' && line2[j + 1] != '\'') {
 		num1++;
+	}
 
 	ntabs += num1 - num2;
+
 	return ntabs;
 }
 
 void
 autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
-				  gint start, gint end)
+				  const gint start, const gint end)
 {	
 	gint i, j;
 	
-	block = g_malloc (1024 * sizeof(gint));
 	block_size = 0;
 	block[block_size++] = -1;
 	
@@ -259,17 +289,22 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 		line1 = gtk_text_buffer_get_text (buffer, &st, &ed, 1);
 		line2 = gtk_text_buffer_get_text (buffer, &ins, &ine, 1);
 
-		if (end != start)
+		if (end != start) {
 			ntabs = autoindent_get_ntabs (buffer, line1, line2, i, 1);
-		else
+		}
+		else {
 			ntabs = autoindent_get_ntabs (buffer, line1, line2, i, 0);
+		}
 		
 		if (ntabs > 0) {
-			for (j = 0; j < ntabs; j++)
-				if (iter != NULL)
+			for (j = 0; j < ntabs; j++) {
+				if (iter != NULL) {
 					gtk_text_buffer_insert (buffer, iter, "\t", -1);
-				else
+				}
+				else {
 					gtk_text_buffer_insert (buffer, &ins, "\t", -1);
+				}
+			}
 		}
 		else if (ntabs < 0) {
 			if (iter != NULL) {
@@ -288,8 +323,7 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 		
 		nspaces = autoindent_get_nspaces (line1, line2);
 		j = 0;
-		while (line2[j++] == '\t')
-			;
+		while (line2[j++] == '\t');
 		j += ntabs - 1;
 		if (iter != NULL) {
 			if (nspaces > 0) {
@@ -320,6 +354,4 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 		g_free (line1);
 		g_free (line2);
 	}
-	
-	g_free (block);
 }

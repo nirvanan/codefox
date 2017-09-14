@@ -32,7 +32,7 @@ void
 compile_current_project (const gchar *path, const gboolean compile);
 
 void
-compile_getline (gchar *line);
+compile_getline (gchar *line, const gint size);
 
 gboolean
 compile_done ();

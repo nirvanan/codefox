@@ -56,8 +56,9 @@ search_state_update ()
 	const gchar *token;
 	gint matched;
 
-	if (!ui_have_editor ())
-		return ;
+	if (!ui_have_editor ()) {
+		return;
+	}
 
 	code = ui_current_editor_code ();
 
@@ -66,7 +67,7 @@ search_state_update ()
 	if (code[0] == 0 || token[0] == 0) {
 		g_free ((gpointer) code);
 
-		return ;
+		return;
 	}
 
 	matched = search_kmp_nth (code, token, -1);
@@ -99,9 +100,8 @@ new_create_new_tab (GtkWidget *widget, gpointer user_data)
 void
 open_open_local_file (GtkWidget *widget, gpointer user_data)
 {
-	gchar *filepath;
+	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (filepath, TRUE, FALSE, NULL);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -129,24 +129,20 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 	ui_disable_redo_widgets ();
 
 	search_state_update ();
-
-	g_free ((gpointer) filepath);
 }
 
 void
 save_save_current_code (GtkWidget *widget, gpointer user_data)
 {
-	gchar *filepath;
+	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 	gchar *code;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_current_editor_filepath (filepath);
 
 	if (g_strcmp0 (filepath, _("Untitled")) == 0) {
 		ui_get_filepath_from_dialog (filepath, FALSE, FALSE, _("Untitled"));
 
 		if (g_strcmp0 (filepath, "NULL") == 0) {
-			g_free ((gpointer) filepath);
 
 			return ;
 		}
@@ -157,17 +153,15 @@ save_save_current_code (GtkWidget *widget, gpointer user_data)
 	ui_save_code_post (filepath);
 	ui_status_entry_new (FILE_OP_SAVE, filepath);
 
-	g_free ((gpointer) filepath);
 	g_free ((gpointer) code);
 }
 
 void
 saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 {
-	gchar *filepath;
+	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 	gchar *code;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	ui_get_filepath_from_dialog (filepath, FALSE, FALSE, filepath);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -178,8 +172,6 @@ saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 
 		g_free ((gpointer) code);
 	}
-
-	g_free ((gpointer) filepath);
 }
 
 
@@ -210,8 +202,10 @@ delete_delete_code (GtkWidget *widget, gpointer user_data)
 void
 quit_quit_program (GtkWidget *widget, gpointer user_data)
 {
-	while (ui_have_editor ())
+	while (ui_have_editor ()) {
 		ui_current_editor_close ();
+	}
+
 	gtk_main_quit ();
 }
 
@@ -224,7 +218,7 @@ format_format_code (GtkWidget *widget, gpointer user_data)
 void
 on_close_page (GtkButton *button, gpointer user_data)
 {
-	ui_editor_close (button);
+	ui_editor_close (GTK_WIDGET (button));
 	ui_undo_redo_widgets_update ();
 }
 
@@ -233,7 +227,7 @@ build_compile (GtkWidget *widget, gpointer user_data)
 {
 	gchar *project_path;
 	gchar *project_name;
-	gchar *exe_path;
+	gchar exe_path[MAX_FILEPATH_LENGTH + 1];
 	gchar *line;
 	gint st;
 	gint ed;
@@ -241,8 +235,7 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	gint error_no;
 	gint warning_no;
 	
-	line = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
-	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	project_path = project_current_path ();
 	project_name = project_current_name ();
 	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
@@ -252,25 +245,32 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	ui_compiletree_clear ();
 	ui_compiletree_apend (_("Start building."), 1);
 
-	if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_COMPILE) == 0)
+	if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_COMPILE) == 0) {
 		compile_current_project (project_path, TRUE);
-	else if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_CLEAR) == 0)
+	}
+	else if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_CLEAR) == 0) {
 		compile_current_project (project_path, FALSE);
-	else
-		return ;
+	}
+	else {
+		g_free ((gpointer) line);
+
+		return;
+	}
 
 	error_no = 0;
 	warning_no = 0;
 	while (!compile_done ()) {
-		compile_getline (line);
+		compile_getline (line, MAX_LINE_LENGTH);
 		
 		if (line[0]) {
 			ui_compiletree_apend (line, 0);
 
-			if (compile_is_error (line))
+			if (compile_is_error (line)) {
 				error_no++;
-			else if (compile_is_warning (line))
+			}
+			else if (compile_is_warning (line)) {
 				warning_no++;
+			}
 		}
 	}
 	ui_compiletree_apend (_("Building finished."), 1);
@@ -278,8 +278,9 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_COMPILE) == 0) {
 		suc = misc_file_exist (exe_path);
 
-		if (suc)
+		if (suc) {
 			ui_enable_project_widgets ();
+		}
 	}
 	else if (g_strcmp0 ((gchar *) user_data, BUILD_WIDGET_CLEAR) == 0) {
 		ui_disable_project_widgets ();
@@ -287,7 +288,6 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	}
 
 	g_free ((gpointer) line);
-	g_free ((gpointer) exe_path);
 }	
 
 void
@@ -295,9 +295,8 @@ run_run_executable (GtkWidget *widget, gpointer user_data)
 {
 	gchar *project_path;
 	gchar *project_name;
-	gchar *exe_path;
+	gchar exe_path[MAX_FILEPATH_LENGTH + 1];
 
-	exe_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 	project_path = project_current_path ();
 	project_name = project_current_name ();
 	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
@@ -305,7 +304,6 @@ run_run_executable (GtkWidget *widget, gpointer user_data)
 	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
 
 	misc_exec_file (exe_path);
-	g_free ((gpointer) exe_path);
 }
 
 void
@@ -332,15 +330,17 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 	ui_current_editor_step_add (TRUE, offset - len, len, NULL);
 
 	linecount = 0;
-	for (i = 0; text[i]; i++)
+	for (i = 0; text[i]; i++) {
 		if (text[i] == '\n') {
 			linecount++;
 		}
+	}
 
 	ui_highlight_on_insert (textbuffer, location, linecount, &end_line);
 
-	if ((text[0] == '\n' || text[0] == '}' || text[0] == '{') && len == 1)
+	if ((text[0] == '\n' || text[0] == '}' || text[0] == '{') && len == 1) {
 		autoindent_apply (textbuffer, location, end_line, end_line);
+	}
 
 	ui_tip_window_destory ();
 	if (text[0] == '(' && len == 1) {
@@ -540,9 +540,6 @@ on_filetree_clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 		return ;
 
 	ui_filetree_menu_popup ();
-
-	void
-			ui_filetree_menu_popup ();
 }
 
 void

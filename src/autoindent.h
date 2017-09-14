@@ -27,6 +27,6 @@
 
 void
 autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
-				  gint start, gint end);
+				  const gint start, const gint end);
 				 
 #endif
