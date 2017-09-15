@@ -16,7 +16,7 @@ indicator.
 * Microsoft VS-like debugging utility, with a complete watch port.
 
 ## Installation
-See INSTALL for installation instructions
+See [INSTALL](https://github.com/nirvanan/Codefox/blob/master/INSTALL) for installation instructions.
 
 ## Licence
 GPL3
