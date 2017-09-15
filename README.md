@@ -15,6 +15,9 @@ indicator.
 * Code auto-completion for variables and functions.
 * Microsoft VS-like debugging utility, with a complete watch port.
 
+## Installation
+See INSTALL for installation instructions
+
 ## Licence
 GPL3
 
