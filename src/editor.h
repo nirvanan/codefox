@@ -110,7 +110,7 @@ void
 ceditor_remove_line_label (CEditor *editor, gint lines);
 
 void
-ceditor_add_notation (CEditor *editor, gint err, gint line, gchar *info);
+ceditor_add_notation (CEditor *editor, gint err, gint line, const gchar *info);
 
 void
 ceditor_clear_notation (CEditor *editor);
@@ -149,8 +149,7 @@ GtkWidget *
 ceditor_icon_add (CEditor *editor, const gint line);
 
 void
-ceditor_step_add (CEditor *editor, const gboolean insert,
-				  const gint offset, const gint len,
+ceditor_step_add (CEditor *editor, const gboolean insert, const gint offset, const gint len,
 				  const gchar *text);
 
 gboolean

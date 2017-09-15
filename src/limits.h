@@ -38,4 +38,7 @@
 /* Max option buffer length. */
 #define MAX_OPTION_LENGTH 1000
 
+/* Max command length. */
+#define MAX_COMMAND_LENGTH 500
+
 #endif

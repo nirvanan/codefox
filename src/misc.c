@@ -36,7 +36,6 @@
 /* FIXME: ... */
 #define BROWSER_PATH "/usr/bin/firefox"
 #define HOME_PAGE "https://github.com/nirvanan/Codefox"
-#define MAX_COMMAND_LENGTH 200
 
 /* Open homepage using default browser. */
 /* FIXME: find default browser. */
@@ -53,7 +52,7 @@ misc_open_homepage()
 
 	UNUSED = system(command);
 
-	g_free (command);
+	g_free ((gpointer) command);
 }
 
 /* Get filesize. */
@@ -65,8 +64,9 @@ misc_get_file_size(const gchar *filepath)
 	FILE *fp;
 
     fp = fopen(filepath, "r");
-    if (fp == NULL)
+    if (fp == NULL) {
 		return filesize;
+	}
     fseek(fp, 0, SEEK_END);  
     filesize = ftell(fp);
     fclose(fp);
@@ -159,22 +159,23 @@ misc_copy_file (const gchar *sour, const gchar *dest)
 gboolean
 misc_delete_file (const gchar *filepath)
 {
-	gboolean noused;
+	gboolean suc;
 	GFile *file;
 
 	file = g_file_new_for_path (filepath);
-	noused = g_file_delete (file, NULL, NULL);
+	suc = g_file_delete (file, NULL, NULL);
 
 	g_object_unref(file);
 
-	return noused;
+	return suc;
 }
 
 void
 misc_get_line_end (const gchar *line, gint *offset)
 {
-	while (line[*offset] != '\n' && line[*offset] != '\0')
+	while (line[*offset] != '\n' && line[*offset] != '\0') {
 		(*offset)++;
+	}
 }
 
 gboolean
@@ -194,11 +195,11 @@ misc_exec_file (const gchar *filepath)
 
 		return;
 	}
-	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH);
+	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
 	UNUSED = system (command);
 	
-	g_free (command);
+	g_free ((gpointer) command);
 }
 

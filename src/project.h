@@ -20,6 +20,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#ifndef PROJECT_H
+#define PROJECT_H
+
 #include <gtk/gtk.h>
 
 typedef enum ProjectType
@@ -87,3 +90,5 @@ project_get_type();
 
 void
 project_mutex_init ();
+
+#endif

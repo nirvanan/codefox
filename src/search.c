@@ -36,11 +36,12 @@ search_kmp_scheme (const gchar *token, const gint len, gint *scheme)
 	j = -1;
 
 	for (i = 1; i < len; i++) {
-		while (j > -1 && token[j + 1] != token[i])
+		while (j > -1 && token[j + 1] != token[i]) {
 			j = scheme[j];
-
-		if (token[j + 1] == token[i])
+		}
+		if (token[j + 1] == token[i]) {
 			j++;
+		}
 		scheme[i] = j;
 	}
 }
@@ -55,8 +56,9 @@ search_kmp_nth (const gchar *text, const gchar *token, const gint n)
 	gint j;
 	gint nth;
 
-	if (n == 0)
+	if (n == 0) {
 		return -1;
+	}
 
 	len = strlen (token);
 	text_len = strlen (text);
@@ -66,8 +68,9 @@ search_kmp_nth (const gchar *text, const gchar *token, const gint n)
 	nth = 0;
 	j = -1;
 	for (i = 0; i < text_len; i++) {
-		while (j > -1 && token[j + 1] != text[i])
+		while (j > -1 && token[j + 1] != text[i]) {
 			j = scheme[j];
+		}
 
 		if (token[j + 1] == text[i])
 			j++;
@@ -84,10 +87,12 @@ search_kmp_nth (const gchar *text, const gchar *token, const gint n)
 		}
 	}
 
-	g_free (scheme);
+	g_free ((gpointer) scheme);
 
-	if (n != -1)
+	if (n != -1) {
 		return -1;
-	else
+	}
+	else {
 		return nth;
+	}
 }

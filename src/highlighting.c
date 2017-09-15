@@ -28,7 +28,7 @@
 
 #define MAX_LEX_SIZE 1000000
 
-static gchar lex[MAX_LEX_SIZE];
+static gchar lex[MAX_LEX_SIZE + 1];
 
 void 
 highlight_register (GtkTextBuffer *buffer)
@@ -55,14 +55,13 @@ highlight_is_keyword (gchar *word)
 	/* Check whether word is a C/C++ keyword. */
 	gint i;
 	
-	for (i = 0; keywords[i]; i++)
-	{
+	for (i = 0; keywords[i]; i++) {
 		gchar *keyword;
 		
 		keyword = keywords[i];
-		
-		if (g_strcmp0 (keyword, word) == 0)
+		if (g_strcmp0 (keyword, word) == 0) {
 			return 1;
+		}
 	}
 	
 	return 0;
@@ -112,52 +111,48 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	gtk_text_buffer_get_end_iter (buffer, &ed);
 	gtk_text_buffer_apply_tag_by_name (buffer, CODE_TAG_NONE, &st, &ed);
 
-	for (i = 0; text[i]; i++)
-	{		
-		if ((!CHAR (text[i]) && !DIGIT (text[i])) || text[i + 1] == 0)
-		{			
+	for (i = 0; text[i]; i++) {		
+		if ((!CHAR (text[i]) && !DIGIT (text[i])) || text[i + 1] == 0) {			
 			gint start_offset;
 			gchar *tag;
 			
 			start_offset = i - lex_len;
 			tag = CODE_TAG_NONE;
 
-			switch (state)
-			{
+			switch (state) {
 				case 0:
-					if (text[i] == '\"')
-					{
+					if (text[i] == '\"') {
 						state = 1;
 						lex[lex_len++] = text[i];
 					}
-					else if (text[i] == '\'')
-					{
+					else if (text[i] == '\'') {
 						state = 2;
 						lex[lex_len++] = text[i];
 					}
-					else if (text[i] == '/')
-					{
+					else if (text[i] == '/') {
 						state = 3;
 						lex[lex_len++] = text[i];
 					}
 					else if (text[i + 1] == 0 && (CHAR (text[i]) || 
-							 DIGIT (text[i])))
+							 DIGIT (text[i]))) {
 						lex[lex_len++] = text[i];
+					}
 					break;
 					
 				case 1:
 					lex[lex_len++] = text[i];
-					if (text[i] == '\"')
-					{
+					if (text[i] == '\"') {
 						int s = 0;
 						int j = lex_len - 2;
 						
-						for ( ; j >= 0; j--)
-							if (lex[j] == '\\')
+						for ( ; j >= 0; j--) {
+							if (lex[j] == '\\') {
 								s++;
-							else
+							}
+							else {
 								break;
-						
+							}
+						}
 						if (s % 2 == 0) {
 							state = 0;
 							tag = CODE_TAG_STRING;
@@ -167,17 +162,18 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 					
 				case 2:
 					lex[lex_len++] = text[i];
-					if (text[i] == '\'')
-					{
+					if (text[i] == '\'') {
 						int s = 0;
 						int j = lex_len - 2;
 						
-						for ( ; j >= 0; j--)
-							if (lex[j] == '\\')
+						for ( ; j >= 0; j--) {
+							if (lex[j] == '\\') {
 								s++;
-							else
+							}
+							else {
 								break;
-						
+							}
+						}
 						if (s % 2 == 0) {
 							state = 0;
 							tag = CODE_TAG_STRING;
@@ -187,10 +183,12 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				
 				case 3:
 					lex[lex_len++] = text[i];
-					if (text[i] == '/')
+					if (text[i] == '/') {
 						state = 4;
-					else if (text[i] == '*')
+					}
+					else if (text[i] == '*') {
 						state = 5;
+					}
 					else {
 						state = 0;
 						tag = CODE_TAG_NONE;
@@ -207,8 +205,9 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 					
 				case 5:
 					lex[lex_len++] = text[i];
-					if (text[i] == '*')
+					if (text[i] == '*') {
 						state = 6;
+					}
 					break;
 					
 				case 6:
@@ -222,29 +221,32 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 			
 			lex[lex_len] = 0;
 			
-			if (state != 0)
+			if (state != 0) {
 				continue;
+			}
 			
 			if (tag == CODE_TAG_NONE) {
-				if (DIGIT (lex[0]))
+				if (DIGIT (lex[0])) {
 					tag = CODE_TAG_CONSTANT;
-				else if (lex[0] == '#')
+				}
+				else if (lex[0] == '#') {
 					tag = CODE_TAG_PREPROCESSOR;
-				else if (CHAR (lex[0]) && lex_len <= MAX_KEYWORD_LENGTH && highlight_is_keyword (lex))
+				}
+				else if (CHAR (lex[0]) && lex_len <= MAX_KEYWORD_LENGTH && highlight_is_keyword (lex)) {
 					tag = CODE_TAG_KEYWORD;
+				}
 			}
 
 			highlight_add_tag (buffer, start, start_offset, lex_len, tag);
 
 			lex_len = 0;
 		}
-		else
+		else {
 			lex[lex_len++] = text[i];
-		
-		
+		}		
 	}
 	
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 void
@@ -265,7 +267,7 @@ highlight_set_tab (GtkTextView *textview)
 	pango_tab_array_set_tab (tab_array, 0, PANGO_TAB_LEFT, width);
 	gtk_text_view_set_tabs (GTK_TEXT_VIEW (textview), tab_array);
 
-	g_free (tab_string);
+	g_free ((gpointer) tab_string);
 	pango_tab_array_free (tab_array);
 	g_object_unref (G_OBJECT (layout));
 }

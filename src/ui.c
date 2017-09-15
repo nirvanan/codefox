@@ -41,6 +41,10 @@
 #include "env.h"
 #include "limits.h"
 
+#define PAGE_INFO 0
+#define PAGE_COMPILE 1
+#define PAGE_DEBUG 2
+
 #define MESSAGE_BUF_SIZE 1000
 #define MAX_TIP_LENGTH 10000
 
@@ -79,6 +83,7 @@ static const gchar *license =
 "See the GNU General Public License for more details.\n\n"
 "You should have received a copy of the GNU General Public License\n"
 "along with Codefox. If not, see <http://www.gnu.org/licenses/>.";
+static const gchar *authors[] = {"Gordon Lee", NULL};
 
 static GtkStockItem items[] =
 {
@@ -216,19 +221,19 @@ signal_connect ()
 	
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(window->filetree));
 	g_signal_connect (select, "changed", 
-						G_CALLBACK (on_filetree_selection_changed), NULL);
+					  G_CALLBACK (on_filetree_selection_changed), NULL);
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(window->compilertree));
 	g_signal_connect (select, "changed", 
-						G_CALLBACK (on_compilertree_selection_changed), NULL);
+					  G_CALLBACK (on_compilertree_selection_changed), NULL);
 	g_signal_connect_after (window->filetree, "button-release-event", 
-						G_CALLBACK (on_filetree_clicked), NULL);
+							G_CALLBACK (on_filetree_clicked), NULL);
 	g_signal_connect (window->filetree, "row-activated", 
-						G_CALLBACK (on_filetree_2clicked), NULL);
+					  G_CALLBACK (on_filetree_2clicked), NULL);
 }
 
 /* Get all widgets in the builder by name*/
 static void
-ui_window_init(GtkBuilder *builder, CWindow *window)
+ui_window_init (GtkBuilder *builder, CWindow *window)
 {
 	window->toplevel = gtk_builder_get_object (builder, "toplevel");
 	window->about_item = gtk_builder_get_object (builder, "aboutmenuitem");
@@ -291,14 +296,14 @@ ui_window_init(GtkBuilder *builder, CWindow *window)
 
 /* Init the file tree view. */
 static void
-ui_filetree_init(CWindow *window)
+ui_filetree_init (CWindow *window)
 {
 	filetree_init (GTK_TREE_VIEW (window->filetree));
 }
 
 /* Initialize the status view and notepad. */
 static void
-ui_toolpad_init(CWindow *window)
+ui_toolpad_init (CWindow *window)
 {
 	GtkTextBuffer *buffer;
 	gchar *time;
@@ -334,9 +339,10 @@ ui_toolpad_init(CWindow *window)
 	g_strlcat (welcome_text, _(", have fun!"), MESSAGE_BUF_SIZE);
 	gtk_tree_store_set(store, &iter, 0, time,
 					   1, welcome_text, 
-					   2, "Orange", -1);
-	g_free (welcome_text);
-	g_free (time);
+					   2, "Orange", 
+					   -1);
+	g_free ((gpointer) welcome_text);
+	g_free ((gpointer) time);
 
 	store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -356,7 +362,7 @@ ui_toolpad_init(CWindow *window)
 }
 
 static void
-ui_init_stock_items()
+ui_init_stock_items ()
 {
 	gint i, j;
 	gint icon_size[4] = {16, 24, 32, 48};
@@ -396,7 +402,6 @@ ui_init_stock_items()
 		gtk_icon_factory_add_default (factory);
 		gtk_icon_set_unref (icon_set);
 	}
-	
 }
 
 static void
@@ -429,8 +434,8 @@ ui_preferences_window_init ()
 	template_file = g_build_filename (data_dir, "codefox-editor-settings.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
 
 	preferences_window->toplevel = gtk_builder_get_object (builder, "toplevel");
 	preferences_window->font_button = gtk_builder_get_object (builder, "fontbutton");
@@ -461,8 +466,8 @@ ui_fun_tip_init ()
 	template_file = g_build_filename (data_dir, "codefox-fun-tip.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
 
 	function_tip->tip_window = gtk_builder_get_object (builder, "toplevel");
 	function_tip->tip_label = gtk_builder_get_object (builder, "label");
@@ -484,7 +489,7 @@ ui_debug_view_init (GtkBuilder *builder)
 }
 
 void
-ui_enable_save_widgets()
+ui_enable_save_widgets ()
 {
 	/* Disable items for saving since there is no opened file! */
 	gtk_widget_set_sensitive (GTK_WIDGET (window->save_item), 1);
@@ -494,7 +499,7 @@ ui_enable_save_widgets()
 }
 
 void
-ui_disable_save_widgets()
+ui_disable_save_widgets ()
 {
 	/* Disable items for saving since there is no opened file! */
 	gtk_widget_set_sensitive (GTK_WIDGET (window->save_item), 0);
@@ -504,7 +509,7 @@ ui_disable_save_widgets()
 }
 
 void
-ui_enable_project_widgets()
+ui_enable_project_widgets ()
 {
 	if (project_get_type () == PROJECT_C && (!env_prog_exist (ENV_PROG_GCC) || !env_prog_exist (ENV_PROG_MAKE))) {
 		g_warning ("gcc or make not found.");
@@ -542,7 +547,7 @@ ui_enable_project_widgets()
 }
 
 void
-ui_disable_project_widgets()
+ui_disable_project_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_item), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_toolbar), 0);
@@ -555,7 +560,7 @@ ui_disable_project_widgets()
 }
 
 void
-ui_enable_build_widgets()
+ui_enable_build_widgets ()
 {
 	if (project_get_type () == PROJECT_C && (!env_prog_exist (ENV_PROG_GCC) || !env_prog_exist (ENV_PROG_MAKE))) {
 		g_warning ("gcc or make not found.");
@@ -574,14 +579,14 @@ ui_enable_build_widgets()
 }
 
 void
-ui_disable_build_widgets()
+ui_disable_build_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_item), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->build_toolbar), 0);
 }
 
 void
-ui_enable_debug_widgets()
+ui_enable_debug_widgets ()
 {
 	if (!env_prog_exist (ENV_PROG_XTERM) || !env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
 		g_warning ("xterm or gdb or gdbserver not found.");
@@ -600,7 +605,7 @@ ui_enable_debug_widgets()
 }
 
 void
-ui_disable_debug_widgets()
+ui_disable_debug_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->next_item), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->step_item), 0);
@@ -613,7 +618,7 @@ ui_disable_debug_widgets()
 }
 
 void
-ui_enable_open_project_widgets()
+ui_enable_open_project_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->new_project_item), 1);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->new_project_toolbar), 1);
@@ -622,7 +627,7 @@ ui_enable_open_project_widgets()
 }
 
 void
-ui_disable_open_project_widgets()
+ui_disable_open_project_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->new_project_item), 0);
 	gtk_widget_set_sensitive (GTK_WIDGET (window->new_project_toolbar), 0);
@@ -631,43 +636,43 @@ ui_disable_open_project_widgets()
 }
 
 void
-ui_enable_settings_widgets()
+ui_enable_settings_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->settings_item), 1);
 }
 
 void
-ui_disable_settings_widgets()
+ui_disable_settings_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->settings_item), 0);
 }
 
 void
-ui_enable_undo_widgets()
+ui_enable_undo_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->undo_item), 1);
 }
 
 void
-ui_disable_undo_widgets()
+ui_disable_undo_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->undo_item), 0);
 }
 
 void
-ui_enable_redo_widgets()
+ui_enable_redo_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->redo_item), 1);
 }
 
 void
-ui_disable_redo_widgets()
+ui_disable_redo_widgets ()
 {
 	gtk_widget_set_sensitive (GTK_WIDGET (window->redo_item), 0);
 }
 
 void
-ui_init()
+ui_init ()
 {
 	/* Construct a GtkBuilder instance and load our UI description. */
 	GtkBuilder *builder;
@@ -685,15 +690,15 @@ ui_init()
 	template_file = g_build_filename (data_dir, "codefox.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
-	g_free (icon_path);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
+	g_free ((gpointer) icon_path);
 	
 	window = (CWindow *) g_malloc (sizeof(CWindow));
 
 	member_menu = (CMemberMenu *) g_malloc (sizeof(CMemberMenu));
 	member_menu->active = FALSE;
-	member_menu->prefix = (gchar *) g_malloc (MAX_TIP_LENGTH);
+	member_menu->prefix = (gchar *) g_malloc (MAX_TIP_LENGTH + 1);
 	member_menu->prefix[0] = 0;
 	member_menu->item_list = NULL;
 	
@@ -722,10 +727,9 @@ ui_init()
 
 /* Create a new about dialog. */
 void
-ui_about_dialog_new()
+ui_about_dialog_new ()
 {
 	GtkWidget *about_dialog = gtk_about_dialog_new ();
-	const gchar *authors[] = {"Gordon Lee", NULL};
 	GdkPixbuf *logo;
 	GtkIconTheme *icon_theme;
 	
@@ -753,7 +757,7 @@ ui_about_dialog_new()
 
 /* Create a new editor and show it. */
 void
-ui_editor_new()
+ui_editor_new ()
 {
 	
 	CEditor *new_editor;
@@ -767,9 +771,10 @@ ui_editor_new()
 									  new_editor->textbox, 
 									  new_editor->label_box);
 	
-	if (index != -1)
+	if (index != -1) {
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), 
 									   index);
+	}
 
 	if (g_list_length (window->editor_list) != 0) {
 		ui_enable_save_widgets ();
@@ -780,9 +785,9 @@ ui_editor_new()
 
 /* Create a new editor with code and show it. */
 void
-ui_editor_new_with_text(const gchar *filepath, const gchar *code_buf)
+ui_editor_new_with_text (const gchar *filepath, const gchar *code_buf)
 {
-		CEditor *new_editor;
+	CEditor *new_editor;
 	gint index;
 
 	new_editor = ceditor_new_with_text (filepath, code_buf);
@@ -794,21 +799,21 @@ ui_editor_new_with_text(const gchar *filepath, const gchar *code_buf)
 									  new_editor->label_box);
 									  
 	/* Swap to show the created tab of codenotebook.*/
-	if (index != -1)
+	if (index != -1) {
 		gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), 
 									   index);
+	}
 
 	if (g_list_length (window->editor_list) != 0) {
 		ui_enable_save_widgets ();
 	}
-
 	
 	ui_current_editor_change_mode ();
 }
 
 /* Add a new entry to filetree. */
 void
-ui_filetree_entry_new(gboolean is_file, gchar *filename, gchar *filepath)
+ui_filetree_entry_new (gboolean is_file, gchar *filename, gchar *filepath)
 {
 	filetree_append_to_default (GTK_TREE_VIEW (window->filetree), is_file, 
 								filename, filepath);
@@ -816,7 +821,7 @@ ui_filetree_entry_new(gboolean is_file, gchar *filename, gchar *filepath)
 
 /* Append a new status entry to statustree. */
 void
-ui_status_entry_new(const gint op, const gchar *filepath)
+ui_status_entry_new (const gint op, const gchar *filepath)
 {
 	GtkTreeStore *store;
 	GtkTreeIter  iter;
@@ -824,7 +829,7 @@ ui_status_entry_new(const gint op, const gchar *filepath)
 	gchar *time_buf;
 
 	time_buf = (gchar *) g_malloc (MAX_TIME_LENGTH + 1);
-	message_buf = g_malloc(MESSAGE_BUF_SIZE);
+	message_buf = (gchar *) g_malloc(MESSAGE_BUF_SIZE + 1);
 	misc_time_get_now (time_buf);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
@@ -868,9 +873,10 @@ ui_status_entry_new(const gint op, const gchar *filepath)
 		break;
 	}
 
-	gtk_tree_store_set(store, &iter, 0, time_buf, 1, message_buf, 2, "gray", -1);
-	g_free (time_buf);
-	g_free (message_buf);
+	gtk_tree_store_set (store, &iter, 0, time_buf, 1, message_buf, 2, "gray", -1);
+
+	g_free ((gpointer) time_buf);
+	g_free ((gpointer) message_buf);
 }
 
 /* Create a file choosing dialog and return the file path after user 
@@ -918,7 +924,7 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
 		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
 		g_strlcpy (filepath, path, size);
 		
-		g_free (path);
+		g_free ((gpointer) path);
 	}
 	else {
 		g_strlcpy (filepath, "NULL", size);
@@ -944,8 +950,9 @@ ui_find_editor (const gchar *filepath)
 		CEditor *editor;
 
 		editor = (CEditor *) iterator->data;
-		if (g_strcmp0 (editor->filepath, filepath) == 0)
+		if (g_strcmp0 (editor->filepath, filepath) == 0) {
 			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -953,7 +960,7 @@ ui_find_editor (const gchar *filepath)
 
 /* Find editor with associated filepath. */
 CEditor *
-ui_get_editor(const gchar *filepath)
+ui_get_editor (const gchar *filepath)
 {
 	GList * iterator;
 
@@ -961,8 +968,9 @@ ui_get_editor(const gchar *filepath)
 		CEditor *editor;
 
 		editor = (CEditor *) iterator->data;
-		if (g_strcmp0 (editor->filepath, filepath) == 0)
+		if (g_strcmp0 (editor->filepath, filepath) == 0) {
 			return editor;
+		}
 	}
 
 	return NULL;
@@ -984,7 +992,7 @@ ui_show_editor_by_path (const gchar *filepath)
 }
 
 CEditor *
-ui_get_current_editor()
+ui_get_current_editor ()
 {
 	gint page;
 	GtkWidget *current_page;
@@ -992,8 +1000,9 @@ ui_get_current_editor()
 	
 	page = gtk_notebook_get_current_page (GTK_NOTEBOOK (window->code_notebook));
 
-	if (page == -1)
+	if (page == -1) {
 		return NULL;
+	}
 
 	current_page = gtk_notebook_get_nth_page (GTK_NOTEBOOK (window->code_notebook),
 											  page);
@@ -1012,22 +1021,24 @@ ui_get_current_editor()
 
 /* Get current editor filepath under editing. */
 void
-ui_current_editor_filepath(gchar *filepath)
+ui_current_editor_filepath (gchar *filepath)
 {
 	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
-	if (editor != NULL)
+	if (editor != NULL) {
 		g_strlcpy (filepath, editor->filepath, MAX_FILEPATH_LENGTH);
-	else
+	}
+	else {
 		filepath[0] = 0;
+	}
 }
 
 /* Get current editor code under editing. */
 gchar *
-ui_current_editor_code()
+ui_current_editor_code ()
 {
 	
 	CEditor *editor;
@@ -1038,7 +1049,6 @@ ui_current_editor_code()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
 		return NULL;
 	}
 
@@ -1048,13 +1058,12 @@ ui_current_editor_code()
 
 	ret = gtk_text_buffer_get_text (buffer, &start, &end, 1);
 
-	
 	return ret;
 }
 
 /* Post action after saving a file. */
 void
-ui_save_code_post(const gchar *filepath)
+ui_save_code_post (const gchar *filepath)
 {
 	CEditor *editor;
 
@@ -1069,21 +1078,22 @@ ui_save_code_post(const gchar *filepath)
 
 /* Emit a clipboard signal. */
 void
-ui_emit_clipboard_signal(gint clipboard_signal)
+ui_emit_clipboard_signal (gint clipboard_signal)
 {
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	g_signal_emit_by_name (editor->textview, sig[clipboard_signal], NULL);
 }
 
 /* Emit a click signal on save button. */
 void
-ui_emit_close_signal()
+ui_emit_close_signal ()
 {
 	
 	CEditor *editor;
@@ -1091,8 +1101,7 @@ ui_emit_close_signal()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 	
 	ceditor_emit_close_signal (editor);
@@ -1105,15 +1114,16 @@ ui_emit_save_signal ()
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	g_signal_emit_by_name (window->save_toolbar, "clicked", NULL);
 }
 
 /* Delete selected code from current editor. */
 void
-ui_current_editor_delete_range()
+ui_current_editor_delete_range ()
 {
 	CEditor *editor;
 	GtkTextIter start, end;
@@ -1122,8 +1132,9 @@ ui_current_editor_delete_range()
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 			
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	selected = gtk_text_buffer_get_selection_bound (buffer);
@@ -1135,9 +1146,8 @@ ui_current_editor_delete_range()
 
 /* Format current code under editting. */
 void
-ui_current_editor_format()
+ui_current_editor_format ()
 {
-	
 	CEditor *editor;
 	GtkTextIter start, end;
 	GtkTextBuffer *buffer;
@@ -1147,30 +1157,31 @@ ui_current_editor_format()
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 	
 	i = 0;
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	gtk_text_buffer_get_start_iter (buffer, &start);
 	gtk_text_buffer_get_end_iter (buffer, &end);
 	text =  gtk_text_buffer_get_text (buffer, &start, &end, 1);
-	while (text[i++] == ' ')
-		;
+	while (text[i++] == ' ');
 	gtk_text_buffer_get_iter_at_offset(buffer, &end, i - 1);
 	gtk_text_buffer_delete (buffer, &start, &end);
 	gtk_text_buffer_get_end_iter (buffer, &end);
 	end_line = gtk_text_iter_get_line (&end);
 
-	if (end_line >= 1)
+	if (end_line >= 1) {
 		autoindent_apply (buffer, NULL, 0, end_line);
+	}
 
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 /* Update cursor position. */
 void
-ui_current_editor_update_cursor()
+ui_current_editor_update_cursor ()
 {
 	
 	GtkTextBuffer *buffer;
@@ -1182,8 +1193,9 @@ ui_current_editor_update_cursor()
 	
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	insert = gtk_text_buffer_get_insert (buffer);
@@ -1192,16 +1204,16 @@ ui_current_editor_update_cursor()
 	line = gtk_text_iter_get_line (&iter);
 	column = gtk_text_iter_get_line_offset (&iter);
 				
-	location = g_malloc (100);
-	sprintf (location, _(" Line: %d\tColumn: %d"), line + 1, column);
+	location = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	g_snprintf (location, MAX_LINE_LENGTH, _(" Line: %d\tColumn: %d"), line + 1, column);
 	gtk_label_set_label (GTK_LABEL (window->locationlabel), location);
 
-	g_free (location);
+	g_free ((gpointer) location);
 }
 
 /* Change current edit mode. */
 void
-ui_current_editor_change_mode()
+ui_current_editor_change_mode ()
 {
 	
 	CEditor *editor;
@@ -1210,15 +1222,17 @@ ui_current_editor_change_mode()
 	
 	editor = ui_get_current_editor ();
 	overwrite = gtk_text_view_get_overwrite (GTK_TEXT_VIEW (editor->textview));
-	label = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	label = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 
-	if (overwrite)
-		sprintf (label, _(" Mode: %s"), _("Overwrite"));
-	else
-		sprintf (label, _(" Mode: %s"), _("Insert"));
+	if (overwrite) {
+		g_snprintf (label, MAX_LINE_LENGTH, _(" Mode: %s"), _("Overwrite"));
+	}
+	else {
+		g_snprintf (label, MAX_LINE_LENGTH, _(" Mode: %s"), _("Insert"));
+	}
 	gtk_label_set_label (GTK_LABEL (window->modelabel), label);
 
-	g_free (label);
+	g_free ((gpointer) label);
 }
 
 /* Update line number label after editing code. */
@@ -1231,8 +1245,9 @@ ui_update_line_number_label (const gboolean insert, const gint append,
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	if (insert) {
 		ceditor_append_line_label (editor, append);
@@ -1248,14 +1263,15 @@ ui_update_line_number_label (const gboolean insert, const gint append,
 
 /* Update editting status after switching editor. */
 void
-ui_switch_page()
+ui_switch_page ()
 {
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	ui_current_editor_change_mode();
 	ui_current_editor_update_cursor();
@@ -1302,8 +1318,8 @@ ui_new_project_dialog_new (const gchar *default_project_path)
 	template_file = g_build_filename (data_dir, "codefox-new-project.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
 
 	ui_new_project_dialog_init (builder);
 	gtk_entry_set_text (GTK_ENTRY (new_project_dialog->path_entry), default_project_path);
@@ -1329,8 +1345,8 @@ ui_create_file_dialog_new ()
 	template_file = g_build_filename (data_dir, "codefox-create-file.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
 
 	ui_create_file_dialog_init (builder);
 	gtk_widget_grab_focus (GTK_WIDGET (create_file_dialog->name_entry));
@@ -1354,8 +1370,8 @@ ui_project_settings_dialog_new (const gchar* libs, const gchar* opts)
 	template_file = g_build_filename (data_dir, "codefox-project-settings.ui", NULL);
 	gtk_builder_add_from_file (builder, template_file, NULL);
 
-	g_free (data_dir);
-	g_free (template_file);
+	g_free ((gpointer) data_dir);
+	g_free ((gpointer) template_file);
 
 	ui_project_settings_dialog_init (builder);
 	gtk_entry_set_text (GTK_ENTRY (project_settings_dialog->libs_entry), libs);
@@ -1467,18 +1483,18 @@ ui_filetree_menu_popup ()
 	gint isfile;
 	gint child;
 
-	name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
-	path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
+	path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	filetree_get_current_store (GTK_TREE_VIEW (window->filetree), &name, &path, &isfile, &child);
 	gtk_widget_show(GTK_WIDGET (filetree_menu->add_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->create_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->delete_item));
 
 	if (child == -1) {
-		g_free (name);
-		g_free (path);
+		g_free ((gpointer) name);
+		g_free ((gpointer) path);
 
-		return ;
+		return;
 	}
 
 	if (isfile) {
@@ -1492,12 +1508,12 @@ ui_filetree_menu_popup ()
 
 	gtk_menu_popup (GTK_MENU (filetree_menu->menu), NULL, NULL, NULL, NULL, 3, 0);
 
-	g_free (name);
-	g_free (path);
+	g_free ((gpointer) name);
+	g_free ((gpointer) path);
 }
 
 void
-ui_filetree_current_path(gchar **path, gint *isfile)
+ui_filetree_current_path (gchar **path, gint *isfile)
 {
 	filetree_get_current_store (GTK_TREE_VIEW (window->filetree), NULL, path, isfile, NULL);
 }
@@ -1529,7 +1545,8 @@ ui_confirm_dialog_new (const gchar *message)
 	gint ret;
 	GtkWidget* dialog;
 
-	dialog = gtk_message_dialog_new (GTK_WINDOW (window->toplevel), GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION,
+	dialog = gtk_message_dialog_new (GTK_WINDOW (window->toplevel),
+									 GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION,
 									 GTK_BUTTONS_YES_NO, "%s", message);
 
 	ret = gtk_dialog_run (GTK_DIALOG (dialog));
@@ -1559,13 +1576,14 @@ ui_compiletree_apend (const gchar *line, gint is_message)
 
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->compilertree)));
 	gtk_tree_store_append (store, &iter, NULL);
-	if (is_message)
+	if (is_message) {
 		gtk_tree_store_set(store, &iter, 0, line, 1, "blue", -1);
-	else
+	}
+	else {
 		gtk_tree_store_set(store, &iter, 0, line, 1, "red", -1);
+	}
 
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), 
-								   1);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), PAGE_COMPILE);
 }
 
 void
@@ -1578,7 +1596,7 @@ ui_compiletree_clear ()
 }
 
 void
-ui_append_files_to_second_level(const GList *list, const gint row)
+ui_append_files_to_second_level (const GList *list, const gint row)
 {
 	
 	GList *iterator;
@@ -1594,8 +1612,7 @@ ui_append_files_to_second_level(const GList *list, const gint row)
 	}
 
 	filetree_select_second_level (GTK_TREE_VIEW (window->filetree), -1);
-
-	}
+}
 
 void
 ui_current_editor_line (gchar *line, const gint size, const gint lineno)
@@ -1605,7 +1622,7 @@ ui_current_editor_line (gchar *line, const gint size, const gint lineno)
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		return ;
+		return;
 	}
 
 	ceditor_get_line (editor, line, size, lineno);
@@ -1620,33 +1637,28 @@ ui_current_editor_error_tag_clear ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 
 	ceditor_error_tag_clear (editor);
-
-	}
+}
 
 void
 ui_current_editor_error_tag_add (const gint row, const gint column, const gint len)
 {
-	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 
 	ceditor_error_tag_add (editor, row, column, len);
-
-	}
+}
 
 static void
-ui_memu_popup_position(GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
+ui_memu_popup_position (GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
 					   gpointer user_data)
 {
 	*push_in = FALSE;
@@ -1661,7 +1673,7 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 	GList *iterator;
 	
 
-	full = (gchar *) g_malloc (MAX_TIP_LENGTH);
+	full = (gchar *) g_malloc (MAX_TIP_LENGTH + 1);
 	full[0] = 0;
 	for (iterator = (GList *) signs; iterator; iterator = iterator->next) {
 		g_strlcat (full, name, MAX_TIP_LENGTH);
@@ -1678,14 +1690,15 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 
 	function_tip->active = TRUE;
 
-	g_free (full);
+	g_free ((gpointer) full);
 }
 
 void
 ui_tip_window_destory ()
 {
-	if (!function_tip->active)
-		return ;
+	if (!function_tip->active) {
+		return;
+	}
 
 	gtk_widget_hide (GTK_WIDGET (function_tip->tip_window));
 	function_tip->active = FALSE;
@@ -1697,8 +1710,9 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 	GList *iterator;
 	PangoFontDescription *pfd;
 
-	if (member_menu->active)
+	if (member_menu->active) {
 		ui_member_menu_destroy ();
+	}
 
 	member_menu->menu = (GObject *) gtk_menu_new ();
 	pfd = pango_font_description_from_string ("monospace");
@@ -1746,7 +1760,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 }
 
 void
-ui_current_editor_insert_location(gint *x, gint *y)
+ui_current_editor_insert_location (gint *x, gint *y)
 {
 
 	CEditor *editor;
@@ -1755,7 +1769,7 @@ ui_current_editor_insert_location(gint *x, gint *y)
 		*x = -1;
 		*y = -1;
 
-		return ;
+		return;
 	}
 
 	editor = ui_get_current_editor ();
@@ -1770,8 +1784,9 @@ ui_current_editor_insert (const gchar *text)
 {
 	CEditor *editor;
 
-	if (!ui_have_editor ())
-		return ;
+	if (!ui_have_editor ()) {
+		return;
+	}
 
 	editor = ui_get_current_editor ();
 	ceditor_insert (editor, text);
@@ -1786,8 +1801,9 @@ ui_member_menu_active ()
 void
 ui_member_menu_destroy ()
 {
-	if (!member_menu->active)
-		return ;
+	if (!member_menu->active) {
+		return;
+	}
 
 	gtk_widget_destroy (GTK_WIDGET (member_menu->menu));
 	g_list_free (member_menu->item_list);
@@ -1810,12 +1826,14 @@ ui_member_menu_item_filter ()
 		item = (GtkWidget *) iterator->data;
 		label = gtk_menu_item_get_label (GTK_MENU_ITEM (item));
 
-		if (g_str_has_prefix (label, member_menu->prefix) && g_strcmp0 (label, member_menu->prefix) != 0) {
+		if (g_str_has_prefix (label, member_menu->prefix) &&
+			g_strcmp0 (label, member_menu->prefix) != 0) {
 			gtk_widget_show (item);
 			item_showed++;
 		}
-		else
+		else {
 			gtk_widget_hide (item);
+		}
 	}
 
 	return item_showed;
@@ -1840,8 +1858,9 @@ ui_member_menu_update (const gboolean del, const gchar ch)
 		item_showed = ui_member_menu_item_filter ();
 	}
 
-	if (item_showed == 0)
+	if (item_showed == 0) {
 		gtk_widget_hide (GTK_WIDGET (member_menu->menu));
+	}
 	else {
 		gtk_menu_popup (GTK_MENU (member_menu->menu), NULL, NULL, (GtkMenuPositionFunc) ui_memu_popup_position, NULL, 3, 0);
 	}
@@ -1854,7 +1873,7 @@ ui_member_menu_prefix ()
 }
 
 static CEditor *
-ui_get_editor_by_button(GtkWidget *button)
+ui_get_editor_by_button (GtkWidget *button)
 {
 	GList *iterator;
 	
@@ -1862,8 +1881,9 @@ ui_get_editor_by_button(GtkWidget *button)
 		CEditor *editor;
 
 		editor = (CEditor *) iterator->data;
-		if (editor->close_button == button)
+		if (editor->close_button == button) {
 			return editor;
+		}
 	}
 
 	return NULL;
@@ -1878,7 +1898,7 @@ ui_editor_close (GtkWidget *button)
 	editor = ui_get_editor_by_button (button);
 
 	if (editor == NULL) {
-		return ;
+		return;
 	}
 
 	ui_select_editor_with_path (editor->filepath);
@@ -1904,7 +1924,7 @@ ui_editor_close (GtkWidget *button)
 		gtk_widget_destroy (dialog);
 
 		if (result == GTK_RESPONSE_CANCEL) {
-			return ;
+			return;
 		}
 		else if (result == GTK_RESPONSE_ACCEPT) {
 			ui_emit_save_signal ();
@@ -1931,7 +1951,7 @@ ui_current_editor_close ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		return ;
+		return;
 	}
 
 	ui_editor_close (editor->close_button);
@@ -1947,8 +1967,7 @@ ui_current_editor_set_dirty ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 
 	ceditor_set_dirty (editor, 1);
@@ -1957,12 +1976,15 @@ ui_current_editor_set_dirty ()
 void
 ui_status_image_set (const gboolean error, const gboolean warning)
 {
-	if (error)
+	if (error) {
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSERROR, GTK_ICON_SIZE_MENU);
-	else if (warning)
+	}
+	else if (warning) {
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSWARNING, GTK_ICON_SIZE_MENU);
-	else
+	}
+	else {
 		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSPASS, GTK_ICON_SIZE_MENU);
+	}
 }
 
 void
@@ -2016,7 +2038,6 @@ ui_preferences_window_hide ()
 static void
 ui_editors_config_update ()
 {
-	
 	CEditor *editor;
 	GList * iterator;
 
@@ -2059,7 +2080,7 @@ ui_current_editor_breakpoint_update (gdouble x, gdouble y, gchar *breakpoint_des
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		return ;
+		return;
 	}
 
 	ceditor_breakpoint_update (editor, x, y, breakpoint_desc);
@@ -2090,16 +2111,14 @@ void
 ui_enable_debug_view ()
 {
 	debugview_enable (window->debug_view);
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), 
-								   2);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), PAGE_DEBUG);
 }
 
 void
 ui_disable_debug_view ()
 {
 	debugview_disable (window->debug_view);
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), 
-								   0);
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (window->info_notebook), PAGE_INFO);
 }
 
 void
@@ -2124,20 +2143,23 @@ ui_debug_ptr_add (const gchar *filepath, const gint line)
 	CEditor *editor;
 	GList * iterator;
 
-	if (window->debug_ptr != NULL)
+	if (window->debug_ptr != NULL) {
 		ui_debug_ptr_remove ();
+	}
 
 	if (filepath == NULL) {
 		editor = ui_get_current_editor ();
 		window->debug_ptr = (GObject *) ceditor_icon_add (editor, line);
-		return ;
+
+		return;
 	}
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
 		editor = (CEditor *) iterator->data;
 		if (g_strcmp0 (filepath, editor->filepath) == 0) {
 			window->debug_ptr = (GObject *) ceditor_icon_add (editor, line);
-			return ;
+
+			return;
 		}
 	}
 }
@@ -2145,8 +2167,9 @@ ui_debug_ptr_add (const gchar *filepath, const gint line)
 void
 ui_debug_ptr_remove ()
 {
-	if (window->debug_ptr != NULL)
+	if (window->debug_ptr != NULL) {
 		gtk_widget_destroy (GTK_WIDGET (window->debug_ptr));
+	}
 	window->debug_ptr = NULL;
 }
 
@@ -2166,8 +2189,7 @@ void
 ui_debug_view_stack_add (const gchar *frame_name, const gchar *frame_args,
 						 const gchar *file_line)
 {
-	debug_view_calltree_add (window->debug_view, frame_name, frame_args,
-							 file_line);
+	debug_view_calltree_add (window->debug_view, frame_name, frame_args, file_line);
 }
 
 void
@@ -2186,7 +2208,8 @@ ui_select_editor_with_path (const gchar *filepath)
 			index = gtk_notebook_page_num (GTK_NOTEBOOK (window->code_notebook), 
 										   editor->textbox);
 			gtk_notebook_set_current_page (GTK_NOTEBOOK (window->code_notebook), index);
-			return ;
+
+			return;
 		}
 	}
 }
@@ -2204,16 +2227,16 @@ ui_debug_view_set_values (GList *list)
 }
 
 void
-ui_current_editor_step_add (const gboolean insert,
-							const gint offset, const gint len,
+ui_current_editor_step_add (const gboolean insert, const gint offset, const gint len,
 							const gchar *text)
 {
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	ceditor_step_add (editor, insert, offset, len, text);
 }
@@ -2225,8 +2248,9 @@ ui_current_editor_can_undo ()
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
+	if (editor == NULL) {
 		return FALSE;
+	}
 
 	return ceditor_can_undo (editor);
 }
@@ -2238,8 +2262,9 @@ ui_current_editor_can_redo ()
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
+	if (editor == NULL) {
 		return FALSE;
+	}
 
 	return ceditor_can_redo (editor);
 }
@@ -2253,8 +2278,7 @@ ui_current_editor_undo ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 
 	ceditor_undo (editor);
@@ -2269,8 +2293,7 @@ ui_current_editor_redo ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		
-		return ;
+		return;
 	}
 
 	ceditor_redo (editor);
@@ -2279,15 +2302,19 @@ ui_current_editor_redo ()
 void
 ui_undo_redo_widgets_update ()
 {
-	if (ui_current_editor_can_undo ())
+	if (ui_current_editor_can_undo ()) {
 		ui_enable_undo_widgets ();
-	else
+	}
+	else {
 		ui_disable_undo_widgets ();
+	}
 	
-	if (ui_current_editor_can_redo ())
+	if (ui_current_editor_can_redo ()) {
 		ui_enable_redo_widgets ();
-	else
+	}
+	else {
 		ui_disable_redo_widgets ();
+	}
 }
 
 const gchar *
@@ -2303,8 +2330,9 @@ ui_current_editor_search_init (const gint matched)
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	ceditor_search_init (editor, matched);
 }
@@ -2316,8 +2344,9 @@ ui_current_editor_search_next (const gboolean pre)
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
+	if (editor == NULL) {
 		return 0;
+	}
 
 	return ceditor_search_next (editor, pre);
 }
@@ -2329,8 +2358,9 @@ ui_current_editor_select_range (const gint offset, const gint len)
 
 	editor = ui_get_current_editor ();
 
-	if (editor == NULL)
-		return ;
+	if (editor == NULL) {
+		return;
+	}
 
 	ceditor_select_range (editor, offset, len);
 }

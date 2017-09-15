@@ -66,10 +66,12 @@ debug_view_localtree_init (CDebugView *debug_view)
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->localtree));
 
+	/*
 	gtk_list_store_append (store, &iter);
 	gtk_list_store_set(store, &iter, 0, "bwqdwedwedwefwefwefwefwef", 1, "{12, 32}", -1);
 
 	g_object_ref (store);
+	*/
 }
 
 static void
@@ -109,10 +111,12 @@ debug_view_calltree_init (CDebugView *debug_view)
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->calltree));
 
+	/*
 	gtk_list_store_append (store, &iter);
 	gtk_list_store_set(store, &iter, 0, "bwqdwedwedwefwefwefwefwef", 1, "{12, 32}", 2, "dsfdsfds", -1);
 
 	g_object_ref (store);
+	*/
 }
 
 static void
@@ -146,10 +150,12 @@ debug_view_watchtree_init (CDebugView *debug_view)
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->watchtree));
 
+	/*
 	gtk_list_store_append (store, &iter);
 	gtk_list_store_set(store, &iter, 0, "", 1, "", -1);
 
 	g_object_ref (store);
+	*/
 }
 
 CDebugView *
@@ -205,7 +211,7 @@ debugview_watchtree_cell_change (CDebugView *debug_view, const gchar *path_strin
 	GtkTreeIter iter;
 	gchar *old_text;
 
-	old_text = (gchar *) g_malloc (MAX_CELL_LENGTH);
+	old_text = (gchar *) g_malloc (MAX_CELL_LENGTH + 1);
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
 	gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store), &iter, path_string);
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &old_text, -1);
@@ -228,7 +234,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 	GtkTreeIter iter;
 	gchar *line;
 
-	line = (gchar *) g_malloc (MAX_CELL_LENGTH);
+	line = (gchar *) g_malloc (MAX_CELL_LENGTH + 1);
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW (debug_view->watchtree)));
 	gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store), &iter, "0");
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
@@ -241,13 +247,13 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 
 	*list = g_list_append (*list, (gpointer) line);
 	while (gtk_tree_model_iter_next (GTK_TREE_MODEL (store), &iter)) {
-		line = (gchar *) g_malloc (MAX_CELL_LENGTH);
+		line = (gchar *) g_malloc (MAX_CELL_LENGTH + 1);
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, 0, &line, -1);
 
 		if (line[0] == 0) {
 			g_free ((gpointer) line);
 
-			return ;
+			return;
 		}
 		 *list = g_list_append (*list, (gpointer) line);
 	}

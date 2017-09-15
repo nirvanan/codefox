@@ -245,49 +245,49 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
                              const gboolean project, const gchar *default_path);
 
 gboolean
-ui_have_editor();
+ui_have_editor ();
 
 gboolean
-ui_find_editor(const gchar *filepath);
+ui_find_editor (const gchar *filepath);
 
 CEditor *
-ui_get_editor(const gchar *filepath);
+ui_get_editor (const gchar *filepath);
 
 void
 ui_show_editor_by_path (const gchar *filepath);
 
 void
-ui_current_editor_filepath(gchar *filepath);
+ui_current_editor_filepath (gchar *filepath);
 
 gchar *
-ui_current_editor_code();
+ui_current_editor_code ();
 
 void
-ui_save_code_post(const gchar *filepath);
+ui_save_code_post (const gchar *filepath);
 
 void
-ui_emit_clipboard_signal(gint clipboard_signal);
+ui_emit_clipboard_signal (gint clipboard_signal);
 
 void
-ui_emit_close_signal();
+ui_emit_close_signal ();
 
 void
-ui_emit_save_signal();
+ui_emit_save_signal ();
 
 void
-ui_current_editor_delete_range();
+ui_current_editor_delete_range ();
 
 void
-ui_current_editor_format();
+ui_current_editor_format ();
 
 void
-ui_current_editor_update_cursor();
+ui_current_editor_update_cursor ();
 
 void
-ui_current_editor_change_mode();
+ui_current_editor_change_mode ();
 
 void
-ui_update_line_number_label(const gboolean insert, const gint append, 
+ui_update_line_number_label (const gboolean insert, const gint append, 
 							const GtkTextIter *start, const GtkTextIter *end);
 
 void
@@ -297,16 +297,16 @@ gint
 ui_new_project_dialog_new (const gchar *default_project_path);
 
 gint
-ui_create_file_dialog_new();
+ui_create_file_dialog_new ();
 
 gint
 ui_project_settings_dialog_new (const gchar* libs, const gchar* opts);
 
 void
-ui_new_project_dialog_destory();
+ui_new_project_dialog_destory ();
 
 void
-ui_create_file_dialog_destory();
+ui_create_file_dialog_destory ();
 
 void
 ui_project_settings_dialog_destory ();
@@ -315,34 +315,34 @@ void
 ui_new_project_dialog_info (gchar *name, const gint name_size, gchar *path, const gint path_size, gint *type);
 
 void
-ui_create_file_dialog_info(gchar *name, const gint size);
+ui_create_file_dialog_info (gchar *name, const gint size);
 
 void
 ui_project_settings_dialog_info (gchar *libs, gchar *opts);
 
 void
-ui_start_project(const gchar *project_name, const gchar *project_path);
+ui_start_project (const gchar *project_name, const gchar *project_path);
 
 void
 ui_filetree_menu_popup ();
 
 void
-ui_filetree_current_path(gchar **path, gint *isfile);
+ui_filetree_current_path (gchar **path, gint *isfile);
 
 void
-ui_filetree_append_file_to_current(const gchar *filename);
+ui_filetree_append_file_to_current (const gchar *filename);
 
 void
-ui_error_dialog_new(const gchar *message);
+ui_error_dialog_new (const gchar *message);
 
 gint
-ui_confirm_dialog_new(const gchar *message);
+ui_confirm_dialog_new (const gchar *message);
 
 gint
-ui_filetree_row_second_level();
+ui_filetree_row_second_level ();
 
 void
-ui_filetree_remove_item(const gchar *filepath);
+ui_filetree_remove_item (const gchar *filepath);
 
 void
 ui_compiletree_apend (const gchar *line, gint is_message);
@@ -351,7 +351,7 @@ void
 ui_compiletree_clear ();
 
 void
-ui_append_files_to_second_level(const GList *list, const gint row);
+ui_append_files_to_second_level (const GList *list, const gint row);
 
 void
 ui_current_editor_line (gchar *line, const gint size, const gint lineno);
@@ -369,7 +369,7 @@ void
 ui_member_autocomplete (const GList *funs, const GList *vars);
 
 void
-ui_current_editor_insert_location(gint *x, gint *y);
+ui_current_editor_insert_location (gint *x, gint *y);
 
 void
 ui_current_editor_insert (const gchar *text);
@@ -464,8 +464,7 @@ CEditor *
 ui_get_current_editor();
 
 void
-ui_current_editor_step_add (const gboolean insert,
-							const gint offset, const gint len,
+ui_current_editor_step_add (const gboolean insert, const gint offset, const gint len,
 							const gchar *text);
 
 gboolean

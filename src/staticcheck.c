@@ -48,7 +48,7 @@ static_check (gpointer data)
 	gboolean warning;
 
 	project_path = NULL;
-	file_path = (gchar *) g_malloc (MAX_LINE_LENGTH);
+	file_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 
 	if (1) {
 		//g_usleep (500000);
@@ -56,23 +56,24 @@ static_check (gpointer data)
 		if (ui_have_editor ()) {
 			ui_current_editor_filepath (file_path);
 
-			if (project_path == NULL)
+			if (project_path == NULL) {
 				project_path = project_current_path ();
+			}
 
 			if (project_path == NULL || file_path[0] == 0) {
-				g_free (file_path);
+				g_free ((gpointer) file_path);
 
 				return TRUE;
 			}
 			if (project_get_type () == PROJECT_C && !env_prog_exist (ENV_PROG_GCC)) {
 				g_warning ("gcc not found.");
-				g_free (file_path);
+				g_free ((gpointer) file_path);
 
 				return FALSE;
 			}
 			if (project_get_type () == PROJECT_CPP && !env_prog_exist (ENV_PROG_GPP)) {
 				g_warning ("g++ not found.");
-				g_free (file_path);
+				g_free ((gpointer) file_path);
 
 				return FALSE;
 			}
@@ -88,21 +89,21 @@ static_check (gpointer data)
 			code = ui_current_editor_code ();
 
 			if (code == NULL) {
-				g_free (code_path);
-				g_free (libs);
-				g_free (file_path);
+				g_free ((gpointer) code_path);
+				g_free ((gpointer) libs);
+				g_free ((gpointer) file_path);
 
 				return TRUE;
 			}
 
 			misc_set_file_content (code_path, code);
 
-			g_free (code);
+			g_free ((gpointer) code);
 
-			output = (gchar *) g_malloc (MAX_RESULT_LENGTH);
+			output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
 			compile_static_check (code_path, project_type, libs, output);
 
-			line = (gchar *) g_malloc (MAX_LINE_LENGTH);
+			line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 			p = 0;
 			ui_current_editor_error_tag_clear ();
 
@@ -111,8 +112,9 @@ static_check (gpointer data)
 			while (output[p]) {
 				gint i = 0;
 				
-				while (output[p] && output[p] != '\n')
+				while (output[p] && output[p] != '\n') {
 					line[i++] = output[p++];
+				}
 				line[i] = 0;
 
 				error = compile_is_error (line) || error;
@@ -127,7 +129,6 @@ static_check (gpointer data)
 					compile_get_location (line, &row, &column);
 
 					if (!ui_find_editor (file_path)) {
-
 						continue;
 					}
 
@@ -145,7 +146,7 @@ static_check (gpointer data)
 					
 					ui_current_editor_error_tag_add (row - 1, column - 1, len);
 
-					g_free (code_line);
+					g_free ((gpointer) code_line);
 				}
 				
 				p++;
@@ -153,15 +154,15 @@ static_check (gpointer data)
 
 			ui_status_image_set (error, warning);
 
-			g_free (output);
-			g_free (libs);
-			g_free (code_path);
-			g_free (line);
+			g_free ((gpointer) output);
+			g_free ((gpointer) libs);
+			g_free ((gpointer) code_path);
+			g_free ((gpointer) line);
 		}
 
 	}
 	
-	g_free (file_path);
+	g_free ((gpointer) file_path);
 
 	return TRUE;
 }

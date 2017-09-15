@@ -79,8 +79,9 @@ edit_step_new (const gboolean insert, const gint offset, const gint len,
 static void
 edit_step_free (CEditStep *edit_step)
 {
-	if (!edit_step->insert)
+	if (!edit_step->insert) {
 		g_free ((gpointer) edit_step->deleted);
+	}
 	g_date_time_unref (edit_step->add_time);
 	g_free ((gpointer) edit_step);
 }
@@ -104,7 +105,7 @@ edit_history_step_add (CEditHistory *edit_history, const gboolean insert,
 				edit_step->offset + edit_step->len == offset) {
 				edit_step->len += len;
 
-				return ;
+				return;
 			}
 			else if (!edit_step->insert && edit_step->insert == insert &&
 				offset + strlen (text) == edit_step->offset) {
@@ -119,7 +120,7 @@ edit_history_step_add (CEditHistory *edit_history, const gboolean insert,
 				edit_step->deleted = new_text;
 				edit_step->offset = offset;
 
-				return ;
+				return;
 			}
 		}
 	}
@@ -165,10 +166,12 @@ edit_history_action (CEditHistory *edit_history, GtkTextBuffer *buffer, const gb
 	CEditStep *alt_step;
 	GList *iterator;
 
-	if (undo)
+	if (undo) {
 		iterator = g_list_last (edit_history->step_list);
-	else
+	}
+	else {
 		iterator = g_list_last (edit_history->undo_list);
+	}
 	edit_step = (CEditStep *) iterator->data;
 
 	if (edit_step->insert) {

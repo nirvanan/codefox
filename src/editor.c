@@ -34,6 +34,7 @@
 #include "limits.h"
 
 #define MAX_LINE_NUMBER_LENGTH 20
+#define MAX_LINE_BUFFER_SIZE 100000
 
 static GList *breakpoint_list;
 
@@ -48,10 +49,11 @@ static void
 ceditor_add_global_breakpoint (const gchar *filepath, const gint line)
 {
 	CBreakPointNode *node;
+	gint len = (strlen (filepath) + 1);
 
 	node = (CBreakPointNode *) g_malloc (sizeof (CBreakPointNode));
-	node->filepath = (gchar *) g_malloc ((strlen (filepath) + 1) * sizeof (gchar));
-	g_strlcpy (node->filepath, filepath, strlen (filepath) + 1);
+	node->filepath = (gchar *) g_malloc (len);
+	g_strlcpy (node->filepath, filepath, len);
 	node->line = line;
 	breakpoint_list = g_list_append (breakpoint_list, (gpointer) node);
 }
@@ -101,14 +103,16 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	GdkWindow *window;
 	
 	int len = strlen (label);
-	for (len = len - 1; len >= 0; len--)
-		if (label[len] == '/')
+	for (len = len - 1; len >= 0; len--) {
+		if (label[len] == '/') {
 			break;
+		}
+	}
 	
 	new_editor->label_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 1);
 	new_editor->label_name = gtk_label_new (label + len + 1);
-	new_editor->filepath = g_malloc (MAX_LINE_LENGTH);
-	g_strlcpy (new_editor->filepath, label, MAX_LINE_LENGTH);
+	new_editor->filepath = g_malloc (MAX_FILEPATH_LENGTH + 1);
+	g_strlcpy (new_editor->filepath, label, MAX_FILEPATH_LENGTH);
 	new_editor->close_button = gtk_button_new ();
 	close_image = gtk_image_new_from_stock (GTK_STOCK_CLOSE,
 											GTK_ICON_SIZE_MENU);
@@ -119,8 +123,7 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	gtk_widget_set_has_tooltip (GTK_WIDGET (new_editor->close_button), 1);
 	gtk_widget_set_can_focus (GTK_WIDGET (new_editor->close_button), 0);
 	gtk_widget_set_can_default (GTK_WIDGET (new_editor->close_button), 0);
-	gtk_widget_set_tooltip_text (GTK_WIDGET (new_editor->close_button),
-											 _("Close Tab"));
+	gtk_widget_set_tooltip_text (GTK_WIDGET (new_editor->close_button), _("Close Tab"));
 	gtk_button_set_alignment (GTK_BUTTON (new_editor->close_button), 0.5, 0.5);
 	gtk_widget_set_size_request (new_editor->close_button, 18, 18);
 	gtk_box_pack_start (GTK_BOX (new_editor->label_box), new_editor->label_name, 1, 1, 1);
@@ -157,7 +160,8 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	gtk_box_pack_start (GTK_BOX (new_editor->textbox), new_editor->scroll, 1, 1, 0);
 	gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW (new_editor->event_scroll),
 										gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (new_editor->scroll)));
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (new_editor->event_scroll), GTK_POLICY_NEVER, GTK_POLICY_EXTERNAL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (new_editor->event_scroll),
+									GTK_POLICY_NEVER, GTK_POLICY_EXTERNAL);
 
 	new_editor->notationlist = NULL;
 	new_editor->breakpoint_list = NULL;
@@ -165,27 +169,23 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 
 	/* Connect signal handlers. */
 	g_signal_connect_after (new_editor->textview, "move-cursor", 
-						G_CALLBACK (on_cursor_change), NULL);
+							G_CALLBACK (on_cursor_change), NULL);
 	g_signal_connect_after (new_editor->textview, "toggle-overwrite", 
-						G_CALLBACK (on_mode_change), NULL);
+							G_CALLBACK (on_mode_change), NULL);
 	g_signal_connect (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview)), "mark-set",
-						G_CALLBACK (on_textview_clicked), NULL);
+					  G_CALLBACK (on_textview_clicked), NULL);
 	g_signal_connect (new_editor->close_button, "clicked", 
-						G_CALLBACK (on_close_page), NULL);
+					  G_CALLBACK (on_close_page), NULL);
 	g_signal_connect (new_editor->eventbox, "button-press-event",
 					  G_CALLBACK (on_line_label_2clicked), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  "insert-text",
-					  G_CALLBACK (on_editor_insert), NULL);
+					  		"insert-text", G_CALLBACK (on_editor_insert), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  "delete-range",
-					  G_CALLBACK (on_editor_delete), NULL);
+					  		"delete-range", G_CALLBACK (on_editor_delete), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  "changed",
-					  G_CALLBACK (on_textbuffer_changed), NULL);
+					 	    "changed", G_CALLBACK (on_textbuffer_changed), NULL);
 	g_signal_connect (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  "delete-range",
-					  G_CALLBACK (on_editor_delete2), NULL);
+					  "delete-range", G_CALLBACK (on_editor_delete2), NULL);
 	
 	highlight_register (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))));
 
@@ -225,7 +225,7 @@ ceditor_new_with_text (const gchar *label, const gchar *code_buf)
 	memset (new_editor, 0, sizeof (CEditor));
 	tag_table =  gtk_text_tag_table_new ();
 	buffer = gtk_text_buffer_new (tag_table);
-	gtk_text_buffer_insert_at_cursor (buffer, code_buf, strlen(code_buf)); /* FIXME: use glib! */
+	gtk_text_buffer_insert_at_cursor (buffer, code_buf, strlen(code_buf));
 	new_editor->textview = gtk_text_view_new_with_buffer (buffer);
 	ceditor_init (new_editor, label);
 	
@@ -255,8 +255,9 @@ ceditor_remove (CEditor *editor)
 		CNotation *notation;
 
 		notation = (CNotation *) iterator->data;
-		gtk_widget_destroy (notation->icon);
-
+		if (GTK_IS_WIDGET (notation->icon)) {
+			gtk_widget_destroy (notation->icon);
+		}
 		g_free (notation);
 	}
 	g_list_free (editor->notationlist);
@@ -265,8 +266,10 @@ ceditor_remove (CEditor *editor)
 		CBreakPointTag *breakpoint;
 
 		breakpoint = (CBreakPointTag *) iterator->data;
-		if (GTK_IS_WIDGET (breakpoint->icon))
+		if (GTK_IS_WIDGET (breakpoint->icon)) {
 			gtk_widget_destroy (breakpoint->icon);
+		}
+		g_free ((gpointer) breakpoint->filepath);
 
 		g_free (breakpoint);
 	}
@@ -289,13 +292,20 @@ ceditor_save_path (CEditor *editor, const gchar *filepath)
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	gtk_text_buffer_get_start_iter (buffer, &start);
 	gtk_text_buffer_get_end_iter (buffer, &end);
-	text = gtk_text_buffer_get_text (buffer, &start,
-									 &end, 1);
+	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
 	output = fopen (filepath, "w");
+
+	if (output == NULL) {
+		g_error ("can't open file %s for saving code.", filepath);
+		
+		g_free ((gpointer) text);
+
+		return;
+	}
 	fputs (text, output);
 	fclose (output);
 
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 void
@@ -304,13 +314,15 @@ ceditor_set_dirty (CEditor *editor, gboolean dirty)
 	gchar *label;
 	
 	/* If an opened file has been modified, set the dirty bit. */
-	if (editor->dirty == dirty)
-		return ;
+	if (editor->dirty == dirty) {
+		return;
+	}
 
 	editor->dirty = dirty;
 	label = (gchar *) gtk_label_get_text (GTK_LABEL (editor->label_name));
-	if (!dirty)	
+	if (!dirty) {	
 		gtk_label_set_text (GTK_LABEL (editor->label_name), label + 1);
+	}
 	else
 	{
 		gchar *temp;
@@ -319,7 +331,8 @@ ceditor_set_dirty (CEditor *editor, gboolean dirty)
 		g_strlcpy (temp + 1, label, MAX_FILEPATH_LENGTH);
 		temp[0] = '*';
 		gtk_label_set_text (GTK_LABEL (editor->label_name), temp);
-		g_free (temp);
+
+		g_free ((gpointer) temp);
 	}
 }
 
@@ -337,10 +350,8 @@ ceditor_set_path (CEditor *editor, const gchar *filepath)
 	
 	g_strlcpy (editor->filepath, filepath, MAX_FILEPATH_LENGTH);
 	len = strlen (filepath);
-	for (i = len - 1; filepath[i] != '/'; i--)
-		;
-	gtk_label_set_text (GTK_LABEL (editor->label_name),
-						filepath + i + 1);
+	for (i = len - 1; filepath[i] != '/'; i--) ;
+	gtk_label_set_text (GTK_LABEL (editor->label_name), filepath + i + 1);
 	gtk_widget_set_tooltip_text (GTK_WIDGET (editor->label_box), filepath);
 }
 
@@ -399,8 +410,9 @@ ceditor_append_line_label (CEditor *editor, gint lines)
 	text = g_malloc (sizeof (gchar) * label_len);
 	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), label_len);
 	
-	if (editor->linecount != 0)
+	if (editor->linecount != 0) {
 		g_strlcat (text, "\n", label_len);
+	}
 	for (i = 1; i <= lines; i++)
 	{
 		gchar line[MAX_LINE_NUMBER_LENGTH + 1];
@@ -413,11 +425,13 @@ ceditor_append_line_label (CEditor *editor, gint lines)
 	/* Update linecount. */
 	editor->linecount += lines;
 
-	if (text[len - 1] == '\n')
+	if (text[len - 1] == '\n') {
 		text[len - 1] = 0;
+	}
 	
 	gtk_label_set_text (GTK_LABEL (editor->lineno), text);
-	g_free (text);
+
+	g_free ((gpointer) text);
 }
 
 void
@@ -429,34 +443,36 @@ ceditor_remove_line_label (CEditor *editor, gint lines)
 	gint len;
 	gint p;
 	
-	if (lines <= 0)
-		return ;
+	if (lines <= 0) {
+		return;
+	}
 	
-	text = g_malloc (10240);
-	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), 10240);
+	text = (gchar *)g_malloc (MAX_LINE_BUFFER_SIZE + 1);
+	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), MAX_LINE_BUFFER_SIZE);
 	
 	len = strlen (text);
 	p = 0;
-	for (i = len - 1; i >= 0; i--)
-		if (text[i] == '\n')
-		{
+	for (i = len - 1; i >= 0; i--) {
+		if (text[i] == '\n') {
 			text[i] = 0;
 			p++;
 			
-			if (p == lines)
+			if (p == lines) {
 				break;
+			}
 		}
+	}
 
 	/* Update linecount. */
 	editor->linecount -= lines;
 	
 	gtk_label_set_text (GTK_LABEL (editor->lineno), text);
-	g_free (text);
-	
+
+	g_free ((gpointer) text);
 }
 
 void
-ceditor_add_notation (CEditor *editor, gint err, gint line, gchar *info)
+ceditor_add_notation (CEditor *editor, gint err, gint line, const gchar *info)
 {
 	/* Show an error or warning icon next to the line number column. */
 	GtkWidget *image;
@@ -467,11 +483,12 @@ ceditor_add_notation (CEditor *editor, gint err, gint line, gchar *info)
 	GdkPixbuf *pixbuf;
 	gint p = 0;
 	
-	text = g_malloc (10240);
+	text = (gchar *) g_malloc (MAX_LINE_BUFFER_SIZE + 1);
 	text[0] = 0;
 	
-	while (info[p] != ' ')
+	while (info[p] != ' ') {
 		p++;
+	}
 	p++;
 	
 	for (iterator = editor->notationlist; iterator; iterator = iterator->next) {
@@ -483,30 +500,33 @@ ceditor_add_notation (CEditor *editor, gint err, gint line, gchar *info)
 			   display warning messages as well. 
 			 */
 			if (!notation->err && err) {
-				g_strlcat (text, gtk_widget_get_tooltip_text (notation->icon), 1024);
-				g_strlcat (text, "\n", 1024);
+				g_strlcat (text, gtk_widget_get_tooltip_text (notation->icon), MAX_LINE_BUFFER_SIZE);
+				g_strlcat (text, "\n", MAX_LINE_BUFFER_SIZE);
 				gtk_container_remove (GTK_CONTAINER (editor->notationfixed), notation->icon);
 				g_free (notation);
 				editor->notationlist = g_list_remove (editor->notationlist, (gpointer) notation);
 				break;
 			}
 			else {
-				g_strlcat (text, gtk_widget_get_tooltip_text (notation->icon), 1024);
-				g_strlcat (text, "\n", 1024);
-				g_strlcat (text, info + p, 1024);
+				g_strlcat (text, gtk_widget_get_tooltip_text (notation->icon), MAX_LINE_BUFFER_SIZE);
+				g_strlcat (text, "\n", MAX_LINE_BUFFER_SIZE);
+				g_strlcat (text, info + p, MAX_LINE_BUFFER_SIZE);
 				gtk_widget_set_tooltip_text (notation->icon, text);
-				g_free (text);
-				return ;
+				g_free ((gpointer) text);
+
+				return;
 			}
 		}
 	}
 	
 	/* Add icon. */
 	icon_theme = gtk_icon_theme_get_default ();
-	if (err)
+	if (err) {
 		pixbuf = gtk_icon_theme_load_icon (icon_theme, CODEFOX_STOCK_ERROR, 16, 0, NULL);
-	else
+	}
+	else {
 		pixbuf = gtk_icon_theme_load_icon (icon_theme, CODEFOX_STOCK_WARNING, 16, 0, NULL);
+	}
 	
 	/* When mouse is on icon, display error or warning messages. */
 	image = gtk_image_new_from_pixbuf (pixbuf);
@@ -526,7 +546,7 @@ ceditor_add_notation (CEditor *editor, gint err, gint line, gchar *info)
 	editor->notationlist = g_list_append (editor->notationlist, (gpointer) new_notation);
 	
 	g_object_unref (pixbuf);
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 void
@@ -541,6 +561,10 @@ ceditor_clear_notation (CEditor *editor)
 		
 		notation = (CNotation *) iterator->data;
 		gtk_container_remove (GTK_CONTAINER (editor->notationfixed), notation->icon);
+
+		if (GTK_IS_WIDGET (notation->icon)) {
+			gtk_widget_destroy (notation->icon);
+		}
 		g_free (notation);
 	}
 	
@@ -559,7 +583,6 @@ ceditor_get_line (CEditor *editor, gchar *line, const gint size, const gint line
 {
 	GtkTextBuffer *buffer;
 	GtkTextIter start, end;
-	FILE *output;
 	gchar *text;
 	
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
@@ -569,7 +592,7 @@ ceditor_get_line (CEditor *editor, gchar *line, const gint size, const gint line
 	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
 	g_strlcpy (line, text, size);
 
-	g_free (text);
+	g_free ((gpointer) text);
 }
 
 void
@@ -593,7 +616,6 @@ ceditor_error_tag_add (CEditor *editor, const gint row, const gint column, const
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	gtk_text_buffer_get_iter_at_line (buffer, &start, row);
 	highlight_add_tag (buffer, &start, column, len, "error");
-
 }
 
 void
@@ -666,8 +688,9 @@ ceditor_find_breakpoint (CEditor *editor, gint line)
 		
 		breakpoint = (CBreakPointTag *) iterator->data;
 		
-		if (breakpoint->line == line)
+		if (breakpoint->line == line) {
 			return breakpoint;
+		}
 	}
 
 	return NULL;
@@ -712,8 +735,9 @@ ceditor_breakpoint_update (CEditor *editor, gdouble x, gdouble y, gchar *breakpo
 	gtk_widget_get_preferred_height (editor->lineno, NULL, &line_label_height);
 	line = ((gint) y) / (line_label_height / editor->linecount) + 1;
 
-	if (line > editor->linecount)
-		return ;
+	if (line > editor->linecount) {
+		return;
+	}
 
 	breakpoint = ceditor_find_breakpoint (editor, line);
 
@@ -768,7 +792,7 @@ ceditor_breakpoint_tags_get (CEditor *editor, GList **list)
 		gchar *breakpoint_desc;
 		
 		breakpoint = (CBreakPointTag *) iterator->data;
-		breakpoint_desc = (gchar *) g_malloc (MAX_LINE_LENGTH);
+		breakpoint_desc = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 		g_snprintf (breakpoint_desc, MAX_FILEPATH_LENGTH, "%s %d", breakpoint->filepath, breakpoint->line);
 
 		*list = g_list_append (*list, (gpointer) breakpoint_desc);
@@ -798,14 +822,13 @@ ceditor_icon_add (CEditor *editor, const gint line)
 }
 
 void
-ceditor_step_add (CEditor *editor, const gboolean insert,
-				  const gint offset, const gint len,
+ceditor_step_add (CEditor *editor, const gboolean insert, const gint offset, const gint len,
 				  const gchar *text)
 {
 	if (editor->next_modify_omit)
 	{
 		editor->next_modify_omit = 0;
-		return ;
+		return;
 	}
 	edit_history_step_add (editor->edit_history, insert, offset, len, text);
 }
@@ -854,8 +877,9 @@ ceditor_search_next (CEditor *editor, const gboolean pre)
 {
 	gint next;
 
-	if (editor->total_matched == 0)
+	if (editor->total_matched == 0) {
 		return -1;
+	}
 
 	if (editor->current_matched == 0) {
 		editor->current_matched = 1;

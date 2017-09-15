@@ -45,6 +45,12 @@ env_check_external_prog(const gchar *prog)
 	g_snprintf (cmd, MAX_LINE_LENGTH + 1, "which %s\n", prog);
 	pi = popen (cmd, "r");
 
+	if (pi == NULL) {
+		g_error ("cant open opie for which command");
+
+		return FALSE;
+	}
+
 	/* One line is enough. */
 	line[0] = '\0';
 	UNUSED = fgets (line, MAX_LINE_LENGTH, pi);

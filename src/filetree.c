@@ -50,16 +50,20 @@ filetree_append (GtkTreeView *tree, GtkTreeIter *father,
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (tree));
 	gtk_tree_store_append (store, &iter, father);
 	
-	if (file)
+	if (file) {
 		gtk_tree_store_set(store, &iter, ICON, CODEFOX_STOCK_FILE, 
 						   FILENAME, filename,
 						   ISFILE, file,
-						   FILEPATH, filepath, -1);
-	else
+						   FILEPATH, filepath, 
+						   -1);
+	}
+	else {
 		gtk_tree_store_set(store, &iter, ICON, CODEFOX_STOCK_DIR, 
 						   FILENAME, filename,
 						   ISFILE, file,
-						   FILEPATH, filepath, -1);
+						   FILEPATH, filepath,
+						   -1);
+	}
 	
 	selection = gtk_tree_view_get_selection (tree);
 	path = gtk_tree_model_get_path (GTK_TREE_MODEL (store), &iter);
@@ -84,7 +88,7 @@ filetree_append_to_default (GtkTreeView *tree, gboolean file,
 
 void
 filetree_get_current_store (GtkTreeView *tree, gchar **filename,
-					gchar **filepath, gint *isfile, gint *child)
+							gchar **filepath, gint *isfile, gint *child)
 {
 	GtkTreeStore *store;
 	GtkTreeIter iter;
@@ -95,62 +99,67 @@ filetree_get_current_store (GtkTreeView *tree, gchar **filename,
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(tree));
 	has_node = gtk_tree_selection_get_selected (treeselection, NULL, &iter);
 
-	if (!has_node)
-		return ;
+	if (!has_node) {
+		return;
+	}
 
-	if (isfile != NULL)
+	if (isfile != NULL) {
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 							ISFILE, isfile, -1);
-	if (filepath != NULL)
+	}
+	if (filepath != NULL) {
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 							FILEPATH, filepath, -1);
-	if (filename != NULL)
+	}
+	if (filename != NULL) {
 		gtk_tree_model_get (GTK_TREE_MODEL (store), &iter,
 							FILENAME, filename, -1);
+	}
 	if (child != NULL) {
 		(*child) = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (store), &iter);
 
-		if (g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0") == 0)
+		if (g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0") == 0) {
 			(*child) = LEVEL_FIRST;
+		}
 		else if (g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0:0") == 0 ||
 				 g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0:1") == 0 ||
-				 g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0:2") == 0)
+				 g_strcmp0 (gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter), "0:2") == 0) {
 			(*child) = LEVEL_SECOND;
+		}
 	}
 }
 
 gboolean
-filetree_foreach_select (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
-                      gpointer data)
+filetree_foreach_select (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
 {
 	CForeachSelectData *data_str = (CForeachSelectData *) data;
 	gchar *filepath = data_str->filepath;
 	gboolean isfile;
 	
 	gtk_tree_model_get (model, iter, ISFILE, &isfile, -1);
-	if (isfile)
-	{
+	if (isfile) {
 		gchar *path;
-		path = g_malloc (1024);
-		
+
 		gtk_tree_model_get (model, iter, FILEPATH, &path, -1);
-		if (g_strcmp0 (path, filepath) == 0)
-		{
+		if (g_strcmp0 (path, filepath) == 0) {
 			GtkTreeSelection *selection;
 			
 			selection = gtk_tree_view_get_selection (data_str->tree);
 			gtk_tree_selection_select_iter (selection, iter);
-			g_free (path);
+
+			g_free ((gpointer) path);
+
 			return 1;
 		}
-		else
-		{
-			g_free (path);
+		else {
+			g_free ((gpointer) path);
+
 			return 0;
 		}
 	}
-	else
+	else {
 		return 0;
+	}
 }
 	
 void
@@ -162,8 +171,7 @@ filetree_set_select (GtkTreeView *tree, const gchar *filepath)
     data.filepath = (gchar *) filepath;
     data.tree = tree;
 	model = gtk_tree_view_get_model (tree);
-	gtk_tree_model_foreach (model,
-							(GtkTreeModelForeachFunc) filetree_foreach_select,
+	gtk_tree_model_foreach (model, (GtkTreeModelForeachFunc) filetree_foreach_select,
 							(gpointer) &data);
 }
 
@@ -175,26 +183,25 @@ filetree_foreach_remove (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 	gboolean isfile;
 	
 	gtk_tree_model_get (model, iter, ISFILE, &isfile, -1);
-	if (isfile)
-	{
+	if (isfile) {
 		gchar *path;
-		path = g_malloc (1024);
 		
 		gtk_tree_model_get (model, iter, FILEPATH, &path, -1);
-		if (g_strcmp0 (path, filepath) == 0)
-		{
+		if (g_strcmp0 (path, filepath) == 0) {
 			gtk_tree_store_remove (GTK_TREE_STORE (model), iter);
-			g_free (path);
+
+			g_free ((gpointer) path);
+
 			return 1;
 		}
-		else
-		{
-			g_free (path);
+		else {
+			g_free ((gpointer) path);
 			return 0;
 		}
 	}
-	else
+	else {
 		return 0;
+	}
 }
 
 void
@@ -203,8 +210,7 @@ filetree_remove (GtkTreeView *tree, const gchar *filepath)
 	GtkTreeModel *model;
 	
 	model = gtk_tree_view_get_model (tree);
-	gtk_tree_model_foreach (model,
-							(GtkTreeModelForeachFunc) filetree_foreach_remove,
+	gtk_tree_model_foreach (model, (GtkTreeModelForeachFunc) filetree_foreach_remove,
 							(gpointer) filepath);
 }
 
@@ -215,21 +221,20 @@ filetree_set_selected_path (GtkTreeView *tree, const gchar *filepath,
 	GtkTreeSelection *selection;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	gint len;
+	gint i;
 	
 	filetree_set_select (tree, oldpath);
 	selection = gtk_tree_view_get_selection (tree);
 	gtk_tree_selection_get_selected (selection, NULL, &iter);	
 	model = gtk_tree_view_get_model (tree);
 	
-	gint len;
-	gint i;
-	
 	len = strlen (filepath);
-	for (i = len - 1; filepath[i] != '/'; i--)
-		;
+	for (i = len - 1; filepath[i] != '/'; i--);
 	gtk_tree_store_set(GTK_TREE_STORE (model), &iter,
 					   FILENAME, filepath + i + 1,
-					   FILEPATH, filepath, -1);
+					   FILEPATH, filepath, 
+					   -1);
 }
 
 void
@@ -262,7 +267,7 @@ filetree_project_init (GtkTreeView *tree, const gchar *project_name, const gchar
 {
 	gchar *root_dir;
 
-	root_dir = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
+	root_dir = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	g_strlcpy (root_dir, project_dir, MAX_FILEPATH_LENGTH);
 	g_strlcat (root_dir, "/", MAX_FILEPATH_LENGTH);
 	g_strlcat (root_dir, project_name, MAX_FILEPATH_LENGTH);
@@ -271,7 +276,7 @@ filetree_project_init (GtkTreeView *tree, const gchar *project_name, const gchar
 	filetree_append_to_default (tree, 0, _("source"), root_dir);
 	filetree_append_to_default (tree, 0, _("resource"), root_dir);
 
-	g_free (root_dir);
+	g_free ((gpointer) root_dir);
 }
 
 /* Append a item in current folder. */
@@ -286,12 +291,13 @@ filetree_append_to_current (GtkTreeView *tree, const gchar *filename, const gint
 	treeselection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(tree));
 	gtk_tree_selection_get_selected (treeselection, NULL, &iter);
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH);
 
 	gtk_tree_model_get (GTK_TREE_MODEL (store), &iter, FILEPATH, &filepath, -1);
 	g_strlcat (filepath, "/", MAX_FILEPATH_LENGTH);
 	g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 	filetree_append (GTK_TREE_VIEW (tree), &iter, isfile, filename, filepath);
+
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -328,13 +334,18 @@ filetree_get_row_second_level (GtkTreeView *tree)
 	GtkTreeIter iter;
 	GtkTreeSelection *treeselection;
 	gchar *path;
+	gint ret;
 	
 	treeselection = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
 	store = GTK_TREE_STORE(gtk_tree_view_get_model(tree));
 	gtk_tree_selection_get_selected (treeselection, NULL, &iter);
 	path = gtk_tree_model_get_string_from_iter (GTK_TREE_MODEL (store), &iter);
 
-	return path[2] - '0';
+	ret = path[2] - '0';
+
+	g_free ((gpointer) path);
+
+	return ret;
 }
 
 void
@@ -366,5 +377,5 @@ filetree_append_to_second_level (GtkTreeView *tree, gint row, const gchar *filen
 	g_strlcat (filepath, filename, MAX_FILEPATH_LENGTH);
 	filetree_append (GTK_TREE_VIEW (tree), &iter, isfile, filename, filepath);
 	
-	g_free (filepath);
+	g_free ((gpointer) filepath);
 }

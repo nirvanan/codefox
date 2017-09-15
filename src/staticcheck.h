@@ -21,7 +21,7 @@
  */
  
 #ifndef STATICCHECK_H
-#define STATICCHECK_H_H
+#define STATICCHECK_H
 
 #include <gtk/gtk.h>
 #include <glib.h>

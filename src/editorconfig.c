@@ -48,8 +48,9 @@ editorconfig_default_config_new ()
 void
 editorconfig_user_config_from_default ()
 {
-	if (default_config == NULL)
+	if (default_config == NULL) {
 		user_config = NULL;
+	}
 	else {
 		user_config = (CEditorConfig *) g_malloc (sizeof (CEditorConfig));
 		user_config->pfd = default_config->pfd;
