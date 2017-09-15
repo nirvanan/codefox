@@ -773,7 +773,7 @@ on_project_settings_clicked (GtkWidget *widget, gpointer user_data)
 		g_free ((gpointer) libs);
 		g_free ((gpointer) opts);
 
-		return ;
+		return;
 	}
 
 	ui_project_settings_dialog_info (libs, opts);
@@ -887,7 +887,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		if (!debug_is_active ()) {
 			ui_status_entry_new (FILE_OP_WARNING, _("failed to start or conect to debug process."));
 
-			return ;
+			return;
 		}
 		breakpoint_desc_list = NULL;
 		ui_breakpoint_tags_get (&breakpoint_desc_list);
@@ -943,7 +943,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 		g_free ((gpointer) filename);
 
-		return ;
+		return;
 	}
 
 	if (!ui_find_editor (filepath)) {

@@ -42,7 +42,7 @@ start_timer()
 {
 	g_timeout_add (500, static_check, NULL);
 	g_timeout_add (500, symbol_parse, NULL);
-	//g_timeout_add (200, highlight_parse, NULL);
+	g_timeout_add (1000, highlight_parse, NULL);
 }
 
 int

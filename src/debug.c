@@ -481,7 +481,7 @@ debug_current_locals (GList **locals)
 		*locals = NULL;
 		g_free ((gpointer) output);
 
-		return ;
+		return;
 	}
 
 	if (!g_str_has_prefix (output, "No locals.")) {
@@ -626,7 +626,7 @@ debug_current_stack (GList **stack)
 		g_free (output);
 		*stack = NULL;
 
-		return ;
+		return;
 	}
 
 	i = 0;

@@ -242,7 +242,7 @@ debugview_watchtree_get_all (CDebugView *debug_view, GList **list)
 	if (line[0] == 0) {
 		g_free ((gpointer) line);
 
-		return ;
+		return;
 	}
 
 	*list = g_list_append (*list, (gpointer) line);
