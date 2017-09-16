@@ -1,6 +1,6 @@
 
 templatedir = $(datadir)/codefox
-template_DATA = codefox.ui codefox-new-project.ui codefox-create-file.ui codefox-project-settings.ui codefox-editor-settings.ui codefox-fun-tip.ui.in
+template_DATA = codefox.ui codefox-new-project.ui codefox-create-file.ui codefox-project-settings.ui codefox-editor-settings.ui codefox-fun-tip.ui
 
 EXTRA_DIST = codefox.ui.in \
 	codefox-new-project.ui.in \

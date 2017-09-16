@@ -173,7 +173,7 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/install-sh \
 	$(top_srcdir)/build-aux/ltmain.sh \
 	$(top_srcdir)/build-aux/missing ABOUT-NLS AUTHORS COPYING \
-	ChangeLog INSTALL NEWS TODO build-aux/compile \
+	ChangeLog INSTALL NEWS README TODO build-aux/compile \
 	build-aux/config.guess build-aux/config.rpath \
 	build-aux/config.sub build-aux/depcomp build-aux/install-sh \
 	build-aux/ltmain.sh build-aux/missing install-sh missing

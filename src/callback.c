@@ -207,14 +207,18 @@ delete_delete_code (GtkWidget *widget, gpointer user_data)
 	ui_current_editor_delete_range();
 }
 
-void
+gint
 quit_quit_program (GtkWidget *widget, gpointer user_data)
 {
 	while (ui_have_editor ()) {
-		ui_current_editor_close ();
+		if (!ui_current_editor_close ()) {
+			return TRUE;
+		}
 	}
 
 	gtk_main_quit ();
+
+	return  FALSE;
 }
 
 void
@@ -1108,6 +1112,16 @@ on_search_clicked (GtkWidget *widget, gpointer user_data)
 	}
 
 	g_free ((gpointer) code);
+}
+
+gboolean
+on_key_pressed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+	if (GTK_IS_WIDGET (widget)) {
+		ui_member_menu_destroy ();
+	}
+
+	return TRUE;
 }
 
 void

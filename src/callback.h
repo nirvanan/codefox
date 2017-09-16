@@ -47,7 +47,7 @@ save_save_current_code (GtkWidget *widget, gpointer user_data);
 void
 saveas_save_to_file (GtkWidget *widget, gpointer user_data);
 
-void
+gint
 quit_quit_program (GtkWidget *widget, gpointer user_data);
 
 void
@@ -173,8 +173,11 @@ on_textbuffer_changed (GtkTextBuffer *textbuffer, gpointer user_data);
 void
 on_search_clicked (GtkWidget *widget, gpointer user_data);
 
+gboolean
+on_key_pressed (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+
 void
 do_nothing (GtkTextBuffer *textbuffer, GtkTextIter *start,
-				  GtkTextIter *end, gpointer user_data);
+			GtkTextIter *end, gpointer user_data);
 
 #endif

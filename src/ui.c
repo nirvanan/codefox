@@ -50,6 +50,12 @@
 
 #define LOGO_SIZE 160
 
+/* GTK stocks. */
+#define CODEFOX_STOCK_OPEN "document-open"
+#define CODEFOX_STOCK_NEW "document-new"
+#define CODEFOX_STOCK_DELETE "edit-delete"
+
+/* Non-GTK stocks. */
 #define CODEFOX_STOCK_BUILD "codefox-build"
 #define CODEFOX_STOCK_RUN "codefox-run"
 #define CODEFOX_STOCK_DEBUG "codefox-debug"
@@ -111,7 +117,6 @@ static void ui_window_init(GtkBuilder *builder, CWindow *window);
 static void ui_filetree_init(CWindow *window);
 static void ui_toolpad_init(CWindow *window);
 static void ui_debug_view_init (GtkBuilder *builder);
-static void ui_init_stock_items();
 static void ui_new_project_dialog_init (GtkBuilder *builder);
 static void ui_filetree_menu_init ();
 static void ui_editorconfig_init ();
@@ -359,49 +364,6 @@ ui_toolpad_init (CWindow *window)
 	
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (window->notepadview));
 	gtk_text_buffer_set_text (buffer, _("Write down any notes you want here..."), -1);
-}
-
-static void
-ui_init_stock_items ()
-{
-	gint i, j;
-	gint icon_size[4] = {16, 24, 32, 48};
-
-	gtk_stock_add((GtkStockItem *) items, G_N_ELEMENTS (items));
-	
-	for (i = 0; i < G_N_ELEMENTS (items); i++) {
-		GError *error = NULL;
-		GtkIconTheme *icon_theme;
-		GdkPixbuf *pixbuf;
-		GtkIconSet *icon_set;
-		GtkIconFactory *factory;
-
-		icon_theme = gtk_icon_theme_get_default ();
-		icon_set = gtk_icon_set_new ();
-		factory = gtk_icon_factory_new ();
-
-		for (j = 0; j < G_N_ELEMENTS (icon_size); j++) {
-			pixbuf = gtk_icon_theme_load_icon (icon_theme, items[i].stock_id, icon_size[j], 0, &error);
-			if (!pixbuf) {
-			    g_warning (_("can't load icon: %s."), error->message);
-			    g_error_free (error);
-			} else {
-				GtkIconSource *source;
-
-				source = gtk_icon_source_new ();
-				gtk_icon_source_set_pixbuf (source, pixbuf);
-				gtk_icon_set_add_source (icon_set, source);
-
-				gtk_icon_source_free (source);
-			}
-
-			g_object_unref (pixbuf);
-		}
-
-		gtk_icon_factory_add (factory, items[i].stock_id, icon_set);
-		gtk_icon_factory_add_default (factory);
-		gtk_icon_set_unref (icon_set);
-	}
 }
 
 static void
@@ -683,7 +645,6 @@ ui_init ()
 	/* Add our icon path in case we aren't installed in the system prefix */
 	icon_path = g_build_filename(CODEFOX_DATADIR, "icons", NULL);
 	gtk_icon_theme_append_search_path(gtk_icon_theme_get_default(), icon_path);
-	ui_init_stock_items ();
 
 	builder = gtk_builder_new ();
 	data_dir = g_build_filename (CODEFOX_DATADIR, "codefox", NULL);
@@ -892,8 +853,8 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
 		dialog = gtk_file_chooser_dialog_new (_("Open File"),
 											  GTK_WINDOW (window->toplevel),
 											  GTK_FILE_CHOOSER_ACTION_OPEN,
-											  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-											  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+											  _("Cancel"), GTK_RESPONSE_CANCEL,
+											  _("Open"), GTK_RESPONSE_ACCEPT,
 											  NULL);
 
 		if (project) {
@@ -909,8 +870,8 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
 		dialog = gtk_file_chooser_dialog_new (_("Save File"),
 											  GTK_WINDOW (window->toplevel),
 											  GTK_FILE_CHOOSER_ACTION_SAVE,
-											  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-											  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+											  _("Cancel"), GTK_RESPONSE_CANCEL,
+											  _("Save"), GTK_RESPONSE_ACCEPT,
 											  NULL);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog),
 													    TRUE);
@@ -1454,15 +1415,9 @@ ui_filetree_menu_init ()
 
 	filetree_menu = (CFileTreeMenu *) g_malloc (sizeof (CFileTreeMenu));
 	filetree_menu->menu = (GObject *) gtk_menu_new ();
-	filetree_menu->add_item = (GObject *) gtk_image_menu_item_new_with_label (_("Add local file"));
-	filetree_menu->create_item = (GObject *) gtk_image_menu_item_new_with_label (_("Create empty file"));
-	filetree_menu->delete_item = (GObject *) gtk_image_menu_item_new_with_label (_("Delete this item"));
-	stock_open = gtk_image_new_from_stock (GTK_STOCK_OPEN, GTK_ICON_SIZE_MENU);
-	stock_new = gtk_image_new_from_stock (GTK_STOCK_NEW, GTK_ICON_SIZE_MENU);
-	stock_delete = gtk_image_new_from_stock (GTK_STOCK_DELETE, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (filetree_menu->create_item), stock_new);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (filetree_menu->add_item), stock_open);
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (filetree_menu->delete_item), stock_delete);
+	filetree_menu->add_item = (GObject *) gtk_menu_item_new_with_label (_("Add local file"));
+	filetree_menu->create_item = (GObject *) gtk_menu_item_new_with_label (_("Create empty file"));
+	filetree_menu->delete_item = (GObject *) gtk_menu_item_new_with_label (_("Delete this item"));
 	gtk_menu_shell_append (GTK_MENU_SHELL (filetree_menu->menu), GTK_WIDGET (filetree_menu->create_item));
 	gtk_menu_shell_append (GTK_MENU_SHELL (filetree_menu->menu), GTK_WIDGET (filetree_menu->add_item));
 	gtk_menu_shell_append (GTK_MENU_SHELL (filetree_menu->menu), GTK_WIDGET (filetree_menu->delete_item));
@@ -1506,7 +1461,7 @@ ui_filetree_menu_popup ()
 		gtk_widget_hide(GTK_WIDGET (filetree_menu->delete_item));
 	}
 
-	gtk_menu_popup (GTK_MENU (filetree_menu->menu), NULL, NULL, NULL, NULL, 3, 0);
+	gtk_menu_popup_at_pointer (GTK_MENU (filetree_menu->menu), NULL);
 
 	g_free ((gpointer) name);
 	g_free ((gpointer) path);
@@ -1708,23 +1663,18 @@ void
 ui_member_autocomplete (const GList *funs, const GList *vars)
 {
 	GList *iterator;
-	PangoFontDescription *pfd;
+	gint x, y;
+	GdkRectangle rec;
 
 	if (member_menu->active) {
 		ui_member_menu_destroy ();
 	}
 
 	member_menu->menu = (GObject *) gtk_menu_new ();
-	pfd = pango_font_description_from_string ("monospace");
 	for (iterator = (GList *) funs; iterator; iterator = iterator->next) {
 		GtkWidget *item;
-		GtkWidget *stock;
 
-		item = gtk_image_menu_item_new_with_label ((gchar *) iterator->data);
-		stock = gtk_image_new_from_icon_name (CODEFOX_STOCK_FUNCTION, GTK_ICON_SIZE_MENU);
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), stock);
-		gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
-		gtk_widget_override_font (item, pfd);
+		item = gtk_menu_item_new_with_label ((gchar *) iterator->data);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
 					  	  G_CALLBACK (on_autocomplete_item_clicked), NULL);
@@ -1734,13 +1684,8 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 	}
 	for (iterator = (GList *) vars; iterator; iterator = iterator->next) {
 		GtkWidget *item;
-		GtkWidget *stock;
 
-		item = gtk_image_menu_item_new_with_label ((gchar *) iterator->data);
-		stock = gtk_image_new_from_icon_name (CODEFOX_STOCK_VARIABLE, GTK_ICON_SIZE_MENU);
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), stock);
-		gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
-		gtk_widget_override_font (item, pfd);
+		item = gtk_menu_item_new_with_label ((gchar *) iterator->data);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
 					  	  G_CALLBACK (on_autocomplete_item_clicked), NULL);
@@ -1749,12 +1694,22 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		member_menu->item_list = g_list_append (member_menu->item_list, item);
 	}
 
-	gtk_widget_override_font (GTK_WIDGET (member_menu->menu), pfd);
+	gtk_widget_add_events (GTK_WIDGET (member_menu->menu), GDK_KEY_PRESS_MASK);
+	g_signal_connect (member_menu->menu, "key-press-event", 
+					  G_CALLBACK (on_key_pressed), NULL);
+
 	gtk_menu_shell_set_take_focus (GTK_MENU_SHELL (member_menu->menu), FALSE);
 	gtk_widget_set_can_focus (GTK_WIDGET (member_menu->menu), FALSE);
-	gtk_menu_popup (GTK_MENU (member_menu->menu), NULL, NULL, 
-							  (GtkMenuPositionFunc) ui_memu_popup_position, 
-							  NULL, 3, 0);
+
+	ui_current_editor_insert_location (&x, &y);
+	rec.x = x;
+	rec.y = y;
+	rec.width = 0;
+	rec.height = 0;
+	gtk_menu_popup_at_rect (GTK_MENU (member_menu->menu),
+							gtk_widget_get_window (GTK_WIDGET (window->toplevel)),
+							&rec, GDK_GRAVITY_NORTH_WEST,
+							GDK_GRAVITY_NORTH_WEST, NULL);
 
 	member_menu->active = TRUE;
 }
@@ -1862,7 +1817,18 @@ ui_member_menu_update (const gboolean del, const gchar ch)
 		gtk_widget_hide (GTK_WIDGET (member_menu->menu));
 	}
 	else {
-		gtk_menu_popup (GTK_MENU (member_menu->menu), NULL, NULL, (GtkMenuPositionFunc) ui_memu_popup_position, NULL, 3, 0);
+		gint x, y;
+		GdkRectangle rec;
+
+		ui_current_editor_insert_location (&x, &y);
+		rec.x = x;
+		rec.y = y;
+		rec.width = 0;
+		rec.height = 0;
+		gtk_menu_popup_at_rect (GTK_MENU (member_menu->menu),
+								gtk_widget_get_window (GTK_WIDGET (window->toplevel)),
+								&rec, GDK_GRAVITY_NORTH_WEST,
+								GDK_GRAVITY_NORTH_WEST, NULL);
 	}
 }
 
@@ -1889,7 +1855,7 @@ ui_get_editor_by_button (GtkWidget *button)
 	return NULL;
 }
 
-void
+gint
 ui_editor_close (GtkWidget *button)
 {
 	CEditor *editor;
@@ -1898,7 +1864,7 @@ ui_editor_close (GtkWidget *button)
 	editor = ui_get_editor_by_button (button);
 
 	if (editor == NULL) {
-		return;
+		return 0;
 	}
 
 	ui_select_editor_with_path (editor->filepath);
@@ -1913,18 +1879,18 @@ ui_editor_close (GtkWidget *button)
 										 _("%s has been modified, save to file?"),
 										 editor->filepath);
 		gtk_dialog_add_buttons (GTK_DIALOG (dialog), 
-								GTK_STOCK_CANCEL,
+								_("Cancel"),
 								GTK_RESPONSE_CANCEL,
-								GTK_STOCK_NO,
+								_("No"),
 								GTK_RESPONSE_REJECT,
-								GTK_STOCK_YES,
+								_("Yes"),
 								GTK_RESPONSE_ACCEPT,
 								NULL);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 
 		if (result == GTK_RESPONSE_CANCEL) {
-			return;
+			return 0;
 		}
 		else if (result == GTK_RESPONSE_ACCEPT) {
 			ui_emit_save_signal ();
@@ -1940,9 +1906,11 @@ ui_editor_close (GtkWidget *button)
 	if (g_list_length (window->editor_list) == 0) {
 		ui_disable_save_widgets ();
 	}
+
+	return 1;
 }
 
-void
+gint
 ui_current_editor_close ()
 {
 	CEditor *editor;
@@ -1951,10 +1919,10 @@ ui_current_editor_close ()
 	editor = ui_get_current_editor ();
 
 	if (editor == NULL) {
-		return;
+		return 0;
 	}
 
-	ui_editor_close (editor->close_button);
+	return ui_editor_close (editor->close_button);
 }
 
 void
@@ -1977,13 +1945,13 @@ void
 ui_status_image_set (const gboolean error, const gboolean warning)
 {
 	if (error) {
-		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSERROR, GTK_ICON_SIZE_MENU);
+		gtk_image_set_from_icon_name (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSERROR, GTK_ICON_SIZE_MENU);
 	}
 	else if (warning) {
-		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSWARNING, GTK_ICON_SIZE_MENU);
+		gtk_image_set_from_icon_name (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSWARNING, GTK_ICON_SIZE_MENU);
 	}
 	else {
-		gtk_image_set_from_stock (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSPASS, GTK_ICON_SIZE_MENU);
+		gtk_image_set_from_icon_name (GTK_IMAGE (window->status_image), CODEFOX_STOCK_STATUSPASS, GTK_ICON_SIZE_MENU);
 	}
 }
 

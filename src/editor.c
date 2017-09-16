@@ -27,6 +27,7 @@
  #include "config.h"
 #endif
 
+#include <glib/gstdio.h>
 #include <glib/gi18n-lib.h>
 
 #include "editor.h"
@@ -114,8 +115,7 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	new_editor->filepath = g_malloc (MAX_FILEPATH_LENGTH + 1);
 	g_strlcpy (new_editor->filepath, label, MAX_FILEPATH_LENGTH);
 	new_editor->close_button = gtk_button_new ();
-	close_image = gtk_image_new_from_stock (GTK_STOCK_CLOSE,
-											GTK_ICON_SIZE_MENU);
+	close_image = gtk_image_new_from_icon_name (CODEFOX_STOCK_CLOSE, GTK_ICON_SIZE_MENU);
 	gtk_button_set_image (GTK_BUTTON (new_editor->close_button), 
 						  GTK_WIDGET (close_image));
 	gtk_button_set_relief (GTK_BUTTON (new_editor->close_button),
@@ -124,7 +124,6 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	gtk_widget_set_can_focus (GTK_WIDGET (new_editor->close_button), 0);
 	gtk_widget_set_can_default (GTK_WIDGET (new_editor->close_button), 0);
 	gtk_widget_set_tooltip_text (GTK_WIDGET (new_editor->close_button), _("Close Tab"));
-	gtk_button_set_alignment (GTK_BUTTON (new_editor->close_button), 0.5, 0.5);
 	gtk_widget_set_size_request (new_editor->close_button, 18, 18);
 	gtk_box_pack_start (GTK_BOX (new_editor->label_box), new_editor->label_name, 1, 1, 1);
 	gtk_box_pack_end (GTK_BOX (new_editor->label_box), new_editor->close_button, 0, 0, 0);
@@ -293,7 +292,7 @@ ceditor_save_path (CEditor *editor, const gchar *filepath)
 	gtk_text_buffer_get_start_iter (buffer, &start);
 	gtk_text_buffer_get_end_iter (buffer, &end);
 	text = gtk_text_buffer_get_text (buffer, &start, &end, 1);
-	output = fopen (filepath, "w");
+	output = g_fopen (filepath, "w");
 
 	if (output == NULL) {
 		g_error ("can't open file %s for saving code.", filepath);
@@ -628,8 +627,6 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 	GdkRectangle allocation;
 	GtkWidget *widget;
 	GdkWindow *win;
-	gint toplevel_x;
-	gint toplevel_y;
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	mark = gtk_text_buffer_get_insert (buffer);
@@ -637,7 +634,7 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 	gtk_text_view_get_iter_location (GTK_TEXT_VIEW (editor->textview), &insert, &location);
 
 	*x = location.x;
-	*y = location.y;// + location.height;
+	*y = location.y + location.height;
 
 	gtk_text_view_buffer_to_window_coords (GTK_TEXT_VIEW (editor->textview), GTK_TEXT_WINDOW_WIDGET,
 										   *x, *y, x, y);
@@ -650,12 +647,6 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 		*y += allocation.y;
 		widget = gtk_widget_get_parent (widget);
 	}
-
-	win = gtk_widget_get_window (widget);
-	gdk_window_get_origin (win, &toplevel_x, &toplevel_y);
-
-	*x += toplevel_x;
-	*y += toplevel_y;
 }
 
 void

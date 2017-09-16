@@ -27,6 +27,10 @@
 
 #include "edithistory.h"
 
+/* GTK stocks. */
+#define CODEFOX_STOCK_CLOSE "window-close" 
+
+/* Non-GTK stocks. */
 #define CODEFOX_STOCK_ERROR "codefox-error"
 #define CODEFOX_STOCK_WARNING "codefox-warning"
 #define CODEFOX_STOCK_BREAKPOINT "codefox-breakpoint"

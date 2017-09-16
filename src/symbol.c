@@ -21,6 +21,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
@@ -667,7 +668,7 @@ symbol_parse (gpointer data)
 
 		UNUSED = chdir (project_path);
 		UNUSED = system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
-		ctags = fopen ("tags", "r");
+		ctags = g_fopen ("tags", "r");
 		if (ctags == NULL) {
 			g_warning ("can't open tag file, you might want to check whether ctags is installed.");
 			ui_status_entry_new (FILE_OP_WARNING, _("can't open tag file, please check whether ctags is installed."));

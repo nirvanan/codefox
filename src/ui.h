@@ -389,10 +389,10 @@ ui_member_menu_update (const gboolean del, const gchar ch);
 const gchar *
 ui_member_menu_prefix ();
 
-void
+gint
 ui_editor_close (GtkWidget *button);
 
-void
+gint
 ui_current_editor_close ();
 
 void

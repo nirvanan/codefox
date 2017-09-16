@@ -21,6 +21,7 @@
  */
 
 #include <gtk/gtk.h>
+#include <glib/gstdio.h>
 #include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
@@ -63,7 +64,7 @@ misc_get_file_size(const gchar *filepath)
 	gint filesize = -1;  
 	FILE *fp;
 
-    fp = fopen(filepath, "r");
+    fp = g_fopen(filepath, "r");
     if (fp == NULL) {
 		return filesize;
 	}
