@@ -28,7 +28,7 @@ To get complete coding experience, make sure you have installed following extern
 See [INSTALL](https://github.com/nirvanan/Codefox/blob/master/INSTALL) for installation instructions.
 
 ## Licence
-GPL3
+[GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ## Author
 Gordon Li (nirvanan@live.cn)
