@@ -177,11 +177,11 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	g_signal_connect (new_editor->eventbox, "button-press-event",
 					  G_CALLBACK (on_line_label_2clicked), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  		"insert-text", G_CALLBACK (on_editor_insert), NULL);
+							"insert-text", G_CALLBACK (on_editor_insert), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					  		"delete-range", G_CALLBACK (on_editor_delete), NULL);
+							"delete-range", G_CALLBACK (on_editor_delete), NULL);
 	g_signal_connect_after (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
-					 	    "changed", G_CALLBACK (on_textbuffer_changed), NULL);
+							"changed", G_CALLBACK (on_textbuffer_changed), NULL);
 	g_signal_connect (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
 					  "delete-range", G_CALLBACK (on_editor_delete2), NULL);
 

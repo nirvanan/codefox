@@ -64,15 +64,15 @@ misc_get_file_size(const gchar *filepath)
 	gint filesize = -1;  
 	FILE *fp;
 
-    fp = g_fopen(filepath, "r");
-    if (fp == NULL) {
+	fp = g_fopen(filepath, "r");
+	if (fp == NULL) {
 		return filesize;
 	}
-    fseek(fp, 0, SEEK_END);  
-    filesize = ftell(fp);
-    fclose(fp);
+	fseek(fp, 0, SEEK_END);  
+	filesize = ftell(fp);
+	fclose(fp);
 
-    return filesize;
+	return filesize;
 }
 
 /* Load code file. */

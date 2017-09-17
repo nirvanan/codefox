@@ -98,13 +98,13 @@ on_compilertree_selection_changed (GtkTreeSelection *treeselection, gpointer use
 
 void
 on_cursor_change (GtkTextView *text_view, GtkMovementStep step,
-                    gint count, gboolean extend_selection,
-                    gpointer user_data);
+				  gint count, gboolean extend_selection,
+				  gpointer user_data);
 
 void
 on_textview_clicked (GtkTextBuffer *textbuffer, GtkTextIter *location,
 					 GtkTextMark *mark, gpointer user_data);
-                    
+					
 void
 on_mode_change (GtkTextView *text_view, gpointer user_data);
 
@@ -116,7 +116,7 @@ on_filetree_clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data);
 
 void
 on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column,
-                      gpointer user_data);
+					  gpointer user_data);
 
 void
 on_create_file_clicked (GtkWidget *widget, gpointer user_data);

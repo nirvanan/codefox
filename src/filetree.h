@@ -59,14 +59,14 @@ filetree_get_current_store (GtkTreeView *tree, gchar **filename,
 
 gboolean
 filetree_foreach_select (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
-                      	 gpointer data);
+						 gpointer data);
 
 void
 filetree_set_select (GtkTreeView *tree, const gchar *filepath);
 
 gboolean
 filetree_foreach_remove (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
-                     	 gpointer data);
+						 gpointer data);
 
 void
 filetree_remove (GtkTreeView *tree, const gchar *filepath);

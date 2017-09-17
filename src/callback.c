@@ -102,7 +102,7 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 {
 	gchar *filepath;
 
-    filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
+	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	ui_get_filepath_from_dialog (filepath, MAX_FILEPATH_LENGTH, TRUE, FALSE, NULL);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -130,7 +130,7 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 
 	search_state_update ();
 
-    g_free ((gpointer) filepath);
+	g_free ((gpointer) filepath);
 }
 
 void
@@ -365,11 +365,11 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 
 		while (! CHAR (line[strlen (line) - 1]) && ! DIGIT (line[strlen (line) - 1])) {
 			line[strlen (line) - 1] = 0;
-        }
+		}
 		i = strlen (line) - 1;
 		while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.' && ! SPACE (line[i])) {
 			i--;
-        }
+		}
 		i++;
 
 		sign = NULL;
@@ -377,7 +377,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 
 		if (g_list_length (sign) != 0) {
 			ui_function_autocomplete (line + i, sign);
-        }
+		}
 
 		g_list_free (sign);
 		g_free ((gpointer) line);
@@ -400,15 +400,15 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 			text[0] == '.') {
 			if (text[0] == '>' || text[0] == ':') {
 				line[strlen (line) - 1] = 0;
-            }
+			}
 			while (! CHAR (line[strlen (line) - 1]) &&
 				   !DIGIT (line[strlen (line) - 1])) {
 				line[strlen (line) - 1] = 0;
-            }
+			}
 			i = strlen (line) - 1;
 			while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.') {
 				i--;
-            }
+			}
 			i++;
 
 			funs = NULL;
@@ -416,11 +416,11 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 
 			if (text[0] == ':') {
 				symbol_namespace_get_member (line + i, &funs, &vars);
-            }
+			}
 			else {
 				symbol_variable_get_member (line + i, end_line + 1, 
 											text[0] == '>', &funs, &vars);
-            }
+			}
 
 			if (g_list_length (funs) != 0 || g_list_length (vars) != 0) {
 				ui_member_autocomplete (funs, vars);
@@ -437,10 +437,10 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 	if ((CHAR (text[0]) || DIGIT (text[0])) && len == 1 &&
 		ui_member_menu_active () && text[0] != '.') {
 		ui_member_menu_update (FALSE, text[0]);
-    }
+	}
 	else if (len > 1 || !menu_showed) {
 		ui_member_menu_destroy ();
-    }
+	}
 	
 	ui_current_editor_set_dirty ();
 	ui_update_line_number_label (TRUE, linecount, NULL, NULL);
@@ -475,10 +475,10 @@ on_editor_delete2 (GtkTextBuffer *textbuffer, GtkTextIter *start,
 	if (strlen (text) == 1  && (CHAR (text[0]) || 
 		DIGIT (text[0])) && ui_member_menu_active () && text[0] != '.') {
 		ui_member_menu_update (TRUE, 0);
-    }
+	}
 	else {
 		ui_member_menu_destroy ();
-    }
+	}
 
 	ui_current_editor_step_add (FALSE, offset, -1, text);
 	ui_undo_redo_widgets_update ();
@@ -500,8 +500,8 @@ on_compilertree_selection_changed (GtkTreeSelection *treeselection, gpointer use
 
 void
 on_cursor_change (GtkTextView *text_view, GtkMovementStep step,
-                  gint count, gboolean extend_selection,
-                  gpointer user_data)
+				  gint count, gboolean extend_selection,
+				  gpointer user_data)
 {
 	ui_current_editor_update_cursor ();
 	ui_tip_window_destory ();
@@ -551,8 +551,8 @@ new_project_show_dialog (GtkWidget *widget, gpointer user_data)
 
 
 	g_free ((gpointer) default_project_path);
-    g_free ((gpointer) project_name);
-    g_free ((gpointer) project_path);
+	g_free ((gpointer) project_name);
+	g_free ((gpointer) project_path);
 }
 
 void
@@ -563,14 +563,14 @@ on_filetree_clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 	bevent = (GdkEventButton *) event;
 	if (bevent->button != 3) {
 		return;
-    }
+	}
 
 	ui_filetree_menu_popup ();
 }
 
 void
 on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColumn *column,
-                      gpointer user_data)
+					  gpointer user_data)
 {
 	gchar *filepath;
 	gint isfile;
@@ -594,7 +594,7 @@ on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
 		}
 		else {
 			ui_show_editor_by_path (filepath);
-        }
+		}
 	}
 
 	g_free ((gpointer) filepath);
@@ -631,7 +631,7 @@ on_create_file_clicked (GtkWidget *widget, gpointer user_data)
 		ui_error_dialog_new (message);
 
 		g_free ((gpointer) filename);
-	    g_free ((gpointer) filepath);
+		g_free ((gpointer) filepath);
 
 		return;
 	}
@@ -679,7 +679,7 @@ on_open_file_clicked (GtkWidget *widget, gpointer user_data)
 		}
 
 		g_free ((gpointer) filename);
-        g_free ((gpointer) filepath);
+		g_free ((gpointer) filepath);
 	}
 	g_free ((gpointer) local_file);
 }
@@ -714,7 +714,7 @@ on_delete_file_clicked (GtkWidget *widget, gpointer user_data)
 		}
 	}
 
-    g_free ((gpointer) filepath);
+	g_free ((gpointer) filepath);
 }
 
 void

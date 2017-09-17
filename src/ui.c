@@ -697,25 +697,25 @@ ui_about_dialog_new ()
 	GtkIconTheme *icon_theme;
 	
 	gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG(about_dialog), "Codefox");
-    gtk_about_dialog_set_version (GTK_ABOUT_DIALOG(about_dialog), PACKAGE_VERSION);
-    gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG(about_dialog), authors);
-    gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG(about_dialog), authors);
-    gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(about_dialog), authors);
-    gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG(about_dialog),
-    							  _("Perhaps the most lightweight C/C++ IDE..."));
-    gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG(about_dialog), 
-    							   "Copyright © 2012-2017 Gordon Lee");
-    gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about_dialog), license);
+	gtk_about_dialog_set_version (GTK_ABOUT_DIALOG(about_dialog), PACKAGE_VERSION);
+	gtk_about_dialog_set_authors (GTK_ABOUT_DIALOG(about_dialog), authors);
+	gtk_about_dialog_set_artists (GTK_ABOUT_DIALOG(about_dialog), authors);
+	gtk_about_dialog_set_documenters (GTK_ABOUT_DIALOG(about_dialog), authors);
+	gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG(about_dialog),
+								   _("Perhaps the most lightweight C/C++ IDE..."));
+	gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG(about_dialog), 
+									"Copyright © 2012-2017 Gordon Lee");
+	gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about_dialog), license);
 	gtk_about_dialog_set_wrap_license (GTK_ABOUT_DIALOG (about_dialog), TRUE);
-    icon_theme = gtk_icon_theme_get_default ();
-    logo = gtk_icon_theme_load_icon (icon_theme, "codefox", LOGO_SIZE, 0, NULL);
-    gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG(about_dialog), logo);
-    gtk_about_dialog_set_website (GTK_ABOUT_DIALOG(about_dialog),
-    							  "https://github.com/nirvanan/Codefox");
+	icon_theme = gtk_icon_theme_get_default ();
+	logo = gtk_icon_theme_load_icon (icon_theme, "codefox", LOGO_SIZE, 0, NULL);
+	gtk_about_dialog_set_logo (GTK_ABOUT_DIALOG(about_dialog), logo);
+	gtk_about_dialog_set_website (GTK_ABOUT_DIALOG(about_dialog),
+								  "https://github.com/nirvanan/Codefox");
 
-    gtk_dialog_run (GTK_DIALOG(about_dialog));
-    gtk_widget_destroy (about_dialog);
-    g_object_unref (logo);
+	gtk_dialog_run (GTK_DIALOG(about_dialog));
+	gtk_widget_destroy (about_dialog);
+	g_object_unref (logo);
 }
 
 /* Create a new editor and show it. */
@@ -847,7 +847,7 @@ ui_status_entry_new (const gint op, const gchar *filepath)
  */
 void
 ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean open,
-                             const gboolean project, const gchar *default_path)
+							 const gboolean project, const gchar *default_path)
 {
 	GtkWidget *dialog;
 
@@ -863,9 +863,9 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
 			GtkFileFilter* filter;
 
 			filter = gtk_file_filter_new ();
-		    gtk_file_filter_set_name (filter, _("Codefox project"));
-		    gtk_file_filter_add_pattern(filter,"*.cfp");
-		    gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog),filter);
+			gtk_file_filter_set_name (filter, _("Codefox project"));
+			gtk_file_filter_add_pattern(filter,"*.cfp");
+			gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (dialog),filter);
 		}
 	}
 	else {
@@ -876,7 +876,7 @@ ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean op
 											  _("Save"), GTK_RESPONSE_ACCEPT,
 											  NULL);
 		gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog),
-													    TRUE);
+														TRUE);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog),
 										   default_path);
 	}
@@ -1676,7 +1676,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		item = gtk_menu_item_new_with_label ((gchar *) iterator->data);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
-					  	  G_CALLBACK (on_autocomplete_item_clicked), NULL);
+						  G_CALLBACK (on_autocomplete_item_clicked), NULL);
 
 		gtk_widget_show (item);
 		member_menu->item_list = g_list_append (member_menu->item_list, item);
@@ -1687,7 +1687,7 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 		item = gtk_menu_item_new_with_label ((gchar *) iterator->data);
 		gtk_menu_shell_append (GTK_MENU_SHELL (member_menu->menu), item);
 		g_signal_connect (item, "activate", 
-					  	  G_CALLBACK (on_autocomplete_item_clicked), NULL);
+						  G_CALLBACK (on_autocomplete_item_clicked), NULL);
 
 		gtk_widget_show (item);
 		member_menu->item_list = g_list_append (member_menu->item_list, item);

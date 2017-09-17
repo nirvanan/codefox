@@ -244,7 +244,7 @@ ui_status_entry_new (const gint op, const gchar *filepath);
 
 void
 ui_get_filepath_from_dialog (gchar *filepath, const gint size, const gboolean open,
-                             const gboolean project, const gchar *default_path);
+							 const gboolean project, const gchar *default_path);
 
 gboolean
 ui_have_editor ();

@@ -165,11 +165,11 @@ filetree_foreach_select (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *it
 void
 filetree_set_select (GtkTreeView *tree, const gchar *filepath)
 {
-    GtkTreeModel *model;
-    CForeachSelectData data;
+	GtkTreeModel *model;
+	CForeachSelectData data;
 	
-    data.filepath = (gchar *) filepath;
-    data.tree = tree;
+	data.filepath = (gchar *) filepath;
+	data.tree = tree;
 	model = gtk_tree_view_get_model (tree);
 	gtk_tree_model_foreach (model, (GtkTreeModelForeachFunc) filetree_foreach_select,
 							(gpointer) &data);
@@ -177,7 +177,7 @@ filetree_set_select (GtkTreeView *tree, const gchar *filepath)
 
 gboolean
 filetree_foreach_remove (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
-                      gpointer data)
+					  gpointer data)
 {
 	gchar *filepath = (gchar *) data;
 	gboolean isfile;
