@@ -328,30 +328,33 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 		if (iter != NULL) {
 			if (nspaces > 0) {
 				space = g_strnfill (nspaces, ' ');
-				gtk_text_iter_set_line_offset (iter, j);
+				gtk_text_buffer_get_iter_at_line_index (buffer, iter, i, j);
 				gtk_text_buffer_insert (buffer, iter, space, -1);
+
+				g_free ((gpointer) space);
 			}
 			else if (nspaces < 0) {
-				gtk_text_iter_set_line_offset (&ins, j);
-				gtk_text_iter_set_line_offset (iter, j - nspaces);
+				gtk_text_buffer_get_iter_at_line_index (buffer, &ins, i, j);
+				gtk_text_buffer_get_iter_at_line_index (buffer, iter, i, j - nspaces);
 				gtk_text_buffer_delete (buffer, &ins, iter);
 			}
 		}
 		else {
 			if (nspaces > 0) {
 				space = g_strnfill (nspaces, ' ');
-				gtk_text_iter_set_line_offset (&ins, j);
+				gtk_text_buffer_get_iter_at_line_index (buffer, &ins, i, j);
 				gtk_text_buffer_insert (buffer, &ins, space, -1);
+
+				g_free ((gpointer) space);
 			}
 			else if (nspaces < 0) {
-				gtk_text_iter_set_line_offset (&ins, j);
-				gtk_text_buffer_get_iter_at_line_index (buffer, &ine, i, 
-														j - nspaces);
+				gtk_text_buffer_get_iter_at_line_index (buffer, &ins, i, j);
+				gtk_text_buffer_get_iter_at_line_index (buffer, &ine, i, j - nspaces);
 				gtk_text_buffer_delete (buffer, &ins, &ine);
 			}
 		}
 
-		g_free (line1);
-		g_free (line2);
+		g_free ((gpointer) line1);
+		g_free ((gpointer) line2);
 	}
 }
