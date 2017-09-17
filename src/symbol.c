@@ -100,7 +100,7 @@ symbol_clear_class(gpointer ptr)
 		}
 	}
 	g_list_free (class_ptr->public_member_list);
-	g_list_free_full (class_ptr->public_function_list, g_free);
+	g_list_free (class_ptr->public_function_list);
 
 	g_free (ptr);
 }
@@ -138,7 +138,7 @@ symbol_clear_struct(gpointer ptr)
 		}
 	}
 	g_list_free (struct_ptr->member_list);
-	g_list_free_full (struct_ptr->function_list, g_free);
+	g_list_free (struct_ptr->function_list);
 
 	g_free (ptr);
 }
@@ -176,7 +176,7 @@ symbol_clear_namespace(gpointer ptr)
 		}
 	}
 	g_list_free (namespace_ptr->member_list);
-	g_list_free_full (namespace_ptr->function_list, g_free);
+	g_list_free (namespace_ptr->function_list);
 
 	g_free (ptr);
 }

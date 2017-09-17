@@ -177,4 +177,7 @@ ceditor_search_next (CEditor *editor, const gboolean pre);
 void
 ceditor_select_range (CEditor *editor, const gint offset, const gint len);
 
+void
+ceditor_move_corsor (CEditor *editor, const gint offset);
+
 #endif

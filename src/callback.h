@@ -174,7 +174,7 @@ void
 on_search_clicked (GtkWidget *widget, gpointer user_data);
 
 gboolean
-on_key_pressed (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+on_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer user_data);
 
 void
 do_nothing (GtkTextBuffer *textbuffer, GtkTextIter *start,

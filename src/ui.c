@@ -285,6 +285,7 @@ ui_window_init (GtkBuilder *builder, CWindow *window)
 	window->info_notebook = gtk_builder_get_object (builder, "infonotebook");
 	window->filetree = gtk_builder_get_object (builder, "filetree");
 	window->horizontal_paned = gtk_builder_get_object (builder, "horpaned");
+	window->vertical_paned = gtk_builder_get_object (builder, "verpaned");
 	window->statustree = gtk_builder_get_object (builder, "statustree");
 	window->compilertree = gtk_builder_get_object (builder, "compilertree");
 	window->notepadview = gtk_builder_get_object (builder, "notepadview");
@@ -662,6 +663,7 @@ ui_init ()
 	member_menu->prefix = (gchar *) g_malloc (MAX_TIP_LENGTH + 1);
 	member_menu->prefix[0] = 0;
 	member_menu->item_list = NULL;
+	member_menu->index = -1;
 	
 	ui_window_init(builder, window);
 	ui_debug_view_init (builder);
@@ -1612,21 +1614,14 @@ ui_current_editor_error_tag_add (const gint row, const gint column, const gint l
 	ceditor_error_tag_add (editor, row, column, len);
 }
 
-static void
-ui_memu_popup_position (GtkMenu *menu, gint *x, gint *y, gboolean *push_in,
-					   gpointer user_data)
-{
-	*push_in = FALSE;
-	ui_current_editor_insert_location (x, y);
-}
-
 void
 ui_function_autocomplete (const gchar *name, const GList *signs)
 {
 	gchar *full;
 	gint x, y;
+	gint win_x, win_y;
 	GList *iterator;
-	
+	GdkWindow *win;
 
 	full = (gchar *) g_malloc (MAX_TIP_LENGTH + 1);
 	full[0] = 0;
@@ -1640,6 +1635,10 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 
 	gtk_label_set_label (GTK_LABEL (function_tip->tip_label), full);
 	ui_current_editor_insert_location (&x, &y);
+	win = gtk_widget_get_window (GTK_WIDGET (window->toplevel));
+	gdk_window_get_position (win, &win_x, &win_y);
+	x += win_x;
+	y += win_y;
 	gtk_window_move (GTK_WINDOW (function_tip->tip_window), x, y);
 	gtk_widget_show_all (GTK_WIDGET (function_tip->tip_window));
 
@@ -1712,6 +1711,91 @@ ui_member_autocomplete (const GList *funs, const GList *vars)
 							GDK_GRAVITY_NORTH_WEST, NULL);
 
 	member_menu->active = TRUE;
+
+	member_menu->index = -1;
+	ui_member_menu_index_change (1);
+}
+
+void
+ui_member_menu_index_change (const gint change)
+{
+	gint size;
+	GList *all_items;
+	GList *iterator;
+	gint item;
+
+	if (!member_menu->active || !GTK_IS_WIDGET (member_menu->menu)) {
+		return;
+	}
+
+	all_items = gtk_container_get_children (GTK_CONTAINER (member_menu->menu));
+	size = g_list_length (all_items);
+	if (size <= 0) {
+		return;
+	}
+	
+	member_menu->index = ((member_menu->index + change) % size + size) % size;
+
+	item = 0;
+	for (iterator = all_items; iterator; iterator = iterator->next) {
+		GtkWidget *widget;
+
+		widget = iterator->data;
+		if (GTK_IS_MENU_ITEM (widget) && gtk_widget_is_visible (widget)) {
+			GtkLabel *label;
+			gchar line[MAX_LINE_LENGTH + 1];
+
+			label = GTK_LABEL (gtk_bin_get_child (GTK_BIN (widget)));
+			if (item == member_menu->index) {
+				g_snprintf (line, MAX_LINE_LENGTH, "<span color=\"green\">%s</span>",
+							gtk_label_get_text(label));
+			}
+			else {
+				g_snprintf (line, MAX_LINE_LENGTH, "%s",
+							gtk_label_get_text(label));
+			}
+			gtk_label_set_markup (label, line);
+			item++;
+		}
+	}
+
+	g_list_free (all_items);
+}
+
+void
+ui_member_menu_active_current ()
+{
+	gint size;
+	GList *all_items;
+	GList *iterator;
+	gint item;
+
+	if (!member_menu->active || !GTK_IS_WIDGET (member_menu->menu)) {
+		return;
+	}
+
+	all_items = gtk_container_get_children (GTK_CONTAINER (member_menu->menu));
+	size = g_list_length (all_items);
+	if (size <= 0) {
+		return;
+	}
+	
+	item = 0;
+	for (iterator = all_items; iterator; iterator = iterator->next) {
+		GtkWidget *widget;
+
+		widget = iterator->data;
+		if (GTK_IS_MENU_ITEM (widget) && gtk_widget_is_visible (widget)) {
+			if (item == member_menu->index) {
+				g_signal_emit_by_name (G_OBJECT (widget), "activate", NULL);
+			}
+			else {
+			}
+			item++;
+		}
+	}
+
+	g_list_free (all_items);
 }
 
 void
@@ -1765,6 +1849,16 @@ ui_member_menu_destroy ()
 	member_menu->item_list = NULL;
 	member_menu->prefix[0] = 0;
 	member_menu->active = FALSE;
+	member_menu->index = -1;
+}
+
+void
+ui_member_menu_hide ()
+{
+	if (member_menu->active && GTK_IS_WIDGET (member_menu->menu)) {
+		gtk_widget_hide (GTK_WIDGET (member_menu->menu));
+		member_menu->index = -1;
+	}
 }
 
 static gint
@@ -1776,13 +1870,12 @@ ui_member_menu_item_filter ()
 	item_showed = 0;
 	for (iterator = member_menu->item_list; iterator; iterator = iterator->next) {
 		GtkWidget *item;
-		const gchar *label;
+		GtkLabel *label;
 
 		item = (GtkWidget *) iterator->data;
-		label = gtk_menu_item_get_label (GTK_MENU_ITEM (item));
+		label = GTK_LABEL (gtk_bin_get_child (GTK_BIN (item)));
 
-		if (g_str_has_prefix (label, member_menu->prefix) &&
-			g_strcmp0 (label, member_menu->prefix) != 0) {
+		if (g_str_has_prefix (gtk_label_get_text (label), member_menu->prefix)) {
 			gtk_widget_show (item);
 			item_showed++;
 		}
@@ -1829,6 +1922,9 @@ ui_member_menu_update (const gboolean del, const gchar ch)
 								gtk_widget_get_window (GTK_WIDGET (window->toplevel)),
 								&rec, GDK_GRAVITY_NORTH_WEST,
 								GDK_GRAVITY_NORTH_WEST, NULL);
+
+		member_menu->index = -1;
+		ui_member_menu_index_change (1);
 	}
 }
 
@@ -2366,4 +2462,18 @@ ui_editor_close_by_path (const gchar *filepath)
 		ceditor_set_dirty (editor, 0);
 	}
 	ceditor_emit_close_signal (editor);
+}
+
+void
+ui_current_editor_move_cursor (const gint offset)
+{
+	CEditor *editor;
+
+	editor = ui_get_current_editor ();
+
+	if (editor == NULL) {
+		return;
+	}
+	
+	ceditor_move_corsor (editor, offset);
 }

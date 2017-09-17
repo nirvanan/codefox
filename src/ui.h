@@ -93,6 +93,7 @@ typedef struct {
 	GObject *modelabel;
 	GObject *filetree;
 	GObject *horizontal_paned;
+	GObject *vertical_paned;
 	GObject *status_image;
 	GObject *debug_ptr;
 	GObject *search_entry;
@@ -138,6 +139,7 @@ typedef struct {
 	gboolean active;
 	gchar *prefix;
 	GList *item_list;
+	gint index;
 } CMemberMenu;
 
 typedef struct {
@@ -369,6 +371,12 @@ void
 ui_member_autocomplete (const GList *funs, const GList *vars);
 
 void
+ui_member_menu_index_change (const gint change);
+
+void
+ui_member_menu_active_current ();
+
+void
 ui_current_editor_insert_location (gint *x, gint *y);
 
 void
@@ -382,6 +390,9 @@ ui_member_menu_active ();
 
 void
 ui_member_menu_destroy ();
+
+void
+ui_member_menu_hide ();
 
 void
 ui_member_menu_update (const gboolean del, const gchar ch);
@@ -502,5 +513,8 @@ ui_set_project_label (const gchar *project_name);
 
 void
 ui_editor_close_by_path (const gchar *filepath);
+
+void
+ui_current_editor_move_cursor (const gint offset);
 
 #endif

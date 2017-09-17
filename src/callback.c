@@ -793,8 +793,10 @@ on_autocomplete_item_clicked (GtkWidget *widget, gpointer user_data)
 {
 	const gchar *text;
 	const gchar *prefix;
+	GtkLabel *label;
 
-	text = gtk_menu_item_get_label (GTK_MENU_ITEM (widget));
+	label = GTK_LABEL (gtk_bin_get_child (GTK_BIN (widget)));
+	text = gtk_label_get_text(label);
 	prefix = ui_member_menu_prefix ();
 	ui_current_editor_insert (text + strlen (prefix));
 }
@@ -1115,11 +1117,29 @@ on_search_clicked (GtkWidget *widget, gpointer user_data)
 }
 
 gboolean
-on_key_pressed (GtkWidget *widget, GdkEvent *event, gpointer user_data)
+on_key_pressed (GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	if (GTK_IS_WIDGET (widget)) {
+	gboolean NOUSED;
+
+	if (event->keyval == GDK_KEY_Left || event->keyval == GDK_KEY_Right) {
 		ui_member_menu_destroy ();
 	}
+	else if (event->keyval == GDK_KEY_Down || event->keyval == GDK_KEY_Up){
+		ui_member_menu_index_change (event->keyval == GDK_KEY_Down? -1: 1);
+
+		return TRUE;
+	}
+	else if (event->keyval == GDK_KEY_Return) {
+		ui_member_menu_active_current ();
+		ui_member_menu_destroy ();
+
+		return TRUE;
+	}
+	else {
+		ui_member_menu_hide ();
+	}
+
+	g_signal_emit_by_name (ui_get_current_editor ()->textview, "key-press-event", event, &NOUSED, NULL);	
 
 	return TRUE;
 }

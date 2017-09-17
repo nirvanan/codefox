@@ -101,7 +101,6 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 	GtkWidget *close_image;
 	PangoAttrList *labelatt;
 	PangoAttribute *att;
-	GdkWindow *window;
 	
 	int len = strlen (label);
 	for (len = len - 1; len >= 0; len--) {
@@ -185,6 +184,9 @@ ceditor_init (CEditor *new_editor, const gchar *label)
 					 	    "changed", G_CALLBACK (on_textbuffer_changed), NULL);
 	g_signal_connect (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))),
 					  "delete-range", G_CALLBACK (on_editor_delete2), NULL);
+
+
+	gtk_widget_add_events (GTK_WIDGET (new_editor->textview), GDK_KEY_PRESS_MASK);
 	
 	highlight_register (GTK_TEXT_BUFFER (gtk_text_view_get_buffer (GTK_TEXT_VIEW (new_editor->textview))));
 
@@ -626,7 +628,6 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 	GdkRectangle location;
 	GdkRectangle allocation;
 	GtkWidget *widget;
-	GdkWindow *win;
 
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (editor->textview));
 	mark = gtk_text_buffer_get_insert (buffer);
@@ -644,7 +645,9 @@ ceditor_get_insert_location (CEditor *editor, gint *x, gint *y)
 		gtk_widget_get_allocation (widget, &allocation);
 
 		*x += allocation.x;
-		*y += allocation.y;
+		if (!GTK_IS_SCROLLED_WINDOW (widget)) {
+			*y += allocation.y;
+		}
 		widget = gtk_widget_get_parent (widget);
 	}
 }
@@ -901,4 +904,13 @@ ceditor_select_range (CEditor *editor, const gint offset, const int len)
 	gtk_text_buffer_get_iter_at_offset (buffer, &end, offset + len);
 	gtk_text_buffer_select_range (buffer, &start, &end);
 
+}
+
+void
+ceditor_move_corsor (CEditor *editor, const gint offset)
+{
+	g_signal_emit_by_name (editor->textview, "move-cursor",
+						   GTK_MOVEMENT_LOGICAL_POSITIONS,
+						   offset,
+						   0, FALSE, NULL);
 }
