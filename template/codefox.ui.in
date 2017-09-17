@@ -112,7 +112,7 @@
                       <object class="GtkMenuItem" id="undomenuitem">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label">Undo</property>
+                        <property name="label" translatable="yes">Undo</property>
                       </object>
                     </child>
                     <child>

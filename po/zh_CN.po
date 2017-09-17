@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Codefox guess\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-16 21:56+0800\n"
+"POT-Creation-Date: 2017-09-17 23:13+0800\n"
 "PO-Revision-Date: 2013-10-02 23:12+0800\n"
 "Last-Translator: Gordon Lee <nirvanan@live.cn>\n"
 "Language-Team: Gordon Lee <nirvanan@live.cn>\n"
@@ -29,12 +29,12 @@ msgstr "文件"
 msgid "New"
 msgstr "新建"
 
-#: ../template/codefox.ui.in.h:4 ../src/ui.c:857
+#: ../template/codefox.ui.in.h:4 ../src/ui.c:859
 msgid "Open"
 msgstr "打开"
 
 #: ../template/codefox.ui.in.h:5 ../template/codefox-project-settings.ui.in.h:2
-#: ../src/ui.c:874
+#: ../src/ui.c:876
 msgid "Save"
 msgstr "保存"
 
@@ -59,171 +59,175 @@ msgid "Edit"
 msgstr "编辑"
 
 #: ../template/codefox.ui.in.h:11
+msgid "Undo"
+msgstr "撤销"
+
+#: ../template/codefox.ui.in.h:12
 msgid "Redo"
 msgstr "重做"
 
-#: ../template/codefox.ui.in.h:12
+#: ../template/codefox.ui.in.h:13
 msgid "Cut"
 msgstr "剪切"
 
-#: ../template/codefox.ui.in.h:13
+#: ../template/codefox.ui.in.h:14
 msgid "Copy"
 msgstr "复制"
 
-#: ../template/codefox.ui.in.h:14
+#: ../template/codefox.ui.in.h:15
 msgid "Paste"
 msgstr "粘贴"
 
-#: ../template/codefox.ui.in.h:15
+#: ../template/codefox.ui.in.h:16
 msgid "Delete"
 msgstr "删除"
 
-#: ../template/codefox.ui.in.h:16 ../template/codefox-editor-settings.ui.in.h:1
+#: ../template/codefox.ui.in.h:17 ../template/codefox-editor-settings.ui.in.h:1
 msgid "Preferences"
 msgstr "首选项"
 
-#: ../template/codefox.ui.in.h:17
+#: ../template/codefox.ui.in.h:18
 msgid "Code"
 msgstr "代码"
 
-#: ../template/codefox.ui.in.h:18
+#: ../template/codefox.ui.in.h:19
 msgid "Format"
 msgstr "格式化"
 
-#: ../template/codefox.ui.in.h:19 ../src/filetree.c:251 ../src/ui.c:381
-#: ../src/ui.c:2324
+#: ../template/codefox.ui.in.h:20 ../src/filetree.c:251 ../src/ui.c:382
+#: ../src/ui.c:2446
 msgid "Project"
 msgstr "工程"
 
-#: ../template/codefox.ui.in.h:20
+#: ../template/codefox.ui.in.h:21
 msgid "Build"
 msgstr "组建"
 
-#: ../template/codefox.ui.in.h:21
+#: ../template/codefox.ui.in.h:22
 msgid "Run"
 msgstr "运行"
 
-#: ../template/codefox.ui.in.h:22
+#: ../template/codefox.ui.in.h:23
 msgid "Clear"
 msgstr "清理"
 
-#: ../template/codefox.ui.in.h:23
+#: ../template/codefox.ui.in.h:24
 msgid "Settings"
 msgstr "设置"
 
-#: ../template/codefox.ui.in.h:24
+#: ../template/codefox.ui.in.h:25
 msgid "Debug"
 msgstr "调试"
 
-#: ../template/codefox.ui.in.h:25
+#: ../template/codefox.ui.in.h:26
 msgid "Next"
 msgstr "下一步"
 
-#: ../template/codefox.ui.in.h:26
+#: ../template/codefox.ui.in.h:27
 msgid "Step"
 msgstr "进入"
 
-#: ../template/codefox.ui.in.h:27
+#: ../template/codefox.ui.in.h:28
 msgid "Continue"
 msgstr "继续"
 
-#: ../template/codefox.ui.in.h:28
+#: ../template/codefox.ui.in.h:29
 msgid "Stop"
 msgstr "停止"
 
-#: ../template/codefox.ui.in.h:29
+#: ../template/codefox.ui.in.h:30
 msgid "Help"
 msgstr "帮助"
 
-#: ../template/codefox.ui.in.h:30
+#: ../template/codefox.ui.in.h:31
 msgid "About"
 msgstr "关于"
 
-#: ../template/codefox.ui.in.h:31
+#: ../template/codefox.ui.in.h:32
 msgid "Create a new item"
 msgstr "创建新标签"
 
-#: ../template/codefox.ui.in.h:32
+#: ../template/codefox.ui.in.h:33
 msgid "Open a local file"
 msgstr "打开本地文件"
 
-#: ../template/codefox.ui.in.h:33
+#: ../template/codefox.ui.in.h:34
 msgid "Save current code"
 msgstr "保存当前代码"
 
-#: ../template/codefox.ui.in.h:34
+#: ../template/codefox.ui.in.h:35
 msgid "Save currnet code to a local file"
 msgstr "保存当前代码到本地文件"
 
-#: ../template/codefox.ui.in.h:35 ../template/codefox-new-project.ui.in.h:1
+#: ../template/codefox.ui.in.h:36 ../template/codefox-new-project.ui.in.h:1
 msgid "Create a new project"
 msgstr "创建新工程"
 
-#: ../template/codefox.ui.in.h:36
+#: ../template/codefox.ui.in.h:37
 msgid "Open a exist project"
 msgstr "打开存在的工程"
 
-#: ../template/codefox.ui.in.h:37
+#: ../template/codefox.ui.in.h:38
 msgid "Build current project"
 msgstr "组建工程"
 
-#: ../template/codefox.ui.in.h:38
+#: ../template/codefox.ui.in.h:39
 msgid "Run compiled executable"
 msgstr "运行"
 
-#: ../template/codefox.ui.in.h:39
+#: ../template/codefox.ui.in.h:40
 msgid "Clear built project"
 msgstr "清理已组建的工程"
 
-#: ../template/codefox.ui.in.h:40
+#: ../template/codefox.ui.in.h:41
 msgid "Debug current project"
 msgstr "调试"
 
-#: ../template/codefox.ui.in.h:41
+#: ../template/codefox.ui.in.h:42
 msgid "Next line"
 msgstr "下一行"
 
-#: ../template/codefox.ui.in.h:42
+#: ../template/codefox.ui.in.h:43
 msgid "Step into current line"
 msgstr "进入当前行"
 
-#: ../template/codefox.ui.in.h:43
+#: ../template/codefox.ui.in.h:44
 msgid "Continue running the program"
 msgstr "继续运行"
 
-#: ../template/codefox.ui.in.h:44
+#: ../template/codefox.ui.in.h:45
 msgid "Stop debug"
 msgstr "停止调试"
 
-#: ../template/codefox.ui.in.h:45
+#: ../template/codefox.ui.in.h:46
 msgid "Search backward"
 msgstr "上一个"
 
-#: ../template/codefox.ui.in.h:46
+#: ../template/codefox.ui.in.h:47
 msgid "Search forward"
 msgstr "下一个"
 
-#: ../template/codefox.ui.in.h:47
+#: ../template/codefox.ui.in.h:48
 msgid "Status"
 msgstr "状态"
 
-#: ../template/codefox.ui.in.h:48
+#: ../template/codefox.ui.in.h:49
 msgid "Compiler"
 msgstr "编译器"
 
-#: ../template/codefox.ui.in.h:49
+#: ../template/codefox.ui.in.h:50
 msgid "Local"
 msgstr "局部变量"
 
-#: ../template/codefox.ui.in.h:50
+#: ../template/codefox.ui.in.h:51
 msgid "Call Stack"
 msgstr "调用栈帧"
 
-#: ../template/codefox.ui.in.h:51
+#: ../template/codefox.ui.in.h:52
 msgid "Watch"
 msgstr "监视器"
 
-#: ../template/codefox.ui.in.h:52
+#: ../template/codefox.ui.in.h:53
 msgid "Notepad"
 msgstr "笔记本"
 
@@ -280,8 +284,8 @@ msgid "Create"
 msgstr "创建"
 
 #: ../template/codefox-new-project.ui.in.h:3
-#: ../template/codefox-project-settings.ui.in.h:3 ../src/ui.c:856
-#: ../src/ui.c:873 ../src/ui.c:1858
+#: ../template/codefox-project-settings.ui.in.h:3 ../src/ui.c:858
+#: ../src/ui.c:875 ../src/ui.c:1978
 msgid "Cancel"
 msgstr "取消"
 
@@ -321,35 +325,35 @@ msgstr "编译器选项："
 msgid "Note: Separate each item with space(s)."
 msgstr "注意：每个选项间请用空格隔开。"
 
-#: ../src/callback.c:145 ../src/callback.c:146 ../src/ui.c:727
+#: ../src/callback.c:145 ../src/callback.c:146 ../src/ui.c:729
 msgid "Untitled"
 msgstr "无标题文档"
 
-#: ../src/callback.c:254
+#: ../src/callback.c:258
 msgid "Start building."
 msgstr "开始组建。"
 
-#: ../src/callback.c:284
+#: ../src/callback.c:288
 msgid "Building finished."
 msgstr "组建完成。"
 
-#: ../src/callback.c:625
+#: ../src/callback.c:629
 msgid "Failed to create file."
 msgstr "创建文件失败。"
 
-#: ../src/callback.c:669
+#: ../src/callback.c:673
 msgid "Failed to add file to project."
 msgstr "添加文件失败。"
 
-#: ../src/callback.c:696
+#: ../src/callback.c:700
 msgid "Delete file from project and filesystem?"
 msgstr "从工程及文件系统中删除文件？"
 
-#: ../src/callback.c:702
+#: ../src/callback.c:706
 msgid "Failed to remove file from filesystem."
 msgstr "删除文件失败。"
 
-#: ../src/callback.c:888
+#: ../src/callback.c:894
 msgid "failed to start or conect to debug process."
 msgstr "无法开始或连接调试进程。"
 
@@ -409,145 +413,145 @@ msgstr "源代码"
 msgid "resource"
 msgstr "资源文件"
 
-#: ../src/symbol.c:673
+#: ../src/symbol.c:674
 msgid "can't open tag file, please check whether ctags is installed."
 msgstr "无法创建tag文件，请检查ctags是否安装。"
 
-#: ../src/ui.c:324
+#: ../src/ui.c:325
 msgid "Filesystem operations:"
 msgstr "文件系统操作："
 
-#: ../src/ui.c:342
+#: ../src/ui.c:343
 msgid "This is Codefox "
 msgstr "这是Codefox "
 
-#: ../src/ui.c:344
+#: ../src/ui.c:345
 msgid ", have fun!"
 msgstr "，尽情享受吧！"
 
-#: ../src/ui.c:354
+#: ../src/ui.c:355
 msgid "Compiler outputs:"
 msgstr "编译器输出："
 
-#: ../src/ui.c:366
+#: ../src/ui.c:367
 msgid "Write down any notes you want here..."
 msgstr "写下你想记录的任何东西。。。"
 
-#: ../src/ui.c:381
+#: ../src/ui.c:382
 msgid "None"
 msgstr "无"
 
-#: ../src/ui.c:478 ../src/ui.c:529
+#: ../src/ui.c:479 ../src/ui.c:530
 msgid "gcc or make not found, please check and install."
 msgstr "gcc或者make未找到，请检查并安装。"
 
-#: ../src/ui.c:484 ../src/ui.c:535
+#: ../src/ui.c:485 ../src/ui.c:536
 msgid "g++ or make not found, please check and install."
 msgstr "g++或者make未找到，请检查并安装。"
 
-#: ../src/ui.c:495
+#: ../src/ui.c:496
 msgid "xterm not found, please check and install."
 msgstr "xterm未找到，请检查并安装。"
 
-#: ../src/ui.c:503
+#: ../src/ui.c:504
 msgid "gdb or gdbserver not found, please check and install."
 msgstr "gdb或者gdbserver未找到，请检查并安装。"
 
-#: ../src/ui.c:555
+#: ../src/ui.c:556
 msgid "xterm or gdb or gdbserver not found, please check and install."
 msgstr "xterm或者gdb或者gdbserver未找到，请检查并安装。"
 
-#: ../src/ui.c:703
+#: ../src/ui.c:705
 msgid "Perhaps the most lightweight C/C++ IDE..."
 msgstr "也许是最轻量级的C/C++集成开发环境。。。"
 
-#: ../src/ui.c:800
+#: ../src/ui.c:802
 msgid "An untitled file has been created."
 msgstr "一个无标题文档已经被创建。"
 
-#: ../src/ui.c:804
+#: ../src/ui.c:806
 msgid " has been saved."
 msgstr " 已经被保存。"
 
-#: ../src/ui.c:808
+#: ../src/ui.c:810
 msgid " has been opened."
 msgstr " 已经被打开。"
 
-#: ../src/ui.c:813
+#: ../src/ui.c:815
 msgid " has been created."
 msgstr " 已经被保存。"
 
-#: ../src/ui.c:817
+#: ../src/ui.c:819
 msgid " has been added to current project."
 msgstr " 已经被添加到工程。"
 
-#: ../src/ui.c:821
+#: ../src/ui.c:823
 msgid " has been created and added to current project."
 msgstr " 已经被创建并添加到工程。"
 
-#: ../src/ui.c:825
+#: ../src/ui.c:827
 msgid " has been removed from project."
 msgstr " 已经从工程中删除。"
 
-#: ../src/ui.c:828
+#: ../src/ui.c:830
 msgid "WARNING: "
 msgstr "警告: "
 
-#: ../src/ui.c:832
+#: ../src/ui.c:834
 msgid "ERROR: "
 msgstr "错误: "
 
-#: ../src/ui.c:853
+#: ../src/ui.c:855
 msgid "Open File"
 msgstr "打开文件"
 
-#: ../src/ui.c:864
+#: ../src/ui.c:866
 msgid "Codefox project"
 msgstr "Codefox工程"
 
-#: ../src/ui.c:870
+#: ../src/ui.c:872
 msgid "Save File"
 msgstr "保存文件"
 
-#: ../src/ui.c:1169
+#: ../src/ui.c:1171
 #, c-format
 msgid " Line: %d\tColumn: %d"
 msgstr " 行：%d\t列：%d"
 
-#: ../src/ui.c:1189 ../src/ui.c:1192
+#: ../src/ui.c:1191 ../src/ui.c:1194
 #, c-format
 msgid " Mode: %s"
 msgstr " 模式：%s"
 
-#: ../src/ui.c:1189
+#: ../src/ui.c:1191
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: ../src/ui.c:1192
+#: ../src/ui.c:1194
 msgid "Insert"
 msgstr "插入"
 
-#: ../src/ui.c:1418
+#: ../src/ui.c:1420
 msgid "Add local file"
 msgstr "打开本地文件"
 
-#: ../src/ui.c:1419
+#: ../src/ui.c:1421
 msgid "Create empty file"
 msgstr "创建新标签"
 
-#: ../src/ui.c:1420
+#: ../src/ui.c:1422
 msgid "Delete this item"
 msgstr "删除文件"
 
-#: ../src/ui.c:1855
+#: ../src/ui.c:1975
 #, c-format
 msgid "%s has been modified, save to file?"
 msgstr "%s 已经被修改，是否保存？"
 
-#: ../src/ui.c:1860
+#: ../src/ui.c:1980
 msgid "No"
 msgstr "否"
 
-#: ../src/ui.c:1862
+#: ../src/ui.c:1982
 msgid "Yes"
 msgstr "是"
