@@ -38,6 +38,7 @@ editorconfig_default_config_new ()
 
 	color_style = default_config->code_color;
 
+	NOUSE = gdk_rgba_parse (&(color_style->plain_color), "#000000");
 	NOUSE = gdk_rgba_parse (&(color_style->keyword_color), "#4CA81D");
 	NOUSE = gdk_rgba_parse (&(color_style->string_color), "#C05800");
 	NOUSE = gdk_rgba_parse (&(color_style->constant_color), "#A020F0");

@@ -37,10 +37,10 @@ PKG_PROG_PKG_CONFIG
 
 # Checks for libraries.
 PKG_CHECK_MODULES(codefox, [
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 ])
-AM_PATH_GTK_3_0(3.0.0,,AC_MSG_ERROR(codefox needs GTK+ 3.0.0))
+AM_PATH_GTK_3_0(3.22.0,,AC_MSG_ERROR(codefox needs GTK+ 3.22.0))
 
 AC_PATH_PROG(LIBXML2_CONFIG, xml2-config)
 AC_SUBST(XML_CFLAGS)

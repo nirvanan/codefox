@@ -16447,18 +16447,18 @@ if test -n "$codefox_CFLAGS"; then
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 \""; } >&5
   ($PKG_CONFIG --exists --print-errors "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 ") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_codefox_CFLAGS=`$PKG_CONFIG --cflags "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 " 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
@@ -16473,18 +16473,18 @@ if test -n "$codefox_LIBS"; then
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 \""; } >&5
   ($PKG_CONFIG --exists --print-errors "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 ") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
   pkg_cv_codefox_LIBS=`$PKG_CONFIG --libs "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 " 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
@@ -16508,12 +16508,12 @@ else
 fi
         if test $_pkg_short_errors_supported = yes; then
 	        codefox_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 " 2>&1`
         else
 	        codefox_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 " 2>&1`
         fi
@@ -16521,7 +16521,7 @@ fi
 	echo "$codefox_PKG_ERRORS" >&5
 
 	as_fn_error $? "Package requirements (
-  gtk+-3.0 >= 3.2.0
+  gtk+-3.0 >= 3.22.0
   libxml-2.0 >= 2.4.0
 ) were not met:
 
@@ -16563,7 +16563,7 @@ else
   enable_gtktest=yes
 fi
 
-  min_gtk_version=3.0.0
+  min_gtk_version=3.22.0
 
   pkg_config_args="gtk+-3.0 >= $min_gtk_version"
   for module in .
@@ -16806,7 +16806,7 @@ rm -f core conftest.err conftest.$ac_objext \
      fi
      GTK_CFLAGS=""
      GTK_LIBS=""
-     as_fn_error $? "codefox needs GTK+ 3.0.0" "$LINENO" 5
+     as_fn_error $? "codefox needs GTK+ 3.22.0" "$LINENO" 5
   fi
 
 

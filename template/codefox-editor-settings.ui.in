@@ -43,7 +43,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
-                <property name="font">Sans 12</property>
+                <property name="font">Monospace 12</property>
                 <property name="preview_text"/>
                 <property name="use_font">True</property>
                 <property name="use_size">True</property>

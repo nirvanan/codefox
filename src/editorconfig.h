@@ -26,6 +26,7 @@
 #include <gtk/gtk.h>
 
 typedef struct {
+	GdkRGBA plain_color;
 	GdkRGBA keyword_color;
 	GdkRGBA string_color;
 	GdkRGBA constant_color;

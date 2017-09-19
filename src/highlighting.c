@@ -82,11 +82,7 @@ highlight_add_tag (GtkTextBuffer *buffer, GtkTextIter *startitr,
 	gtk_text_buffer_get_iter_at_offset (buffer, &end, end_offset);
 	/* If needed tag is a error style, we shouldn't delete other tags. */
 	if (g_strcmp0 (tag, CODE_TAG_ERROR) != 0) {
-		gtk_text_buffer_remove_tag_by_name (buffer, CODE_TAG_PREPROCESSOR, &start, &end);
-		gtk_text_buffer_remove_tag_by_name (buffer, CODE_TAG_KEYWORD, &start, &end);
-		gtk_text_buffer_remove_tag_by_name (buffer, CODE_TAG_CONSTANT, &start, &end);
-		gtk_text_buffer_remove_tag_by_name (buffer, CODE_TAG_STRING, &start, &end);
-		gtk_text_buffer_remove_tag_by_name (buffer, CODE_TAG_COMMENT, &start, &end);
+		gtk_text_buffer_remove_all_tags (buffer, &start, &end);
 	}
 	gtk_text_buffer_apply_tag_by_name (buffer, tag, &start, &end);
 }

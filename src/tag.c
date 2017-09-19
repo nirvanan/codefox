@@ -27,6 +27,7 @@ tag_create_tags (GtkTextBuffer *textbuffer, const CEditorConfig *config)
 {
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_NONE,
 								"font-desc", config->pfd,
+								"foreground-rgba", &(config->code_color->plain_color),
 								NULL);
 	gtk_text_buffer_create_tag (textbuffer, CODE_TAG_PREPROCESSOR,
 								"font-desc", config->pfd,
