@@ -744,6 +744,7 @@ ui_editor_new ()
 	}
 	
 	ui_current_editor_change_mode ();
+	ui_preferences_config_update ();
 }
 
 /* Create a new editor with code and show it. */
@@ -772,6 +773,7 @@ ui_editor_new_with_text (const gchar *filepath, const gchar *code_buf)
 	}
 	
 	ui_current_editor_change_mode ();
+	ui_preferences_config_update ();
 }
 
 /* Add a new entry to filetree. */
