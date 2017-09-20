@@ -239,7 +239,9 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				}
 			}
 
-			highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, tag);
+			if (tag != CODE_TAG_NONE || lex[0] > 0) {
+				highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, tag);
+			}
 
 			lex_len = 0;
 			wide_char_lex = 0;

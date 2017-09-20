@@ -22,7 +22,7 @@ To get complete coding experience, make sure you have installed following extern
 * GDB, which is installed by default in Ubuntu.
 * GDBServer, also installed by default in Ubuntu.
 * ctags, run `sudo apt install ctags`.
-* cscope, run `sudo apt install cscopes`.
+* cscope, run `sudo apt install cscope`.
 
 ## Installation
 See [INSTALL](https://github.com/nirvanan/Codefox/blob/master/INSTALL) for installation instructions.

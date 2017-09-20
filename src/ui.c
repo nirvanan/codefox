@@ -1736,6 +1736,15 @@ ui_member_menu_index_change (const gint change)
 		return;
 	}
 	
+	size = 0;
+	for (iterator = all_items; iterator; iterator = iterator->next) {
+		GtkWidget *widget;
+
+		widget = iterator->data;
+		if (GTK_IS_MENU_ITEM (widget) && gtk_widget_is_visible (widget)) {
+			size++;
+		}
+	}
 	member_menu->index = ((member_menu->index + change) % size + size) % size;
 
 	item = 0;
