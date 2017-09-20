@@ -37,12 +37,20 @@
 #include "highlighting.h"
 #include "env.h"
 
+gboolean
+timer(gpointer data)
+{
+	gboolean UNUSED;
+
+	UNUSED = highlight_parse (NULL);
+	UNUSED = static_check (NULL);
+	UNUSED = symbol_parse (NULL);
+}
+
 void
 start_timer()
 {
-	g_timeout_add (500, static_check, NULL);
-	g_timeout_add (500, symbol_parse, NULL);
-	g_timeout_add (1000, highlight_parse, NULL);
+	g_timeout_add (500, timer, NULL);
 }
 
 int
