@@ -1,4 +1,4 @@
-# Codefox - A fast and lightweight C/C++ IDE
+# Codefox - Yet another fast and lightweight C/C++ IDE
 
 ## About
 Codefox is a lightweight integrated development environment running on

@@ -214,13 +214,9 @@ debug_parse_mi_line (gchar *line)
 				temp[j++] = '\t';
 				break;
 			case '\'':
-				temp[j++] = '\'';
-				break;
 			case '\"':
-				temp[j++] = '\"';
-				break;
 			case '\\':
-				temp[j++] = '\\';
+				temp[j++] = line[i + 1];
 				break;
 			default:
 				g_warning ("unknown mi escape char: \\%c.", line[i + 1]);

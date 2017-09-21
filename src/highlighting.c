@@ -96,7 +96,6 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	gint i;
 	gint lex_len;
 	gint state;
-	GtkTextIter st, ed;
 	gint wide_char;
 	gint wide_char_lex;
 	
@@ -107,9 +106,8 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	wide_char = 0;
 	wide_char_lex = 0;
 
-	gtk_text_buffer_get_start_iter (buffer, &st);
-	gtk_text_buffer_get_end_iter (buffer, &ed);
-	gtk_text_buffer_apply_tag_by_name (buffer, CODE_TAG_NONE, &st, &ed);
+	gtk_text_buffer_remove_all_tags (buffer, start, end);
+	gtk_text_buffer_apply_tag_by_name (buffer, CODE_TAG_NONE, start, end);
 
 	for (i = 0; text[i]; i++) {		
 		if ((!CHAR (text[i]) && !DIGIT (text[i]) && text[i] > 0) || text[i + 1] == 0) {			
@@ -121,6 +119,9 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 
 			switch (state) {
 				case 0:
+					if (lex_len > 0 && (text[i] == '\"' || text[i] == '\'' || text[i] == '/')) {
+						i--;
+					}
 					if (text[i] == '\"') {
 						state = 1;
 						lex[lex_len++] = text[i];
