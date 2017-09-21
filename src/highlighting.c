@@ -122,7 +122,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 					if (lex_len > 0 && (text[i] == '\"' || text[i] == '\'' || text[i] == '/')) {
 						i--;
 					}
-					if (text[i] == '\"') {
+					else if (text[i] == '\"') {
 						state = 1;
 						lex[lex_len++] = text[i];
 					}
