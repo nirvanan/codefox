@@ -98,6 +98,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	gint state;
 	gint wide_char;
 	gint wide_char_lex;
+	gint start_offset;
 	
 	text = gtk_text_iter_get_text (start, end);
 	lex_len = 0;
@@ -111,7 +112,6 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 
 	for (i = 0; text[i]; i++) {		
 		if ((!CHAR (text[i]) && !DIGIT (text[i]) && text[i] > 0) || text[i + 1] == 0) {			
-			gint start_offset;
 			gchar *tag;
 			
 			start_offset = i - lex_len;
@@ -200,7 +200,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				
 				case 4:
 					lex[lex_len++] = text[i];
-					if (text[i] == '\n') {
+					if (text[i] == '\n' || text[i + 1] == '\0') {
 						state = 0;
 						tag = CODE_TAG_COMMENT;
 					}
@@ -256,6 +256,10 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				wide_char_lex++;
 			}
 		}		
+	}
+
+	if (state == 4 && lex_len > 0) {
+		highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, CODE_TAG_COMMENT);
 	}
 	
 	g_free ((gpointer) text);
