@@ -168,6 +168,7 @@ saveas_save_to_file (GtkWidget *widget, gpointer user_data)
 	gchar *code;
 
 	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
+	filepath[0] = '\0';
 	ui_get_filepath_from_dialog (filepath, MAX_FILEPATH_LENGTH, FALSE, FALSE, filepath);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
@@ -401,12 +402,12 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 			if (text[0] == '>' || text[0] == ':') {
 				line[strlen (line) - 1] = 0;
 			}
-			while (! CHAR (line[strlen (line) - 1]) &&
+			while (strlen (line) > 0 && !CHAR (line[strlen (line) - 1]) &&
 				   !DIGIT (line[strlen (line) - 1])) {
 				line[strlen (line) - 1] = 0;
 			}
 			i = strlen (line) - 1;
-			while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.') {
+			while (i >= 0 && (CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.') {
 				i--;
 			}
 			i++;
