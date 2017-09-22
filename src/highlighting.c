@@ -80,10 +80,6 @@ highlight_add_tag (GtkTextBuffer *buffer, GtkTextIter *startitr,
 	end_offset = start_offset + len;
 	gtk_text_buffer_get_iter_at_offset (buffer, &start, start_offset);
 	gtk_text_buffer_get_iter_at_offset (buffer, &end, end_offset);
-	/* If needed tag is a error style, we shouldn't delete other tags. */
-	if (g_strcmp0 (tag, CODE_TAG_ERROR) != 0) {
-		//gtk_text_buffer_remove_all_tags (buffer, &start, &end);
-	}
 	gtk_text_buffer_apply_tag_by_name (buffer, tag, &start, &end);
 }
 
@@ -254,6 +250,9 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 			}
 			if (lex_len > 1 && lex[lex_len - 2] < 0 && lex[lex_len - 1] < 0) {
 				wide_char_lex++;
+			}
+			if (state == 3) {
+				state = 0;
 			}
 		}		
 	}
