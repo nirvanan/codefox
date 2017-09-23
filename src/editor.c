@@ -914,3 +914,15 @@ ceditor_move_corsor (CEditor *editor, const gint offset)
 						   offset,
 						   0, FALSE, NULL);
 }
+
+gboolean
+ceditor_get_need_highlight(CEditor *editor)
+{
+	return editor->need_highlight;
+}
+
+void
+ceditor_set_need_highlight(CEditor *editor, gboolean need)
+{
+	editor->need_highlight = need;
+}

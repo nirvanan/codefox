@@ -446,6 +446,7 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 	ui_current_editor_set_dirty ();
 	ui_update_line_number_label (TRUE, linecount, NULL, NULL);
 	ui_current_editor_update_cursor();
+	ui_current_editor_set_need_highlight(TRUE);
 
 	ui_undo_redo_widgets_update ();
 }
@@ -459,6 +460,7 @@ on_editor_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 	ui_current_editor_set_dirty ();
 	
 	ui_current_editor_update_cursor();
+	ui_current_editor_set_need_highlight(TRUE);
 	ui_tip_window_destory ();
 }
 

@@ -744,6 +744,7 @@ ui_editor_new ()
 	}
 	
 	ui_current_editor_change_mode ();
+	ui_current_editor_set_need_highlight(TRUE);
 	ui_preferences_config_update ();
 }
 
@@ -773,6 +774,7 @@ ui_editor_new_with_text (const gchar *filepath, const gchar *code_buf)
 	}
 	
 	ui_current_editor_change_mode ();
+	ui_current_editor_set_need_highlight(TRUE);
 	ui_preferences_config_update ();
 }
 
@@ -1033,8 +1035,9 @@ ui_save_code_post (const gchar *filepath)
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
-	if (ceditor_get_dirty (editor))
+	if (ceditor_get_dirty (editor)) {
 		ceditor_set_dirty (editor, 0);
+	}
 	filetree_set_selected_path (GTK_TREE_VIEW (window->filetree),
 								filepath,
 								(const gchar *) editor->filepath);
@@ -2487,4 +2490,32 @@ ui_current_editor_move_cursor (const gint offset)
 	}
 	
 	ceditor_move_corsor (editor, offset);
+}
+
+gboolean
+ui_current_editor_get_need_highlight()
+{
+	CEditor *editor;
+
+	editor = ui_get_current_editor ();
+
+	if (editor == NULL) {
+		return FALSE;
+	}
+
+	return ceditor_get_need_highlight(editor);
+}
+
+void
+ui_current_editor_set_need_highlight(gboolean need)
+{
+	CEditor *editor;
+
+	editor = ui_get_current_editor ();
+
+	if (editor == NULL) {
+		return;
+	}
+
+	ceditor_set_need_highlight(editor, need);
 }

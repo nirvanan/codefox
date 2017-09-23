@@ -75,6 +75,7 @@ typedef struct {
 	gint current_matched;
 	gint total_matched;
 	gint next_modify_omit;
+	gboolean need_highlight;
 } CEditor;
 
 CEditor *
@@ -179,5 +180,11 @@ ceditor_select_range (CEditor *editor, const gint offset, const gint len);
 
 void
 ceditor_move_corsor (CEditor *editor, const gint offset);
+
+gboolean
+ceditor_get_need_highlight(CEditor *editor);
+
+void
+ceditor_set_need_highlight(CEditor *editor, gboolean need);
 
 #endif

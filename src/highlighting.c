@@ -292,6 +292,10 @@ highlight_parse (gpointer data)
 {
 	CEditor *editor;
 
+	if (!ui_current_editor_get_need_highlight ()) {
+		return TRUE;
+	}
+
 	editor = ui_get_current_editor ();
 	if (editor != NULL) {
 		GtkTextBuffer *buffer;
@@ -302,6 +306,8 @@ highlight_parse (gpointer data)
 		gtk_text_buffer_get_end_iter (buffer, &end);
 
 		highlight_apply (buffer, &start, &end);
+
+		ui_current_editor_set_need_highlight (FALSE);
 
 		return TRUE;
 	}

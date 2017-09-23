@@ -517,4 +517,10 @@ ui_editor_close_by_path (const gchar *filepath);
 void
 ui_current_editor_move_cursor (const gint offset);
 
+gboolean
+ui_current_editor_get_need_highlight();
+
+void
+ui_current_editor_set_need_highlight(gboolean need);
+
 #endif
