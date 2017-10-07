@@ -18,7 +18,7 @@ indicator.
 ## Requirements
 To get complete coding experience, make sure you have installed following external programs:
 * GCC and G++.
-* XTerm, that goes without saying, ^\_^.
+* XTerm, it goes without saying, ^\_^.
 * GDB, which is installed by default in Ubuntu.
 * GDBServer, also installed by default in Ubuntu.
 * ctags, run `sudo apt install ctags`.

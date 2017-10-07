@@ -848,6 +848,7 @@ enable_nls
 enable_rpath
 with_libiconv_prefix
 with_libintl_prefix
+enable_debug
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1515,6 +1516,7 @@ Optional Features:
   --disable-gtktest       do not try to compile and run a test GTK+ program
   --disable-nls           do not use Native Language Support
   --disable-rpath         do not hardcode runtime library paths
+  --enable-debug          enable DEBUG mode(default=no)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -19713,6 +19715,19 @@ fi
 done
 
 
+# enable debug or not
+# Check whether --enable-debug was given.
+if test "${enable_debug+set}" = set; then :
+  enableval=$enable_debug;
+else
+  enable_debug=no
+fi
+
+if test "x$enable_debug" = "xyes"; then :
+  CFLAGS="-g2 -O0 -DDEBUG -Wall"
+elif test "x$enable_debug" = "xno"; then :
+  CFLAGS="-O2 -Wall"
+fi
 
 ac_config_files="$ac_config_files Makefile src/Makefile icons/Makefile icons/16x16/Makefile icons/24x24/Makefile icons/32x32/Makefile icons/48x48/Makefile icons/scalable/Makefile po/Makefile.in template/Makefile template/codefox.ui template/codefox-new-project.ui template/codefox-create-file.ui template/codefox-project-settings.ui template/codefox-editor-settings.ui template/codefox-fun-tip.ui data/Makefile data/codefox.pc data/codefox.appdata.xml"
 

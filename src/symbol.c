@@ -449,7 +449,6 @@ symbol_parse_line (const gchar *line)
 
 		if (token[0] == 't') {
 			g_strlcpy (variable_ptr->type, token + ftoffset, MAX_TYPENAME_LENGTH);
-			variable_ptr->metaclass = (token[8] == 'c')? META_TYPE_CLASS: META_TYPE_STRUCT;
 		}
 	}
 	else if (type[0] == 'f') {
