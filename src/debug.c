@@ -1,12 +1,12 @@
 /*
- * debug.h
+ * debug.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <fcntl.h>
@@ -100,13 +98,13 @@ static void
 debug_skip_startup_output ()
 {
 	gchar *line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	gchar *UNUSED;
+	gchar *ret;
 
 	for (;;) {
 		line[0] = 0;
 		errno = 0;
-		UNUSED = fgets (line, MAX_LINE_LENGTH, out_file);
-		if (errno == EAGAIN) {
+		ret = fgets (line, MAX_LINE_LENGTH, out_file);
+		if (errno == EAGAIN && ret == NULL) {
 			continue;
 		}
 		if (g_str_has_prefix (line, "(gdb)")) {
@@ -121,8 +119,7 @@ void
 debug_startup (const gchar *project_path, const gchar *project_name)
 {
 	gchar *exe_path;
-	FILE *pipe_file;
-	gint UNUSED;
+	gint ret;
 
 	if (!env_prog_exist (ENV_PROG_XTERM) || !env_prog_exist (ENV_PROG_GDB) || !env_prog_exist (ENV_PROG_GDBSERVER)) {
 		g_warning ("xterm gdb or gdbserver not found.");
@@ -144,8 +141,23 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 		execlp ("xterm", "xterm", "-e", "gdbserver", GDB_SERVER_PORT_ARG, exe_path, NULL);
 	}
 
-	UNUSED = pipe (fd1);
-	UNUSED = pipe (fd2);
+	ret = pipe (fd1);
+	if (ret == -1) {
+		g_error ("failed to pipe fd1.");
+
+		g_free ((gpointer) exe_path);
+
+		return;
+	}
+
+	ret = pipe (fd2);
+	if (ret == -1) {
+		g_error ("failed to pipe fd2.");
+
+		g_free ((gpointer) exe_path);
+
+		return;
+	}
 
 	gdb_pid = fork ();
 	if (gdb_pid == 0) {
@@ -240,9 +252,10 @@ void
 debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 {
 	gchar *line;
-	gint UNUSED;
-	gchar *UNUSED2;
+	gint ret;
+	gchar *ret2;
 	gint start;
+	gchar cmd_line[MAX_LINE_LENGTH + 1];
 
 	g_mutex_lock (&debug_mutex);
 	if (!debugging) {
@@ -253,24 +266,34 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 
 	fflush (out_file);
 
-	UNUSED = write (fd1[1], command, strlen (command));
+	g_strlcpy (cmd_line, command, MAX_LINE_LENGTH);
 	if (para != NULL) {
-		UNUSED = write (fd1[1], " ", 1);
-		UNUSED = write (fd1[1], para, strlen (para));
+		g_strlcat (cmd_line, " ", MAX_LINE_LENGTH);
+		g_strlcat (cmd_line, para, MAX_LINE_LENGTH);
 	}
-	UNUSED = write (fd1[1], "\n", 1);
+	g_strlcat (cmd_line, "\n", MAX_LINE_LENGTH);
+
+	ret = write (fd1[1], cmd_line, strlen (cmd_line));
+	if (ret == -1) {
+		g_error ("failed to write command and args to gdb pipe.");
+
+		g_mutex_unlock (&debug_mutex);
+
+		return;
+	}
 
 	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	line[0] = 0;
-	if (output != NULL)
+	if (output != NULL) {
 		output[0] = 0;
+	}
 
 	start = 0;
 	while (1) {
 		line[0] = 0;
 		errno = 0;
-		UNUSED2 = fgets (line, MAX_LINE_LENGTH, out_file);
-		if (errno == EAGAIN) {
+		ret2 = fgets (line, MAX_LINE_LENGTH, out_file);
+		if (errno == EAGAIN && ret2 == NULL) {
 			continue;
 		}
 		if (!start && (!g_str_has_prefix (line, "&") || !g_str_has_prefix (line + 2, command))) {
@@ -291,7 +314,7 @@ debug_command_exec (const gchar *command, const gchar *para, gchar *output)
 		}
 	}
 
-	g_free (line);
+	g_free ((gpointer) line);
 
 	g_mutex_unlock (&debug_mutex);
 }
@@ -307,8 +330,6 @@ debug_breakpoints_insert (GList *list)
 
 	for (iterator = list; iterator; iterator = iterator->next) {
 		gchar *breakpoint_desc;
-		CBreakPoint *breakpoint;
-		gint i;
 
 		breakpoint_desc = (gchar *) iterator->data;
 		debug_breakpoint_add (breakpoint_desc);

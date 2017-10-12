@@ -2,11 +2,11 @@
  * callback.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -112,13 +110,9 @@ open_open_local_file (GtkWidget *widget, gpointer user_data)
 
 		if (!exist) {
 			gchar *code_buf;
-			gint filesize;
-			gint name_offset;
 
-			filesize = misc_get_file_size (filepath);
 			misc_get_file_content (filepath, &code_buf);
 			ui_editor_new_with_text (filepath, code_buf);
-			name_offset = misc_get_file_name_in_path (filepath);
 			ui_status_entry_new (FILE_OP_OPEN, filepath);
 
 			g_free ((gpointer) code_buf);
@@ -242,8 +236,6 @@ build_compile (GtkWidget *widget, gpointer user_data)
 	gchar *project_name;
 	gchar exe_path[MAX_FILEPATH_LENGTH + 1];
 	gchar *line;
-	gint st;
-	gint ed;
 	gboolean suc;
 	gint error_no;
 	gint warning_no;
@@ -364,11 +356,11 @@ on_editor_insert (GtkTextBuffer *textbuffer, GtkTextIter *location,
 		line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 		ui_current_editor_line (line, MAX_LINE_LENGTH, end_line);
 
-		while (! CHAR (line[strlen (line) - 1]) && ! DIGIT (line[strlen (line) - 1])) {
+		while (strlen(line) > 0 && ! CHAR (line[strlen (line) - 1]) && ! DIGIT (line[strlen (line) - 1])) {
 			line[strlen (line) - 1] = 0;
 		}
 		i = strlen (line) - 1;
-		while ((CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.' && ! SPACE (line[i])) {
+		while (i >= 0 && (CHAR (line[i]) || DIGIT (line[i])) && line[i] != '.' && ! SPACE (line[i])) {
 			i--;
 		}
 		i++;
@@ -582,14 +574,11 @@ on_filetree_2clicked (GtkTreeView *tree_view, GtkTreePath *path, GtkTreeViewColu
 
 	if (isfile) {
 		gchar *code_buf;
-		gint filesize;
-		gint name_offset;
 		gint exist;
 
 		exist = ui_find_editor (filepath);
 
 		if (!exist) {
-			filesize = misc_get_file_size (filepath);
 			misc_get_file_content (filepath, &code_buf);
 			ui_editor_new_with_text (filepath, code_buf);
 
@@ -957,10 +946,7 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 	if (!ui_find_editor (filepath)) {
 		gchar *code_buf;
-		gint filesize;
-		gint name_offset;
 
-		filesize = misc_get_file_size (filepath);
 		misc_get_file_content (filepath, &code_buf);
 		ui_editor_new_with_text (filepath, code_buf);
 

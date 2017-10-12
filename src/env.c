@@ -2,11 +2,11 @@
  * env.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <string.h>
@@ -39,21 +37,26 @@ env_check_external_prog(const gchar *prog)
 {
 	gchar line[MAX_LINE_LENGTH + 1];
 	gchar cmd[MAX_LINE_LENGTH + 1];
-	gchar *UNUSED;
+	gchar *ret;
 	FILE *pi;
 
 	g_snprintf (cmd, MAX_LINE_LENGTH + 1, "which %s\n", prog);
 	pi = popen (cmd, "r");
 
 	if (pi == NULL) {
-		g_error ("cant open opie for which command");
+		g_error ("can't open opie for which command.");
 
 		return FALSE;
 	}
 
 	/* One line is enough. */
 	line[0] = '\0';
-	UNUSED = fgets (line, MAX_LINE_LENGTH, pi);
+	ret = fgets (line, MAX_LINE_LENGTH, pi);
+	if (ret == NULL) {
+		g_error ("failed to read which command output.");
+
+		return FALSE;
+	}
 
 	pclose (pi);
 

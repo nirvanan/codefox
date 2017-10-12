@@ -2,11 +2,11 @@
  * ui.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -76,21 +74,20 @@ static CFunctionTip *function_tip;
 static CMemberMenu *member_menu;
 static CPreferencesWindow *preferences_window;
 
-static GMutex ui_mutex;
-
 static const gchar *license = 
-"Codefox is free software: you can redistribute it and/or modify it\n"
-"under the terms of the GNU General Public License as published\n"
-"by the Free Software Foundation, either version 3 of the License,\n"
-"or (at your option) any later version.\n\n"
-"Codefox is distributed in the hope that it will be useful, but\n"
-"WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
-"See the GNU General Public License for more details.\n\n"
+"Codefox is free software: you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation, either version 3 of the License, or\n"
+"(at your option) any later version.\n\n"
+"Codefox is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+"GNU General Public License for more details.\n\n"
 "You should have received a copy of the GNU General Public License\n"
 "along with Codefox. If not, see <http://www.gnu.org/licenses/>.";
-static const gchar *authors[] = {"Gordon Lee", NULL};
+static const gchar *authors[] = {"Gordon Li", NULL};
 
+/*
 static GtkStockItem items[] =
 {
 	{CODEFOX_STOCK_BUILD, "Build", 0, 0, NULL},
@@ -108,6 +105,7 @@ static GtkStockItem items[] =
 	{CODEFOX_STOCK_BREAKPOINT, "Breakpoint", 0, 0, NULL },
 	{CODEFOX_STOCK_DEBUGPTR, "Debugptr", 0, 0, NULL }
 };
+*/
 
 static const gchar *sig[3] = {"cut-clipboard", "copy-clipboard", 
 							  "paste-clipboard"};
@@ -389,7 +387,6 @@ ui_preferences_window_init ()
 	GtkBuilder *builder;
 	gchar *data_dir;
 	gchar *template_file;
-	gint response;
 
 	preferences_window = (CPreferencesWindow *) g_malloc (sizeof (CPreferencesWindow));
 	builder = gtk_builder_new ();
@@ -421,7 +418,6 @@ ui_fun_tip_init ()
 	GtkBuilder *builder;
 	gchar *data_dir;
 	gchar *template_file;
-	gint response;
 
 	function_tip = (CFunctionTip *) g_malloc (sizeof (CFunctionTip));
 	builder = gtk_builder_new ();
@@ -704,7 +700,7 @@ ui_about_dialog_new ()
 	gtk_about_dialog_set_comments (GTK_ABOUT_DIALOG(about_dialog),
 								   _("Perhaps the most lightweight C/C++ IDE..."));
 	gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG(about_dialog), 
-									"Copyright © 2012-2017 Gordon Lee");
+									"Copyright © 2012-2017 Gordon Li");
 	gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about_dialog), license);
 	gtk_about_dialog_set_wrap_license (GTK_ABOUT_DIALOG (about_dialog), TRUE);
 	icon_theme = gtk_icon_theme_get_default ();
@@ -1416,10 +1412,6 @@ ui_start_project (const gchar *project_name, const gchar *project_path)
 static void
 ui_filetree_menu_init ()
 {
-	GtkWidget *stock_open;
-	GtkWidget *stock_new;
-	GtkWidget *stock_delete;
-
 	filetree_menu = (CFileTreeMenu *) g_malloc (sizeof (CFileTreeMenu));
 	filetree_menu->menu = (GObject *) gtk_menu_new ();
 	filetree_menu->add_item = (GObject *) gtk_menu_item_new_with_label (_("Add local file"));
@@ -1498,6 +1490,10 @@ ui_error_dialog_new (const gchar *message)
 
 	ret = gtk_dialog_run (GTK_DIALOG (dialog));
 
+	if (ret != GTK_RESPONSE_OK) {
+		g_warning ("a weird response %d returned after an error dialog.", ret);
+	}
+
 	gtk_widget_destroy (dialog);
 }
 
@@ -1512,6 +1508,10 @@ ui_confirm_dialog_new (const gchar *message)
 									 GTK_BUTTONS_YES_NO, "%s", message);
 
 	ret = gtk_dialog_run (GTK_DIALOG (dialog));
+
+	if (ret != GTK_RESPONSE_YES && ret != GTK_RESPONSE_NO) {
+		g_warning ("a weird response %d returned after a confirm dialog.", ret);
+	}
 
 	gtk_widget_destroy (dialog);
 
@@ -2024,7 +2024,6 @@ gint
 ui_current_editor_close ()
 {
 	CEditor *editor;
-	gint n_page;
 
 	editor = ui_get_current_editor ();
 
@@ -2038,9 +2037,7 @@ ui_current_editor_close ()
 void
 ui_current_editor_set_dirty ()
 {
-	
 	CEditor *editor;
-	gint n_page;
 
 	editor = ui_get_current_editor ();
 
@@ -2072,7 +2069,6 @@ ui_highlight_on_delete (GtkTextBuffer *textbuffer, GtkTextIter *start,
 	
 	GtkTextIter startitr, enditr;
 	gint start_line, end_line;
-	CEditor *current;
 	
 	start_line = gtk_text_iter_get_line (start);
 	end_line = gtk_text_iter_get_line (end);
@@ -2116,7 +2112,6 @@ ui_preferences_window_hide ()
 static void
 ui_editors_config_update ()
 {
-	CEditor *editor;
 	GList * iterator;
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
@@ -2152,7 +2147,6 @@ ui_preferences_config_update ()
 void
 ui_current_editor_breakpoint_update (gdouble x, gdouble y, gchar *breakpoint_desc)
 {
-	
 	CEditor *editor;
 
 	editor = ui_get_current_editor ();
@@ -2167,13 +2161,10 @@ ui_current_editor_breakpoint_update (gdouble x, gdouble y, gchar *breakpoint_des
 void
 ui_editors_breakpoint_tag_update ()
 {
-	
 	CEditor *editor;
 	GList * iterator;
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
-		CEditor *editor;
-
 		editor = (CEditor *) iterator->data;
 		ceditor_breakpoint_tags_resize (editor);
 	}
@@ -2207,8 +2198,6 @@ ui_breakpoint_tags_get (GList **list)
 	GList * iterator;
 
 	for (iterator = window->editor_list; iterator; iterator = iterator->next) {
-		CEditor *editor;
-
 		editor = (CEditor *) iterator->data;
 		ceditor_breakpoint_tags_get (editor, list);
 	}

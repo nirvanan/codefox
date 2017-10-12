@@ -2,11 +2,11 @@
  * edithistory.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <string.h>
@@ -32,8 +30,7 @@
 static CEditStep * edit_step_new (const gboolean insert, const gint offset, const gint len,
 								  const gchar *text);
 static void edit_step_free (CEditStep *edit_step);
-static void edit_history_rehighlighting (GtkTextBuffer *buffer, const gint offset, const gint len);
-
+//static void edit_history_rehighlighting (GtkTextBuffer *buffer, const gint offset, const gint len);
 
 CEditHistory *
 edit_history_new ()
@@ -141,6 +138,7 @@ edit_history_step_add (CEditHistory *edit_history, const gboolean insert,
 	}
 }
 
+/*
 static void
 edit_history_rehighlighting (GtkTextBuffer *buffer, const gint offset, const gint len)
 {
@@ -156,6 +154,7 @@ edit_history_rehighlighting (GtkTextBuffer *buffer, const gint offset, const gin
 
 	highlight_apply (buffer, &start, &end);
 }
+*/
 
 void
 edit_history_action (CEditHistory *edit_history, GtkTextBuffer *buffer, const gboolean undo)

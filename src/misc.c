@@ -1,12 +1,12 @@
 /*
- * misc.h
+ * misc.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <gtk/gtk.h>
@@ -44,14 +42,18 @@ void
 misc_open_homepage()
 {
 	gchar *command;
-	gint UNUSED;
+	gint ret;
 
 	command = (gchar *) g_malloc(MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, BROWSER_PATH, MAX_COMMAND_LENGTH);
 	g_strlcat (command, " ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, HOME_PAGE, MAX_COMMAND_LENGTH);
 
-	UNUSED = system(command);
+	ret = system(command);
+
+	if (ret != 0) {
+		g_warning ("opening default browser return %d.", ret);
+	}
 
 	g_free ((gpointer) command);
 }
@@ -82,6 +84,10 @@ misc_get_file_content(const gchar *filepath, gchar **file_buf)
 	gboolean suc;
 
 	suc = g_file_get_contents (filepath, file_buf, NULL, NULL);
+
+	if (!suc) {
+		g_error ("failed to load file %s.", filepath);
+	}
 }
 
 /* Save code file. */
@@ -91,6 +97,10 @@ misc_set_file_content(const gchar *filepath, const gchar *file_buf)
 	gboolean suc;
 
 	suc = g_file_set_contents (filepath, file_buf, strlen (file_buf), NULL);
+
+	if (!suc) {
+		g_error ("failed to set file content %s.", filepath);
+	}
 }
 
 /* Get filename offset in filepath. */
@@ -189,7 +199,7 @@ void
 misc_exec_file (const gchar *filepath)
 {
 	gchar *command;
-	gint UNUSED;
+	gint ret;
 
 	if (!env_prog_exist (ENV_PROG_XTERM)) {
 		g_warning ("xterm not found.");
@@ -199,7 +209,11 @@ misc_exec_file (const gchar *filepath)
 	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
-	UNUSED = system (command);
+	ret = system (command);
+
+	if (ret != 0) {
+		g_warning ("exec returned %d.", ret);
+	}
 	
 	g_free ((gpointer) command);
 }

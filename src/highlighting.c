@@ -2,11 +2,11 @@
  * highlighting.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <gtk/gtk.h>
@@ -98,6 +96,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	
 	text = gtk_text_iter_get_text (start, end);
 	lex_len = 0;
+	start_offset = 0;
 	lex[0] = 0;
 	state = 0;
 	wide_char = 0;
@@ -224,7 +223,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				continue;
 			}
 			
-			if (tag == CODE_TAG_NONE) {
+			if (g_strcmp0 (tag, CODE_TAG_NONE) == 0) {
 				if (DIGIT (lex[0])) {
 					tag = CODE_TAG_CONSTANT;
 				}
@@ -236,7 +235,7 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				}
 			}
 
-			if (tag != CODE_TAG_NONE) {
+			if (g_strcmp0 (tag, CODE_TAG_NONE) != 0) {
 				highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, tag);
 			}
 

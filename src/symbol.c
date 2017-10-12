@@ -2,11 +2,11 @@
  * symbol.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <gtk/gtk.h>
@@ -239,6 +237,8 @@ symbol_debug_dump (gpointer *ptr, gint level)
 			}
 			break;
 		}
+		default:
+			break;
 	}			
 }
 
@@ -338,8 +338,6 @@ symbol_parse_line (const gchar *line)
 {
 	gchar *name;
 	gchar *type;
-	gchar *acess;
-	gchar *sign;
 	gchar *token;
 	gint offset;
 	gint ftoffset;
@@ -582,44 +580,12 @@ symbol_parse_line (const gchar *line)
 static void
 symbol_clear ()
 {
-	GList *iterator;
-	GList *iterator2;
-
-	/*
-	for (iterator = class_list; iterator; iterator = iterator->next) {
-		CSymbolClass *class_ptr;
-
-		class_ptr = (CSymbolClass *) iterator->data;
-		g_list_free_full (class_ptr->public_member_list, g_free);
-		g_list_free_full (class_ptr->public_function_list, g_free);
-	}
-	g_list_free_full (class_list, g_free);
-	*/
 	g_list_free_full (class_list, symbol_clear_class);
 	class_list = NULL;
 	
-	/*
-	for (iterator = struct_list; iterator; iterator = iterator->next) {
-		CSymbolStruct *struct_ptr;
-		
-		struct_ptr = (CSymbolStruct *) iterator->data;
-		g_list_free_full (struct_ptr->member_list, g_free);
-		g_list_free_full (struct_ptr->function_list, g_free);
-	}
-	g_list_free_full (struct_list, g_free);
-	*/
 	g_list_free_full (struct_list, symbol_clear_struct);
 	struct_list = NULL;
 	
-	/*
-	for (iterator = namespace_list; iterator; iterator = iterator->next){
-		CSymbolNamespace *namespace_ptr;
-		
-		namespace_ptr = (CSymbolNamespace *) iterator->data;
-		g_list_free_full (namespace_ptr->member_list, g_free);
-	}
-	g_list_free_full (namespace_list, g_free);
-	*/
 	g_list_free_full (namespace_list, symbol_clear_namespace);
 	namespace_list = NULL;
 
@@ -644,12 +610,11 @@ gboolean
 symbol_parse (gpointer data)
 {
 	gchar *project_path;
-	gchar *filepath;
 	FILE *ctags;
 	gchar *line;
 	gint i;
-	gint UNUSED;
-	gchar *UNUSED2;
+	gint ret;
+	gchar *ret2;
 
 	if (!env_prog_exist (ENV_PROG_CTAGS) || !env_prog_exist (ENV_PROG_CSCOPE)) {
 		g_warning ("ctags or cscope not found.");
@@ -665,8 +630,20 @@ symbol_parse (gpointer data)
 		if (project_path == NULL)
 			return TRUE;
 
-		UNUSED = chdir (project_path);
-		UNUSED = system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
+		ret = chdir (project_path);
+		if (ret == -1) {
+			g_error ("failed to chdir to %s while parsing symbol.", project_path);
+			
+			return FALSE;
+		}
+
+		ret = system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
+		if (ret != 0) {
+			g_warning ("executing ctags returned %d.", ret);
+
+			return FALSE;
+		}
+
 		ctags = g_fopen ("tags", "r");
 		if (ctags == NULL) {
 			g_warning ("can't open tag file, you might want to check whether ctags is installed.");
@@ -678,7 +655,13 @@ symbol_parse (gpointer data)
 		line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 
 		for (i = 0; i < 6; i++) {
-			UNUSED2 = fgets (line, MAX_LINE_LENGTH, ctags);
+			ret2 = fgets (line, MAX_LINE_LENGTH, ctags);
+
+			if (ret2 == NULL) {
+				g_error ("failed to skip tag headers.");
+
+				return FALSE;
+			}
 		}
 
 		symbol_clear ();
@@ -688,12 +671,20 @@ symbol_parse (gpointer data)
 			symbol_parse_line (line);
 		}
 
-		//symbol_debug ();
+#ifdef SYMBOL_DEBUG
+		symbol_debug ();
+#endif
 
 		g_free ((gpointer) line);
 		fclose ((gpointer) ctags);
 
-		UNUSED = system ("cscope -b");
+		ret = system ("cscope -b");
+
+		if (ret != 0) {
+			g_warning ("cscope returned %d.", ret);
+
+			return FALSE;
+		}
 	}
 
 	return TRUE;

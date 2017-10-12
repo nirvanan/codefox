@@ -2,11 +2,11 @@
  * debugview.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -44,7 +42,6 @@ debug_view_localtree_init (CDebugView *debug_view)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *select;
-	GtkTreeIter  iter;
 
 	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -65,13 +62,6 @@ debug_view_localtree_init (CDebugView *debug_view)
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(debug_view->localtree));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->localtree));
-
-	/*
-	gtk_list_store_append (store, &iter);
-	gtk_list_store_set(store, &iter, 0, "bwqdwedwedwefwefwefwefwef", 1, "{12, 32}", -1);
-
-	g_object_ref (store);
-	*/
 }
 
 static void
@@ -81,7 +71,6 @@ debug_view_calltree_init (CDebugView *debug_view)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *select;
-	GtkTreeIter  iter;
 
 	store = gtk_list_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -110,13 +99,6 @@ debug_view_calltree_init (CDebugView *debug_view)
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(debug_view->calltree));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->calltree));
-
-	/*
-	gtk_list_store_append (store, &iter);
-	gtk_list_store_set(store, &iter, 0, "bwqdwedwedwefwefwefwefwef", 1, "{12, 32}", 2, "dsfdsfds", -1);
-
-	g_object_ref (store);
-	*/
 }
 
 static void
@@ -126,7 +108,6 @@ debug_view_watchtree_init (CDebugView *debug_view)
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *select;
-	GtkTreeIter  iter;
 
 	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -149,13 +130,6 @@ debug_view_watchtree_init (CDebugView *debug_view)
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(debug_view->watchtree));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 	gtk_tree_view_columns_autosize (GTK_TREE_VIEW(debug_view->watchtree));
-
-	/*
-	gtk_list_store_append (store, &iter);
-	gtk_list_store_set(store, &iter, 0, "", 1, "", -1);
-
-	g_object_ref (store);
-	*/
 }
 
 CDebugView *
@@ -218,8 +192,6 @@ debugview_watchtree_cell_change (CDebugView *debug_view, const gchar *path_strin
 	gtk_list_store_set (store, &iter, 0, new_text, 1, value, -1);
 
 	if (old_text[0] == 0 && new_text[0] != 0) {
-		GtkTreeIter new_iter;
-
 		gtk_list_store_append (store, &iter);
 		gtk_list_store_set(store, &iter, 0, "", 1, "", -1);
 	}
@@ -264,7 +236,6 @@ debugview_watchtree_set_all (CDebugView *debug_view, GList *list)
 {
 	GtkListStore *store;
 	GtkTreeIter iter;
-	gchar *line;
 	GSList *iterator;
 	gint row;
 	gchar *path;

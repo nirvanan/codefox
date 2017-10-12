@@ -2,11 +2,11 @@
  * project.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <glib.h>
@@ -88,6 +86,12 @@ project_new(const gchar *project_name, const gchar *project_dir, const CProjectT
 	g_strlcat (new_project->project_path, project_name, MAX_FILEPATH_LENGTH);
 	new_project->project_type = project_type;
 	suc = g_mkdir (new_project->project_path, DIR_MODE);
+	
+	if (suc == -1) {
+		g_error ("failed to create project directory %s.", new_project->project_path);
+
+		g_free ((gpointer) new_project);
+	}
 	project_save_xml(new_project);
 
 	project = new_project;
@@ -174,7 +178,6 @@ project_load_xml(CProject *project, const gchar *xml_file)
 	xmlNodePtr child;
 	xmlNodePtr node;
 	xmlChar *tmp_c;
-	GList *iterator;
 	gchar *type;
 
 	doc = xmlReadFile(xml_file, "UTF-8", 0);
@@ -185,7 +188,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	}
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (type, tmp_c, MAX_FILEPATH_LENGTH);
+	g_strlcpy (type, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 	project->project_type = (g_strcmp0(type, "C++") == 0);
 
@@ -194,7 +197,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	}
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->project_name, tmp_c, MAX_FILEPATH_LENGTH);
+	g_strlcpy (project->project_name, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
@@ -202,7 +205,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	}
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->project_path, tmp_c, MAX_FILEPATH_LENGTH);
+	g_strlcpy (project->project_path, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
@@ -217,7 +220,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		}
 		new_header = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_header, tmp_c, MAX_FILEPATH_LENGTH);
+		g_strlcpy (new_header, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 		project->header_list = g_list_append (project->header_list, (gpointer) new_header);
 		xmlFree (tmp_c);
 	}
@@ -234,7 +237,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		}
 		new_source = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_source, tmp_c, MAX_FILEPATH_LENGTH);
+		g_strlcpy (new_source, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 		project->source_list = g_list_append (project->source_list, (gpointer) new_source);
 		xmlFree (tmp_c);
 	}
@@ -251,7 +254,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		}
 		new_resource = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 		tmp_c = xmlNodeGetContent(node);
-		g_strlcpy (new_resource, tmp_c, MAX_FILEPATH_LENGTH);
+		g_strlcpy (new_resource, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 		project->resource_list = g_list_append (project->resource_list, (gpointer) new_resource);
 		xmlFree (tmp_c);
 	}
@@ -261,7 +264,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	}
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->libs, tmp_c, MAX_FILEPATH_LENGTH);
+	g_strlcpy (project->libs, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	child = child->next;
@@ -269,7 +272,7 @@ project_load_xml(CProject *project, const gchar *xml_file)
 		child = child->next;
 	}
 	tmp_c = xmlNodeGetContent(child);
-	g_strlcpy (project->opts, tmp_c, MAX_FILEPATH_LENGTH);
+	g_strlcpy (project->opts, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
 	g_free (type);

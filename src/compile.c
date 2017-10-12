@@ -2,11 +2,11 @@
  * compile.c
  * This file is part of codefox
  *
- * Copyright (C) 2012-2013 - Gordon Lee
+ * Copyright (C) 2012-2017 - Gordon Li
  *
- * This program is free software; you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,9 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
  
 
@@ -42,7 +40,7 @@ compile_compile (gpointer data)
 	FILE *pi;
 	gchar *line;
 	const gchar *path;
-	gint NOUSE;
+	gint ret;
 
 	if (!env_prog_exist (ENV_PROG_MAKE)) {
 		g_warning ("make not found.");
@@ -52,7 +50,13 @@ compile_compile (gpointer data)
 
 	path = (const gchar *) data;
 	fflush (stdin);
-	NOUSE = chdir (path);
+	ret = chdir (path);
+
+	if (ret == -1) {
+		g_error ("can't chdir to %s.", path);
+
+		return NULL;
+	}
 
 	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make 2>&1", "r");
@@ -86,11 +90,17 @@ compile_clear (gpointer data)
 	FILE *pi;
 	gchar *line;
 	const gchar *path;
-	gint NOUSE;
+	gint ret;
 
 	path = (const gchar *) data;
 	fflush (stdin);
-	NOUSE = chdir (path);
+	ret = chdir (path);
+
+	if (ret == -1) {
+		g_error ("can't chdir to %s.", path);
+
+		return NULL;
+	}
 
 	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make clean 2>&1", "r");
