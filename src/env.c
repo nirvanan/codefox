@@ -53,7 +53,7 @@ env_check_external_prog(const gchar *prog)
 	line[0] = '\0';
 	ret = fgets (line, MAX_LINE_LENGTH, pi);
 	if (ret == NULL) {
-		g_error ("failed to read which command output.");
+		g_warning ("failed to read which command output for %s.", prog);
 
 		return FALSE;
 	}
