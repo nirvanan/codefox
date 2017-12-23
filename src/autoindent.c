@@ -321,7 +321,7 @@ autoindent_apply (GtkTextBuffer *buffer, GtkTextIter *iter,
 		
 		nspaces = autoindent_get_nspaces (line1, line2);
 		j = 0;
-		while (line2[j++] == '\t');
+		while (line2[j] && line2[j] == '\t') j++;
 		j += ntabs - 1;
 		if (iter != NULL) {
 			if (nspaces > 0) {

@@ -336,18 +336,14 @@ symbol_read_token (const gchar *line, gchar *token, gint *offset, gint *ftoffset
 static void
 symbol_parse_line (const gchar *line)
 {
-	gchar *name;
-	gchar *type;
-	gchar *token;
+	gchar name[MAX_LINE_LENGTH + 1];
+	gchar type[MAX_LINE_LENGTH + 1];
+	gchar token[MAX_LINE_LENGTH + 1];
 	gint offset;
 	gint ftoffset;
 	CSymbolClass *class_ptr;
 	CSymbolStruct *struct_ptr;
 	CSymbolNamespace *namespace_ptr;
-
-	name = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	type = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	token = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 
 	sscanf(line, "%s", name);
 	offset = 0;
@@ -438,10 +434,6 @@ symbol_parse_line (const gchar *line)
 		token[0] = 0;
 		symbol_read_token (line, token, &offset, &ftoffset);
 		if (token[0] == 0) {
-			g_free ((gpointer) name);
-			g_free ((gpointer) type);
-			g_free ((gpointer) token);
-
 			return;
 		}
 
@@ -463,10 +455,6 @@ symbol_parse_line (const gchar *line)
 			if (line[offset]) {
 				g_strlcpy (function_ptr->sign, line + offset + 10, MAX_SIGN_LENGTH);
 			}
-
-			g_free ((gpointer) name);
-			g_free ((gpointer) type);
-			g_free ((gpointer) token);
 
 			return;
 		}
@@ -571,10 +559,6 @@ symbol_parse_line (const gchar *line)
 		}
 		variable_list = g_list_append (variable_list, variable_ptr);
 	}
-
-	g_free ((gpointer) name);
-	g_free ((gpointer) type);
-	g_free ((gpointer) token);
 }
 
 static void
@@ -611,7 +595,7 @@ symbol_parse (gpointer data)
 {
 	gchar *project_path;
 	FILE *ctags;
-	gchar *line;
+	gchar line[MAX_LINE_LENGTH + 1];
 	gint i;
 	gint ret;
 	gchar *ret2;
@@ -622,71 +606,67 @@ symbol_parse (gpointer data)
 		return FALSE;
 	}
 	symbol_clear ();
-	if (1) {
-		//g_usleep (500000);
 
-		project_path = project_current_path ();
+	project_path = project_current_path ();
 
-		if (project_path == NULL)
-			return TRUE;
+	if (project_path == NULL)
+		return TRUE;
 
-		ret = chdir (project_path);
-		if (ret == -1) {
-			g_error ("failed to chdir to %s while parsing symbol.", project_path);
-			
-			return FALSE;
-		}
+	ret = chdir (project_path);
+	if (ret == -1) {
+		g_error ("failed to chdir to %s while parsing symbol.", project_path);
+		
+		return FALSE;
+	}
 
-		ret = system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
-		if (ret != 0) {
-			g_warning ("executing ctags returned %d.", ret);
+	ret = system ("ctags -R --fields=ksSta --c++-kinds=+l --c-kinds=+l --exclude=Makefile *");
+	if (ret != 0) {
+		g_warning ("executing ctags returned %d.", ret);
 
-			return FALSE;
-		}
+		return FALSE;
+	}
 
-		ctags = g_fopen ("tags", "r");
-		if (ctags == NULL) {
-			g_warning ("can't open tag file, you might want to check whether ctags is installed.");
-			ui_status_entry_new (FILE_OP_WARNING, _("can't open tag file, please check whether ctags is installed."));
+	ctags = g_fopen ("tags", "r");
+	if (ctags == NULL) {
+		g_warning ("can't open tag file, you might want to check whether ctags is installed.");
+		ui_status_entry_new (FILE_OP_WARNING, _("can't open tag file, please check whether ctags is installed."));
 
-			return FALSE;
-		}
+		return FALSE;
+	}
 
-		line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+	for (i = 0; i < 6; i++) {
+		ret2 = fgets (line, MAX_LINE_LENGTH, ctags);
 
-		for (i = 0; i < 6; i++) {
-			ret2 = fgets (line, MAX_LINE_LENGTH, ctags);
+		if (ret2 == NULL) {
+			g_error ("failed to skip tag headers.");
 
-			if (ret2 == NULL) {
-				g_error ("failed to skip tag headers.");
-
-				return FALSE;
-			}
-		}
-
-		symbol_clear ();
-
-		while (fgets (line, MAX_LINE_LENGTH, ctags)) {
-			line[strlen (line) - 1] = 0;
-			symbol_parse_line (line);
-		}
-
-#ifdef SYMBOL_DEBUG
-		symbol_debug ();
-#endif
-
-		g_free ((gpointer) line);
-		fclose ((gpointer) ctags);
-
-		ret = system ("cscope -b");
-
-		if (ret != 0) {
-			g_warning ("cscope returned %d.", ret);
+			/* This is stupid, why doesn't glic provide a g_fclose? */
+			fclose (ctags);
 
 			return FALSE;
 		}
 	}
 
+	symbol_clear ();
+
+	while (fgets (line, MAX_LINE_LENGTH, ctags)) {
+		line[strlen (line) - 1] = 0;
+		symbol_parse_line (line);
+	}
+
+#ifdef SYMBOL_DEBUG
+	symbol_debug ();
+#endif
+
+	fclose ((gpointer) ctags);
+
+	ret = system ("cscope -b");
+
+	if (ret != 0) {
+		g_warning ("cscope returned %d.", ret);
+
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -808,13 +788,13 @@ symbol_get_member_from_type (const gchar *type, GList **funs, GList **vars)
 void
 symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean isptr, GList **funs, GList **vars)
 {
-	gchar *command;
-	gchar *filepath;
+	gchar command[MAX_COMMAND_LENGTH + 1];
+	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 	gchar *project_path;
 	gchar *output;
-	gchar *last_line;
+	gchar last_line[MAX_LINE_LENGTH + 1];
 	FILE *pipe_file;
-	gchar *type;
+	gchar type[MAX_TYPENAME_LENGTH + 1];
 
 	project_path = project_current_path ();
 
@@ -822,11 +802,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		return;
 	}
 	
-	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH + 1);
 	output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
-	last_line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	type = (gchar *) g_malloc (MAX_TYPENAME_LENGTH + 1);
-	filepath = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 
 	if (ui_have_editor ()) {
 		const gchar *code;
@@ -893,11 +869,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		symbol_get_member_from_type (type, funs, vars);
 	}
 
-	g_free ((gpointer) command);
 	g_free ((gpointer) output);
-	g_free ((gpointer) filepath);
-	g_free ((gpointer) last_line);	
-	g_free ((gpointer) type);
 }
 
 void

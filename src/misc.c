@@ -41,10 +41,9 @@
 void
 misc_open_homepage()
 {
-	gchar *command;
+	gchar command[MAX_COMMAND_LENGTH + 1];
 	gint ret;
 
-	command = (gchar *) g_malloc(MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, BROWSER_PATH, MAX_COMMAND_LENGTH);
 	g_strlcat (command, " ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, HOME_PAGE, MAX_COMMAND_LENGTH);
@@ -54,8 +53,6 @@ misc_open_homepage()
 	if (ret != 0) {
 		g_warning ("opening default browser return %d.", ret);
 	}
-
-	g_free ((gpointer) command);
 }
 
 /* Get filesize. */
@@ -198,7 +195,7 @@ misc_file_exist (const gchar *filepath)
 void
 misc_exec_file (const gchar *filepath)
 {
-	gchar *command;
+	gchar command[MAX_COMMAND_LENGTH + 1];
 	gint ret;
 
 	if (!env_prog_exist (ENV_PROG_XTERM)) {
@@ -206,7 +203,6 @@ misc_exec_file (const gchar *filepath)
 
 		return;
 	}
-	command = (gchar *) g_malloc (MAX_COMMAND_LENGTH + 1);
 	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
 	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
 	ret = system (command);
@@ -214,7 +210,5 @@ misc_exec_file (const gchar *filepath)
 	if (ret != 0) {
 		g_warning ("exec returned %d.", ret);
 	}
-	
-	g_free ((gpointer) command);
 }
 

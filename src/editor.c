@@ -324,14 +324,11 @@ ceditor_set_dirty (CEditor *editor, gboolean dirty)
 	}
 	else
 	{
-		gchar *temp;
+		gchar filename[MAX_FILEPATH_LENGTH + 1];
 
-		temp = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-		g_strlcpy (temp + 1, label, MAX_FILEPATH_LENGTH);
-		temp[0] = '*';
-		gtk_label_set_text (GTK_LABEL (editor->label_name), temp);
-
-		g_free ((gpointer) temp);
+		g_strlcpy (filename + 1, label, MAX_FILEPATH_LENGTH);
+		filename[0] = '*';
+		gtk_label_set_text (GTK_LABEL (editor->label_name), filename);
 	}
 }
 
@@ -446,7 +443,7 @@ ceditor_remove_line_label (CEditor *editor, gint lines)
 		return;
 	}
 	
-	text = (gchar *)g_malloc (MAX_LINE_BUFFER_SIZE + 1);
+	text = (gchar *) g_malloc (MAX_LINE_BUFFER_SIZE + 1);
 	g_strlcpy (text, gtk_label_get_text (GTK_LABEL (editor->lineno)), MAX_LINE_BUFFER_SIZE);
 	
 	len = strlen (text);
@@ -817,8 +814,7 @@ void
 ceditor_step_add (CEditor *editor, const gboolean insert, const gint offset, const gint len,
 				  const gchar *text)
 {
-	if (editor->next_modify_omit)
-	{
+	if (editor->next_modify_omit) {
 		editor->next_modify_omit = 0;
 		return;
 	}

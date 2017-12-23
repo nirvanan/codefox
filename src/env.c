@@ -44,7 +44,7 @@ env_check_external_prog(const gchar *prog)
 	pi = popen (cmd, "r");
 
 	if (pi == NULL) {
-		g_error ("can't open opie for which command.");
+		g_error ("can't open pipe for which command.");
 
 		return FALSE;
 	}

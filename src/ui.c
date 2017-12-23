@@ -84,7 +84,7 @@ static const gchar *license =
 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
 "GNU General Public License for more details.\n\n"
 "You should have received a copy of the GNU General Public License\n"
-"along with Codefox. If not, see <http://www.gnu.org/licenses/>.";
+"along with Codefox.  If not, see <http://www.gnu.org/licenses/>.";
 static const gchar *authors[] = {"Gordon Li", NULL};
 
 /*
@@ -310,13 +310,13 @@ static void
 ui_toolpad_init (CWindow *window)
 {
 	GtkTextBuffer *buffer;
-	gchar *time;
+	gchar time[MAX_TIME_LENGTH + 1];
 	GtkTreeStore *store;
 	GtkCellRenderer *renderer;
 	GtkTreeViewColumn *column;
 	GtkTreeSelection *select;
 	GtkTreeIter  iter;
-	gchar *welcome_text;
+	gchar welcome_text[MESSAGE_BUF_SIZE + 1];
 
 	store = gtk_tree_store_new (3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -333,11 +333,9 @@ ui_toolpad_init (CWindow *window)
 	gtk_tree_view_set_model (GTK_TREE_VIEW (window->statustree), GTK_TREE_MODEL (store));
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW(window->statustree));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
-	time = g_malloc (MAX_TIME_LENGTH + 1);
 	misc_time_get_now (time);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
-	welcome_text = g_malloc (MESSAGE_BUF_SIZE);
 	g_strlcpy (welcome_text, _("This is Codefox "), MESSAGE_BUF_SIZE);
 	g_strlcat (welcome_text, PACKAGE_VERSION, MESSAGE_BUF_SIZE);
 	g_strlcat (welcome_text, _(", have fun!"), MESSAGE_BUF_SIZE);
@@ -345,8 +343,6 @@ ui_toolpad_init (CWindow *window)
 					   1, welcome_text, 
 					   2, "Orange", 
 					   -1);
-	g_free ((gpointer) welcome_text);
-	g_free ((gpointer) time);
 
 	store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	column = gtk_tree_view_column_new ();
@@ -788,11 +784,9 @@ ui_status_entry_new (const gint op, const gchar *filepath)
 {
 	GtkTreeStore *store;
 	GtkTreeIter  iter;
-	gchar *message_buf;
-	gchar *time_buf;
+	gchar message_buf[MESSAGE_BUF_SIZE + 1];
+	gchar time_buf[MAX_TIME_LENGTH + 1];
 
-	time_buf = (gchar *) g_malloc (MAX_TIME_LENGTH + 1);
-	message_buf = (gchar *) g_malloc(MESSAGE_BUF_SIZE + 1);
 	misc_time_get_now (time_buf);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
@@ -837,9 +831,6 @@ ui_status_entry_new (const gint op, const gchar *filepath)
 	}
 
 	gtk_tree_store_set (store, &iter, 0, time_buf, 1, message_buf, 2, "gray", -1);
-
-	g_free ((gpointer) time_buf);
-	g_free ((gpointer) message_buf);
 }
 
 /* Create a file choosing dialog and return the file path after user 
@@ -1152,7 +1143,7 @@ ui_current_editor_update_cursor ()
 	GtkTextMark *insert;
 	GtkTextIter iter;
 	gint line, column;
-	gchar *location;
+	gchar location[MAX_LINE_LENGTH + 1];
 	CEditor *editor;
 	
 	editor = ui_get_current_editor ();
@@ -1168,11 +1159,8 @@ ui_current_editor_update_cursor ()
 	line = gtk_text_iter_get_line (&iter);
 	column = gtk_text_iter_get_line_offset (&iter);
 				
-	location = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	g_snprintf (location, MAX_LINE_LENGTH, _(" Line: %d\tColumn: %d"), line + 1, column);
 	gtk_label_set_label (GTK_LABEL (window->locationlabel), location);
-
-	g_free ((gpointer) location);
 }
 
 /* Change current edit mode. */
@@ -1182,11 +1170,10 @@ ui_current_editor_change_mode ()
 	
 	CEditor *editor;
 	gboolean overwrite;
-	gchar *label;
+	gchar label[MAX_LINE_LENGTH + 1];
 	
 	editor = ui_get_current_editor ();
 	overwrite = gtk_text_view_get_overwrite (GTK_TEXT_VIEW (editor->textview));
-	label = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 
 	if (overwrite) {
 		g_snprintf (label, MAX_LINE_LENGTH, _(" Mode: %s"), _("Overwrite"));
@@ -1195,8 +1182,6 @@ ui_current_editor_change_mode ()
 		g_snprintf (label, MAX_LINE_LENGTH, _(" Mode: %s"), _("Insert"));
 	}
 	gtk_label_set_label (GTK_LABEL (window->modelabel), label);
-
-	g_free ((gpointer) label);
 }
 
 /* Update line number label after editing code. */
@@ -1437,17 +1422,12 @@ ui_filetree_menu_popup ()
 	gint isfile;
 	gint child;
 
-	name = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	filetree_get_current_store (GTK_TREE_VIEW (window->filetree), &name, &path, &isfile, &child);
 	gtk_widget_show(GTK_WIDGET (filetree_menu->add_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->create_item));
 	gtk_widget_show(GTK_WIDGET (filetree_menu->delete_item));
 
 	if (child == -1) {
-		g_free ((gpointer) name);
-		g_free ((gpointer) path);
-
 		return;
 	}
 
@@ -1461,9 +1441,6 @@ ui_filetree_menu_popup ()
 	}
 
 	gtk_menu_popup_at_pointer (GTK_MENU (filetree_menu->menu), NULL);
-
-	g_free ((gpointer) name);
-	g_free ((gpointer) path);
 }
 
 void
@@ -1622,13 +1599,12 @@ ui_current_editor_error_tag_add (const gint row, const gint column, const gint l
 void
 ui_function_autocomplete (const gchar *name, const GList *signs)
 {
-	gchar *full;
+	gchar full[MAX_TIP_LENGTH + 1];
 	gint x, y;
 	gint win_x, win_y;
 	GList *iterator;
 	GdkWindow *win;
 
-	full = (gchar *) g_malloc (MAX_TIP_LENGTH + 1);
 	full[0] = 0;
 	for (iterator = (GList *) signs; iterator; iterator = iterator->next) {
 		g_strlcat (full, name, MAX_TIP_LENGTH);
@@ -1648,8 +1624,6 @@ ui_function_autocomplete (const gchar *name, const GList *signs)
 	gtk_widget_show_all (GTK_WIDGET (function_tip->tip_window));
 
 	function_tip->active = TRUE;
-
-	g_free ((gpointer) full);
 }
 
 void

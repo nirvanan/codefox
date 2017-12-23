@@ -123,7 +123,7 @@ project_save_xml(CProject *project)
 	xmlNodePtr root_node;
 	xmlNodePtr node;
 	GList *iterator;
-	gchar *xml_path;
+	gchar xml_path[MAX_FILEPATH_LENGTH + 1];
 
 	doc = xmlNewDoc(BAD_CAST ("1.0"));
 	root_node = xmlNewNode(NULL, BAD_CAST ("Project"));
@@ -159,15 +159,12 @@ project_save_xml(CProject *project)
 	xmlNewChild(root_node, NULL, BAD_CAST ("LIBS"), BAD_CAST (project->libs));
 	xmlNewChild(root_node, NULL, BAD_CAST ("OPTS"), BAD_CAST (project->opts));
 
-	xml_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	g_strlcpy (xml_path, project->project_path, MAX_FILEPATH_LENGTH);
 	g_strlcat (xml_path, "/project.cfp", MAX_FILEPATH_LENGTH);
 	xmlSaveFormatFileEnc(xml_path, doc, "UTF-8", 1);
 
 	xmlFreeDoc(doc);
 	xmlCleanupParser();
-
-	g_free ((gpointer) xml_path);
 }
 
 static void 
@@ -178,11 +175,10 @@ project_load_xml(CProject *project, const gchar *xml_file)
 	xmlNodePtr child;
 	xmlNodePtr node;
 	xmlChar *tmp_c;
-	gchar *type;
+	gchar type[MAX_FILEPATH_LENGTH + 1];
 
 	doc = xmlReadFile(xml_file, "UTF-8", 0);
 	root_node = xmlDocGetRootElement(doc);
-	type = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	child = root_node->children;
 	while (child->type != XML_ELEMENT_NODE) {
 		child = child->next;
@@ -275,7 +271,6 @@ project_load_xml(CProject *project, const gchar *xml_file)
 	g_strlcpy (project->opts, (const gchar*) tmp_c, MAX_FILEPATH_LENGTH);
 	xmlFree (tmp_c);
 
-	g_free (type);
 	xmlFreeDoc (doc);
 }
 
@@ -400,11 +395,9 @@ project_delete_file(const gchar *filepath, const gint file_type)
 static void
 project_generate_makefile(CProject *project)
 {
-	gchar *makefile_path;
-	gchar *makefile_buf;
+	gchar makefile_path[MAX_FILEPATH_LENGTH + 1];
+	gchar makefile_buf[MAX_FILEPATH_LENGTH + 1];
 
-	makefile_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	makefile_buf = (gchar *) g_malloc (MAX_MAKEFILE_LENGTH + 1);
 	g_strlcpy (makefile_path, project->project_path, MAX_FILEPATH_LENGTH);
 	g_strlcat (makefile_path, "/Makefile", MAX_FILEPATH_LENGTH);
 
@@ -451,9 +444,6 @@ project_generate_makefile(CProject *project)
 	g_strlcat (makefile_buf, "rebuild: clean all\n", MAX_MAKEFILE_LENGTH);
 
 	misc_set_file_content (makefile_path, makefile_buf);
-
-	g_free ((gpointer) makefile_path);
-	g_free ((gpointer) makefile_buf);
 }
 
 gchar *

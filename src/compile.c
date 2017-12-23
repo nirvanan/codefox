@@ -38,7 +38,7 @@ static gpointer
 compile_compile (gpointer data)
 {
 	FILE *pi;
-	gchar *line;
+	gchar line[MAX_LINE_LENGTH + 1];
 	const gchar *path;
 	gint ret;
 
@@ -58,7 +58,6 @@ compile_compile (gpointer data)
 		return NULL;
 	}
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make 2>&1", "r");
 
 	if (pi == NULL) {
@@ -77,8 +76,6 @@ compile_compile (gpointer data)
 	done = TRUE;
 	g_mutex_unlock (&compile_mutex);
 
-	g_free (line);
-
 	pclose (pi);
 
 	return NULL;
@@ -88,7 +85,7 @@ static gpointer
 compile_clear (gpointer data)
 {
 	FILE *pi;
-	gchar *line;
+	gchar line[MAX_LINE_LENGTH + 1];
 	const gchar *path;
 	gint ret;
 
@@ -102,7 +99,6 @@ compile_clear (gpointer data)
 		return NULL;
 	}
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	pi = popen ("make clean 2>&1", "r");
 
 	if (pi == NULL) {
@@ -113,7 +109,6 @@ compile_clear (gpointer data)
 
 	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_mutex_lock (&compile_mutex);
-
 		g_strlcat (buffer, line, MAX_RESULT_LENGTH);
 		g_mutex_unlock (&compile_mutex);
 	}
@@ -121,8 +116,6 @@ compile_clear (gpointer data)
 	g_mutex_lock (&compile_mutex);
 	done = TRUE;
 	g_mutex_unlock (&compile_mutex);
-
-	g_free (line);
 
 	pclose (pi);
 
@@ -187,13 +180,11 @@ void
 compile_static_check (const gchar *filepath, const gint type, const gchar *libs, gchar *output)
 {
 	FILE *pi;
-	gchar *line;
-	gchar *command;
+	gchar line[MAX_LINE_LENGTH + 1];
+	gchar command[MAX_LINE_LENGTH + 1];
 
 	fflush (stdin);
 
-	line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	command = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	g_strlcpy (command, type? "g++ -S -Wall ": "gcc -S -Wall ", MAX_LINE_LENGTH);
 	if (strlen (libs) > 0) {
 		g_strlcat (command, "`pkg-config --cflags ", MAX_LINE_LENGTH);
@@ -202,7 +193,6 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 	}
 	g_strlcat (command, filepath, MAX_LINE_LENGTH);
 	g_strlcat (command, " 2>&1", MAX_LINE_LENGTH);
-
 
 	output[0] = 0;
 
@@ -213,11 +203,9 @@ compile_static_check (const gchar *filepath, const gint type, const gchar *libs,
 		
 		return;
 	}
-	while (fgets (line, MAX_LINE_LENGTH, pi))
+	while (fgets (line, MAX_LINE_LENGTH, pi)) {
 		g_strlcat (output, line, MAX_RESULT_LENGTH);
-
-	g_free ((gpointer) line);
-	g_free ((gpointer) command);
+	}
 
 	pclose (pi);
 }

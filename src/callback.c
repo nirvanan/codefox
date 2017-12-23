@@ -712,24 +712,23 @@ on_delete_file_clicked (GtkWidget *widget, gpointer user_data)
 void
 on_open_project (GtkWidget *widget, gpointer user_data)
 {
-	gchar *filepath;
+	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 	gchar *project_name;
 	gchar *project_path;
-	gchar *project_root;
 	gint offset;
 	GList *fold1;
 	GList *fold2;
 	GList *fold3;
 
-	filepath = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	ui_get_filepath_from_dialog (filepath, MAX_FILEPATH_LENGTH, TRUE, TRUE, NULL);
 
 	if (g_strcmp0 (filepath, "NULL") != 0) {
+		gchar project_root[MAX_FILEPATH_LENGTH + 1];
+
 		project_new_from_xml (filepath);
 		project_get_file_lists (&fold1, &fold2, &fold3);
 		project_path = project_current_path ();
 		project_name = project_current_name ();
-		project_root = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 		g_strlcpy (project_root, project_path, MAX_FILEPATH_LENGTH);
 		offset = misc_get_file_name_in_path (project_path);
 		project_root[offset] = 0;
@@ -743,31 +742,21 @@ on_open_project (GtkWidget *widget, gpointer user_data)
 
 		ui_set_window_title (project_name);
 		ui_set_project_label (project_name);
-
-		g_free ((gpointer) project_root);
 	}
-
-
-	g_free ((gpointer) filepath);
 }
 
 void
 on_project_settings_clicked (GtkWidget *widget, gpointer user_data)
 {
 	gint response;
-	gchar *libs;
-	gchar *opts;
+	gchar libs[MAX_FILEPATH_LENGTH + 1];
+	gchar opts[MAX_FILEPATH_LENGTH + 1];
 
-	libs = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	opts = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	project_get_settings (libs, MAX_OPTION_LENGTH, opts, MAX_OPTION_LENGTH);
 	response = ui_project_settings_dialog_new (libs, opts);
 
 	if (response) {
 		ui_project_settings_dialog_destory ();
-
-		g_free ((gpointer) libs);
-		g_free ((gpointer) opts);
 
 		return;
 	}
@@ -775,9 +764,6 @@ on_project_settings_clicked (GtkWidget *widget, gpointer user_data)
 	ui_project_settings_dialog_info (libs, opts);
 	project_set_settings (libs, opts);
 	ui_project_settings_dialog_destory ();
-
-	g_free ((gpointer) libs);
-	g_free ((gpointer) opts);
 }
 
 void
@@ -816,38 +802,32 @@ void
 on_line_label_2clicked (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
 	GdkEventButton *bevent;
-	gchar *breakpoint_desc;
+	gchar breakpoint_desc[MAX_FILEPATH_LENGTH + 1];
 	
 	bevent = (GdkEventButton *) event;
 	if (bevent->type != GDK_2BUTTON_PRESS) {
 		return;
 	}
 
-	breakpoint_desc = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	ui_current_editor_breakpoint_update (bevent->x, bevent->y, breakpoint_desc);
 
 	if (debug_is_active ()) {
 		debug_breakpoint_update (breakpoint_desc);
 	}
-
-	g_free ((gpointer) breakpoint_desc);
 }
 
 void
 on_watchtree_edited (GtkCellRendererText *cell, gchar *path_string,
 					 gchar *new_text,  gpointer user_data)
 {
-	gchar *value;
+	gchar value[MAX_LINE_LENGTH + 1];
 
 	if (new_text[0] == 0) {
 		return;
 	}
 
-	value = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	debug_expression_value (new_text, value, MAX_LINE_LENGTH);
 	ui_watchtree_cell_change (path_string, new_text, value);
-
-	g_free ((gpointer) value);
 }
 
 void
@@ -855,13 +835,13 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 {
 	gchar *action;
 	gint line;
-	gchar *name;
-	gchar *value;
-	gchar *frame_name;
-	gchar *frame_args;
-	gchar *file_line;
+	gchar name[MAX_LINE_LENGTH + 1];
+	gchar value[MAX_LINE_LENGTH + 1];
+	gchar frame_name[MAX_LINE_LENGTH + 1];
+	gchar frame_args[MAX_LINE_LENGTH + 1];
+	gchar file_line[MAX_LINE_LENGTH + 1];
 	gchar *project_path;
-	gchar *filename;
+	gchar filename[MAX_FILEPATH_LENGTH + 1];
 	gchar filepath[MAX_FILEPATH_LENGTH + 1];
 	GList *output_list;
 	GList *value_list;
@@ -904,7 +884,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 		debug_command_exec ("c", NULL, NULL);
 	}
 
-	filename = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
 	debug_current_file_line (g_strcmp0 (action, DEBUG_WIDGET_START) == 0,
 							 filename, MAX_FILEPATH_LENGTH, &line);
 
@@ -919,8 +898,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 			g_strcmp0 (action, DEBUG_WIDGET_CONTINUE) == 0) {
 			ui_debug_view_clear ();
 			ui_debug_ptr_remove ();
-
-			g_free ((gpointer) filename);
 
 			return;
 		}
@@ -939,8 +916,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	if (!misc_file_exist (filepath) || filename[0] == 0) {
 		debug_command_exec ("c", NULL, NULL);
 
-		g_free ((gpointer) filename);
-
 		return;
 	}
 
@@ -958,8 +933,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 	output_list = NULL;
 	debug_current_locals (&output_list);
-	name = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	value = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	for (iterator = output_list; iterator; iterator = iterator->next) {
 		gchar *local;
 
@@ -974,9 +947,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	output_list = NULL;
 
 	debug_current_stack (&output_list);
-	frame_name = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	frame_args = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-	file_line = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
 	for (iterator = output_list; iterator; iterator = iterator->next) {
 		gchar *line;
 
@@ -993,13 +963,13 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 	ui_debug_view_get_all_expression (&output_list);
 	value_list = NULL;
 	for (iterator = output_list; iterator; iterator = iterator->next) {
-		gchar *line;
-		gchar *value;
+		gchar *expression;
+		gchar *exp_value;
 
-		line = (gchar *) iterator->data;
-		value = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
-		debug_expression_value (line, value, MAX_LINE_LENGTH);
-		value_list = g_list_append (value_list, (gpointer) value);
+		expression = (gchar *) iterator->data;
+		exp_value = (gchar *) g_malloc (MAX_LINE_LENGTH + 1);
+		debug_expression_value (expression, exp_value, MAX_LINE_LENGTH);
+		value_list = g_list_append (value_list, (gpointer) exp_value);
 	}
 	ui_debug_view_set_values (value_list);
 
@@ -1013,13 +983,6 @@ on_debug_action_clicked (GtkWidget *widget, gpointer user_data)
 
 		g_timeout_add (200, debug_monitor, NULL);
 	}
-
-	g_free ((gpointer) name);
-	g_free ((gpointer) value);
-	g_free ((gpointer) frame_name);
-	g_free ((gpointer) frame_args);
-	g_free ((gpointer) file_line);
-	g_free ((gpointer) filename);
 }
 
 void
