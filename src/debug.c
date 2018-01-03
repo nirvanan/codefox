@@ -131,9 +131,7 @@ debug_startup (const gchar *project_path, const gchar *project_name)
 	gdb_pid = (pid_t) 0;
 	proc_pid = (pid_t) 0;
 
-	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
-	g_strlcat (exe_path, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
+	g_snprintf (exe_path, MAX_FILEPATH_LENGTH, "%s/%s", project_path, project_name);
 
 	target_pid = fork ();
 	if (target_pid == 0) {
@@ -332,9 +330,8 @@ debug_connect (const gchar *project_path, const gchar *project_name)
 	gint len;
 
 	output = (gchar *) g_malloc (MAX_RESULT_LENGTH + 1);
-	g_strlcpy (exe_path, project_path, MAX_FILEPATH_LENGTH);
-	g_strlcat (exe_path, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (exe_path, project_name, MAX_FILEPATH_LENGTH);
+
+	g_snprintf (exe_path, MAX_FILEPATH_LENGTH, "%s/%s", project_path, project_name);
 
 	debug_command_exec ("target remote", GDB_SERVER_PORT_ARG, NULL);
 	debug_command_exec ("info", "proc", output);

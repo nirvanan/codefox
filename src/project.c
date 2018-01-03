@@ -48,10 +48,10 @@ project_path_init ()
 	gboolean suc;
 
 	default_projects_root = (gchar *) malloc(MAX_FILEPATH_LENGTH + 1);
-	g_strlcpy (default_projects_root, g_getenv("HOME"), MAX_FILEPATH_LENGTH);
-	g_strlcat (default_projects_root, "/Projects", MAX_FILEPATH_LENGTH);
-	suc = g_mkdir (default_projects_root, DIR_MODE);
 
+	g_snprintf (default_projects_root, MAX_FILEPATH_LENGTH, "%s/Projects", g_getenv("HOME"));
+
+	suc = g_mkdir (default_projects_root, DIR_MODE);
 	if (suc == 0) {
 		g_message ("default projects root is created.");
 	}
@@ -81,21 +81,20 @@ project_new(const gchar *project_name, const gchar *project_dir, const CProjectT
 	new_project = (CProject *) g_malloc (sizeof (CProject));
 	project_init (new_project);
 	g_strlcpy (new_project->project_name, project_name, MAX_FILEPATH_LENGTH);
-	g_strlcpy (new_project->project_path, project_dir == NULL? default_projects_root: project_dir, MAX_FILEPATH_LENGTH);
-	g_strlcat (new_project->project_path, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (new_project->project_path, project_name, MAX_FILEPATH_LENGTH);
+	g_snprintf (new_project->project_path, MAX_FILEPATH_LENGTH, "%s/%s",
+				project_dir == NULL? default_projects_root: project_dir,
+				project_name);
 	new_project->project_type = project_type;
+
 	suc = g_mkdir (new_project->project_path, DIR_MODE);
-	
 	if (suc == -1) {
 		g_error ("failed to create project directory %s.", new_project->project_path);
 
 		g_free ((gpointer) new_project);
 	}
+
 	project_save_xml(new_project);
-
 	project = new_project;
-
 	project_generate_makefile (project);
 
 	return new_project;
@@ -287,11 +286,10 @@ project_create_empty (const gchar *filepath, const gchar *filename, const gint f
 	gboolean suc;
 
 	final_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	g_strlcpy (final_path, filepath, MAX_FILEPATH_LENGTH);
-	g_strlcat (final_path, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (final_path, filename, MAX_FILEPATH_LENGTH);
-	suc = misc_create_file (final_path);
 
+	g_snprintf (final_path, MAX_FILEPATH_LENGTH, "%s/%s", filepath, filename);
+
+	suc = misc_create_file (final_path);
 	if (suc) {
 		switch (file_type) {
 		case FILE_HEADER:
@@ -317,11 +315,10 @@ project_add_file(const gchar *filepath, const gchar *filename, const gchar *loca
 	gboolean suc;
 
 	final_path = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	g_strlcpy (final_path, filepath, MAX_FILEPATH_LENGTH);
-	g_strlcat (final_path, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (final_path, filename, MAX_FILEPATH_LENGTH);
-	suc = misc_copy_file (local_file, final_path);
 
+	g_snprintf (final_path, MAX_FILEPATH_LENGTH, "%s/%s", filepath, filename);
+
+	suc = misc_copy_file (local_file, final_path);
 	if (suc) {
 		switch (file_type) {
 		case FILE_HEADER:
@@ -398,8 +395,7 @@ project_generate_makefile(CProject *project)
 	gchar makefile_path[MAX_FILEPATH_LENGTH + 1];
 	gchar makefile_buf[MAX_FILEPATH_LENGTH + 1];
 
-	g_strlcpy (makefile_path, project->project_path, MAX_FILEPATH_LENGTH);
-	g_strlcat (makefile_path, "/Makefile", MAX_FILEPATH_LENGTH);
+	g_snprintf (makefile_path, MAX_FILEPATH_LENGTH, "%s/Makefile", project->project_path);
 
 	if (project->project_type == PROJECT_C) {
 		g_strlcpy (makefile_buf, "CC=gcc\n", MAX_MAKEFILE_LENGTH);

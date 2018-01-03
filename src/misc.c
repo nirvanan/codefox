@@ -32,9 +32,10 @@
 #include "env.h"
 #include "limits.h"
 
-/* FIXME: ... */
-#define BROWSER_PATH "/usr/bin/firefox"
-#define HOME_PAGE "https://github.com/nirvanan/Codefox"
+/* This script shall open default browser in GNOME desktop. */
+#define BROWSER_PATH "/etc/alternatives/gnome-www-browser"
+
+#define HOME_PAGE "https://github.com/nirvanan/codefox"
 
 /* Open homepage using default browser. */
 /* FIXME: find default browser. */
@@ -44,12 +45,9 @@ misc_open_homepage()
 	gchar command[MAX_COMMAND_LENGTH + 1];
 	gint ret;
 
-	g_strlcpy (command, BROWSER_PATH, MAX_COMMAND_LENGTH);
-	g_strlcat (command, " ", MAX_COMMAND_LENGTH);
-	g_strlcat (command, HOME_PAGE, MAX_COMMAND_LENGTH);
+	g_snprintf (command, MAX_COMMAND_LENGTH, "%s %s &", BROWSER_PATH, HOME_PAGE);
 
 	ret = system(command);
-
 	if (ret != 0) {
 		g_warning ("opening default browser return %d.", ret);
 	}
@@ -203,10 +201,10 @@ misc_exec_file (const gchar *filepath)
 
 		return;
 	}
-	g_strlcpy (command, "xterm -e ", MAX_COMMAND_LENGTH);
-	g_strlcat (command, filepath, MAX_COMMAND_LENGTH);
-	ret = system (command);
 
+	g_snprintf (command, MAX_COMMAND_LENGTH, "xterm -e %s", filepath);
+
+	ret = system (command);
 	if (ret != 0) {
 		g_warning ("exec returned %d.", ret);
 	}

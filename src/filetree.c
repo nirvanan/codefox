@@ -262,18 +262,14 @@ filetree_init (GtkTreeView *tree)
 void
 filetree_project_init (GtkTreeView *tree, const gchar *project_name, const gchar *project_dir)
 {
-	gchar *root_dir;
+	gchar root_dir[MAX_FILEPATH_LENGTH + 1];
 
-	root_dir = (gchar *) g_malloc (MAX_FILEPATH_LENGTH + 1);
-	g_strlcpy (root_dir, project_dir, MAX_FILEPATH_LENGTH);
-	g_strlcat (root_dir, "/", MAX_FILEPATH_LENGTH);
-	g_strlcat (root_dir, project_name, MAX_FILEPATH_LENGTH);
+	g_snprintf (root_dir, MAX_FILEPATH_LENGTH, "%s/%s", project_dir, project_name);
+
 	filetree_append (tree, NULL, 0, project_name, project_dir);
 	filetree_append_to_default (tree, 0, _("header"), root_dir);
 	filetree_append_to_default (tree, 0, _("source"), root_dir);
 	filetree_append_to_default (tree, 0, _("resource"), root_dir);
-
-	g_free ((gpointer) root_dir);
 }
 
 /* Append a item in current folder. */

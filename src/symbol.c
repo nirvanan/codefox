@@ -810,16 +810,9 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		code = ui_current_editor_code ();
 
 		if (code != NULL) {
-			g_strlcpy (filepath, project_path, MAX_LINE_LENGTH);
-			g_strlcat (filepath, "/", MAX_LINE_LENGTH);
-			g_strlcat (filepath, ".symbol.", MAX_LINE_LENGTH);
-
-			if (project_get_type () == PROJECT_C) {
-				g_strlcat (filepath, "c", MAX_LINE_LENGTH);
-			}
-			else {
-				g_strlcat (filepath, "cpp", MAX_LINE_LENGTH);
-			}
+			g_snprintf (filepath, MAX_FILEPATH_LENGTH, "%s/.symbol.%s",
+						project_path,
+						project_get_type () == PROJECT_C? "c": "cpp");
 
 			misc_set_file_content (filepath, code);
 
@@ -827,10 +820,7 @@ symbol_variable_get_member (const gchar *name, const gint lineno, const gboolean
 		}
 	}
 
-	g_strlcpy (command, "cscope -L0 ", MAX_LINE_LENGTH);
-	g_strlcat (command, name, MAX_LINE_LENGTH);
-	g_strlcat (command, " ", MAX_LINE_LENGTH);
-	g_strlcat (command, filepath, MAX_LINE_LENGTH);
+	g_snprintf (command, MAX_LINE_LENGTH, "cscope -L0 %s %s", name, filepath);
 
 	pipe_file = popen (command, "r");
 	last_line[0] = 0;

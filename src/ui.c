@@ -336,9 +336,11 @@ ui_toolpad_init (CWindow *window)
 	misc_time_get_now (time);
 	store = GTK_TREE_STORE (gtk_tree_view_get_model (GTK_TREE_VIEW (window->statustree)));
 	gtk_tree_store_append (store, &iter, NULL);
-	g_strlcpy (welcome_text, _("This is Codefox "), MESSAGE_BUF_SIZE);
-	g_strlcat (welcome_text, PACKAGE_VERSION, MESSAGE_BUF_SIZE);
-	g_strlcat (welcome_text, _(", have fun!"), MESSAGE_BUF_SIZE);
+	g_snprintf (welcome_text, MESSAGE_BUF_SIZE, "%s %s%s",
+				_("This is Codefox"),
+				PACKAGE_VERSION,
+				_(", have fun!"));
+
 	gtk_tree_store_set(store, &iter, 0, time,
 					   1, welcome_text, 
 					   2, "Orange", 
@@ -796,37 +798,28 @@ ui_status_entry_new (const gint op, const gchar *filepath)
 		g_strlcpy (message_buf, _("An untitled file has been created."), MESSAGE_BUF_SIZE);
 		break;
 	case FILE_OP_SAVE:
-		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been saved."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s", filepath, _("has been saved."));
 		break;
 	case FILE_OP_OPEN:
-		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been opened."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s", filepath, _("has been opened."));
 		break;
 	case FILE_OP_NEW_PROJECT:
-		g_strlcpy (message_buf, "A new project ", MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been created."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s %s", _("A new project"), filepath, _("has been created."));
 		break;
 	case FILE_OP_ADD_FILE:
-		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been added to current project."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s", filepath, _("has been added to current project."));
 		break;
 	case FILE_OP_CREATE_FILE:
-		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been created and added to current project."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s", filepath, _("has been created and added to current project."));
 		break;
 	case FILE_OP_DELETE_FILE:
-		g_strlcpy (message_buf, filepath, MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, _(" has been removed from project."), MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s %s", filepath, _("has been removed from project."));
 		break;
 	case FILE_OP_WARNING:
-		g_strlcpy (message_buf, _("WARNING: "), MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, filepath, MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s%s", _("WARNING: "), filepath);
 		break;
 	case FILE_OP_ERROR:
-		g_strlcpy (message_buf, _("ERROR: "), MESSAGE_BUF_SIZE);
-		g_strlcat (message_buf, filepath, MESSAGE_BUF_SIZE);
+		g_snprintf (message_buf, MESSAGE_BUF_SIZE, "%s%s", _("ERROR: "), filepath);
 		break;
 	}
 
@@ -1386,9 +1379,10 @@ ui_start_project (const gchar *project_name, const gchar *project_path)
 	gchar title[MAX_FILEPATH_LENGTH + 1];
 
 	filetree_project_init (GTK_TREE_VIEW (window->filetree), project_name, project_path);
-	g_strlcat (title, project_name, MAX_FILEPATH_LENGTH);
-	g_strlcat (title, " - ", MAX_FILEPATH_LENGTH);
-	g_strlcpy (title, gtk_window_get_title (GTK_WINDOW (window->toplevel)), MAX_FILEPATH_LENGTH);
+
+	g_snprintf (title, MAX_FILEPATH_LENGTH, "%s - %s",
+				gtk_window_get_title (GTK_WINDOW (window->toplevel)),
+				project_name);
 	
 	gtk_window_set_title (GTK_WINDOW (window->toplevel), title);
 }

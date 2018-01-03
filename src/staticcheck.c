@@ -50,8 +50,8 @@ static_check (gpointer data)
 	if (!ui_have_editor ()) {
 		return TRUE;
 	}
-	ui_current_editor_filepath (file_path);
 
+	ui_current_editor_filepath (file_path);
 	if (project_path == NULL) {
 		project_path = project_current_path ();
 	}
@@ -72,16 +72,11 @@ static_check (gpointer data)
 
 	project_type = project_get_type ();
 	project_get_settings (libs, MAX_LINE_LENGTH, NULL, 0);
-	g_strlcpy (code_path, project_path, MAX_LINE_LENGTH);
-	g_strlcat (code_path, "/", MAX_LINE_LENGTH);
-	g_strlcat (code_path, ".static.", MAX_LINE_LENGTH);
-	g_strlcat (code_path, project_type? "cpp": "c", MAX_LINE_LENGTH);
+	g_snprintf (code_path, MAX_LINE_LENGTH, "%s/.static.%s",
+				project_path, project_type? "cpp": "c");
+
 	code = ui_current_editor_code ();
-
 	if (code == NULL) {
-		g_free ((gpointer) code_path);
-		g_free ((gpointer) libs);
-
 		return TRUE;
 	}
 
