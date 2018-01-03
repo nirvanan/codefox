@@ -45,6 +45,12 @@ misc_open_homepage()
 	gchar command[MAX_COMMAND_LENGTH + 1];
 	gint ret;
 
+	if (!misc_file_exist (BROWSER_PATH)) {
+		g_warning ("can't find default browser.");
+
+		return;
+	}
+
 	g_snprintf (command, MAX_COMMAND_LENGTH, "%s %s &", BROWSER_PATH, HOME_PAGE);
 
 	ret = system(command);
