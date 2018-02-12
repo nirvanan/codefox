@@ -46,8 +46,8 @@ static gchar *keywords[] =
 };
 
 typedef struct Trie {
-    struct Trie *sub[128];
-    gint flag;
+	struct Trie *sub[128];
+	gint flag;
 } CTrie;
 
 static CTrie *trie;
@@ -55,31 +55,31 @@ static CTrie *trie;
 static CTrie *
 keywords_trie_create ()
 {
-    CTrie *ret = (CTrie *) g_malloc (sizeof (CTrie));
-    
+	CTrie *ret = (CTrie *) g_malloc (sizeof (CTrie));
+	
 	if (!ret) {
 		g_error ("faild to create trie.");
 
 		return NULL;
 	}
 
-    memset (ret, 0, sizeof(CTrie));
-    
-    return ret;
+	memset (ret, 0, sizeof(CTrie));
+	
+	return ret;
 }
 
 /** Inserts a word into the trie. */
 static void
 keywords_trie_insert (CTrie *obj, gchar *word)
 {
-    gchar *t = word;
-    CTrie *h = obj;
-    
-    if (!obj || !word || !word[0]) {
-        return;
-    }
-    while (t[0]) {
-        CTrie *n;
+	gchar *t = word;
+	CTrie *h = obj;
+	
+	if (!obj || !word || !word[0]) {
+		return;
+	}
+	while (t[0]) {
+		CTrie *n;
 		
 		if (!h->sub[(gint) t[0]]) {
 			n = (CTrie *) g_malloc (sizeof (CTrie));
@@ -88,50 +88,50 @@ keywords_trie_insert (CTrie *obj, gchar *word)
 		else {
 			n = h->sub[(gint) t[0]];
 		};
-        h->sub[(gint) t[0]] = n;
-        if (!t[1]) {
-            n->flag = 1;
-        }
-        t++;
-        h = n;
-    }
+		h->sub[(gint) t[0]] = n;
+		if (!t[1]) {
+			n->flag = 1;
+		}
+		t++;
+		h = n;
+	}
 }
 
 static gint
 keywords_trie_search (CTrie *obj, gchar *word) {
-    if (!obj || !word || !word[0]) {
-        return 0;
-    }
-    if (!word[1]) {
+	if (!obj || !word || !word[0]) {
+		return 0;
+	}
+	if (!word[1]) {
 		return obj->sub[(gint) word[0]] && obj->sub[(gint) word[0]]->flag;
-    }
-    return obj->sub[(gint) word[0]]? keywords_trie_search(obj->sub[(gint) word[0]], word + 1): 0;
+	}
+	return obj->sub[(gint) word[0]]? keywords_trie_search(obj->sub[(gint) word[0]], word + 1): 0;
 }
 
 /*
 static gint
 keywords_trie_starts_with (CTrie* obj, gchar *prefix) {
-    if (!obj || !prefix || !prefix[0]) {
-        return 0;
-    }
-    if (!prefix[1]) {
-        return obj->sub[prefix[0] - 'a'] != NULL;
-    }
+	if (!obj || !prefix || !prefix[0]) {
+		return 0;
+	}
+	if (!prefix[1]) {
+		return obj->sub[prefix[0] - 'a'] != NULL;
+	}
 
-    return obj->sub[prefix[0] - 'a']? keywords_trie_starts_with(obj->sub[prefix[0] - 'a'], prefix + 1): 0;
+	return obj->sub[prefix[0] - 'a']? keywords_trie_starts_with(obj->sub[prefix[0] - 'a'], prefix + 1): 0;
 }
 
 static void
 keywords_trie_free (CTrie* obj) {
-    if (!obj) {
-        return;
-    }
+	if (!obj) {
+		return;
+	}
 
-    for (gint i = 0; i < 26; i++) {
-        keywords_trie_free (obj->sub[i]);
-    }
+	for (gint i = 0; i < 26; i++) {
+		keywords_trie_free (obj->sub[i]);
+	}
 
-    g_free (obj);
+	g_free (obj);
 }
 */
 
