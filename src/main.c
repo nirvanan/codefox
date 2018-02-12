@@ -56,10 +56,21 @@ timer(gpointer data)
 	return TRUE;
 }
 
-void
+static void
 start_timer()
 {
 	g_timeout_add (500, timer, NULL);
+}
+
+static void
+modules_init ()
+{
+	project_path_init ();
+	project_mutex_init ();
+	highlight_init ();
+	env_init ();
+	ui_init ();
+	symbol_init ();
 }
 
 int
@@ -72,11 +83,8 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	project_path_init ();
-	project_mutex_init ();
-	env_init ();
-	ui_init ();
-	symbol_init ();
+	modules_init ();
+
 	start_timer ();
 
 	/* Main loop. */

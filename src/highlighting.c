@@ -28,6 +28,12 @@
 
 static gchar lex[MAX_LEX_SIZE + 1];
 
+void
+highlight_init ()
+{
+	keywords_init ();
+}
+
 void 
 highlight_register (GtkTextBuffer *buffer)
 {  
@@ -51,18 +57,7 @@ static gboolean
 highlight_is_keyword (gchar *word)
 {
 	/* Check whether word is a C/C++ keyword. */
-	gint i;
-	
-	for (i = 0; keywords[i]; i++) {
-		gchar *keyword;
-		
-		keyword = keywords[i];
-		if (g_strcmp0 (keyword, word) == 0) {
-			return 1;
-		}
-	}
-	
-	return 0;
+	return keywords_is_keyword (word);
 }
 
 void

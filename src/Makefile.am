@@ -26,6 +26,7 @@ codefox_SOURCES = autoindent.c \
 	ui.c \
 	ui.h \
 	keywords.h \
+	keywords.c \
 	prefix.c \
 	prefix.h \
 	project.c \

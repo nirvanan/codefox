@@ -115,11 +115,11 @@ am_codefox_OBJECTS = codefox-autoindent.$(OBJEXT) \
 	codefox-highlighting.$(OBJEXT) codefox-main.$(OBJEXT) \
 	codefox-misc.$(OBJEXT) codefox-staticcheck.$(OBJEXT) \
 	codefox-symbol.$(OBJEXT) codefox-tag.$(OBJEXT) \
-	codefox-ui.$(OBJEXT) codefox-prefix.$(OBJEXT) \
-	codefox-project.$(OBJEXT) codefox-editorconfig.$(OBJEXT) \
-	codefox-debug.$(OBJEXT) codefox-debugview.$(OBJEXT) \
-	codefox-edithistory.$(OBJEXT) codefox-search.$(OBJEXT) \
-	codefox-env.$(OBJEXT)
+	codefox-ui.$(OBJEXT) codefox-keywords.$(OBJEXT) \
+	codefox-prefix.$(OBJEXT) codefox-project.$(OBJEXT) \
+	codefox-editorconfig.$(OBJEXT) codefox-debug.$(OBJEXT) \
+	codefox-debugview.$(OBJEXT) codefox-edithistory.$(OBJEXT) \
+	codefox-search.$(OBJEXT) codefox-env.$(OBJEXT)
 codefox_OBJECTS = $(am_codefox_OBJECTS)
 codefox_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -388,6 +388,7 @@ codefox_SOURCES = autoindent.c \
 	ui.c \
 	ui.h \
 	keywords.h \
+	keywords.c \
 	prefix.c \
 	prefix.h \
 	project.c \
@@ -510,6 +511,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-filetree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-highlighting.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-keywords.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codefox-prefix.Po@am__quote@
@@ -708,6 +710,20 @@ codefox-ui.obj: ui.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ui.c' object='codefox-ui.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -c -o codefox-ui.obj `if test -f 'ui.c'; then $(CYGPATH_W) 'ui.c'; else $(CYGPATH_W) '$(srcdir)/ui.c'; fi`
+
+codefox-keywords.o: keywords.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -MT codefox-keywords.o -MD -MP -MF $(DEPDIR)/codefox-keywords.Tpo -c -o codefox-keywords.o `test -f 'keywords.c' || echo '$(srcdir)/'`keywords.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/codefox-keywords.Tpo $(DEPDIR)/codefox-keywords.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='keywords.c' object='codefox-keywords.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -c -o codefox-keywords.o `test -f 'keywords.c' || echo '$(srcdir)/'`keywords.c
+
+codefox-keywords.obj: keywords.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -MT codefox-keywords.obj -MD -MP -MF $(DEPDIR)/codefox-keywords.Tpo -c -o codefox-keywords.obj `if test -f 'keywords.c'; then $(CYGPATH_W) 'keywords.c'; else $(CYGPATH_W) '$(srcdir)/keywords.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/codefox-keywords.Tpo $(DEPDIR)/codefox-keywords.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='keywords.c' object='codefox-keywords.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -c -o codefox-keywords.obj `if test -f 'keywords.c'; then $(CYGPATH_W) 'keywords.c'; else $(CYGPATH_W) '$(srcdir)/keywords.c'; fi`
 
 codefox-prefix.o: prefix.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(codefox_CFLAGS) $(CFLAGS) -MT codefox-prefix.o -MD -MP -MF $(DEPDIR)/codefox-prefix.Tpo -c -o codefox-prefix.o `test -f 'prefix.c' || echo '$(srcdir)/'`prefix.c

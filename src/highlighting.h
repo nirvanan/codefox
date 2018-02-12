@@ -35,6 +35,9 @@ c == '(' || c == ')')
 #define SPACE(c) (c == ' ' || c == '\n' || c == '\t')
 
 void
+highlight_init ();
+
+void
 highlight_register (GtkTextBuffer *buffer);
 
 void

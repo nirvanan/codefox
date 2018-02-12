@@ -23,21 +23,10 @@
 
 #define MAX_KEYWORD_LENGTH 16
 
-/* All C/C++ keywords. */
-gchar *keywords[] = 
-{
-	"asm", "auto", "bad_cast",
-	"bad_typeid", "bool", "break", "case", "catch", "char", "class",
-	"const", "const_cast", "continue", "default", "delete", "do",
-	"double", "dynamic_cast", "else", "enum", "except", "explicit",
-	"extern", "false", "finally", "float", "for", "friend", "goto",
-	"if", "inline", "int", "long", "mutable", "namespace", "new",
-	"operator", "private", "protected", "public", "register",
-	"reinterpret_cast", "return", "short", "signed", "sizeof",
-	"static", "static_cast", "struct", "switch", "template", "this",
-	"throw", "true", "try", "type_info", "typedef", "typeid",
-	"typename", "union", "unsigned", "using", "virtual", "void",
-	"volatile", "wchar_t", "while"
-} ;
+void
+keywords_init ();
+
+gint
+keywords_is_keyword (gchar *word);
 
 #endif /* KEYWORDS_H */
