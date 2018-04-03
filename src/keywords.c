@@ -46,7 +46,7 @@ static gchar *keywords[] =
 };
 
 typedef struct Trie {
-	struct Trie *sub[128];
+	struct Trie *sub[256];
 	gint flag;
 } CTrie;
 
@@ -103,9 +103,9 @@ keywords_trie_search (CTrie *obj, gchar *word) {
 		return 0;
 	}
 	if (!word[1]) {
-		return obj->sub[(gint) word[0]] && obj->sub[(gint) word[0]]->flag;
+		return obj->sub[(guchar) word[0]] && obj->sub[(guchar) word[0]]->flag;
 	}
-	return obj->sub[(gint) word[0]]? keywords_trie_search(obj->sub[(gint) word[0]], word + 1): 0;
+	return obj->sub[(guchar) word[0]]? keywords_trie_search(obj->sub[(guchar) word[0]], word + 1): 0;
 }
 
 /*

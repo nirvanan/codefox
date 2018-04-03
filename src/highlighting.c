@@ -85,8 +85,6 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	gint i;
 	gint lex_len;
 	gint state;
-	gint wide_char;
-	gint wide_char_lex;
 	gint start_offset;
 	
 	text = gtk_text_iter_get_text (start, end);
@@ -94,8 +92,6 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	start_offset = 0;
 	lex[0] = 0;
 	state = 0;
-	wide_char = 0;
-	wide_char_lex = 0;
 
 	gtk_text_buffer_remove_all_tags (buffer, start, end);
 	gtk_text_buffer_apply_tag_by_name (buffer, CODE_TAG_NONE, start, end);
@@ -133,8 +129,8 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				case 1:
 					lex[lex_len++] = text[i];
 					if (text[i] == '\"') {
-						int s = 0;
-						int j = lex_len - 2;
+						gint s = 0;
+						gint j = lex_len - 2;
 						
 						for ( ; j >= 0; j--) {
 							if (lex[j] == '\\') {
@@ -154,8 +150,8 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 				case 2:
 					lex[lex_len++] = text[i];
 					if (text[i] == '\'') {
-						int s = 0;
-						int j = lex_len - 2;
+						gint s = 0;
+						gint j = lex_len - 2;
 						
 						for ( ; j >= 0; j--) {
 							if (lex[j] == '\\') {
@@ -231,20 +227,16 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 			}
 
 			if (g_strcmp0 (tag, CODE_TAG_NONE) != 0) {
-				highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, tag);
+				glong utf8_start_offset = g_utf8_pointer_to_offset (text, text + start_offset);
+				glong utf8_lex_len = g_utf8_strlen (lex, lex_len);
+
+				highlight_add_tag (buffer, start, utf8_start_offset, utf8_lex_len, tag);
 			}
 
 			lex_len = 0;
-			wide_char_lex = 0;
 		}
 		else {
 			lex[lex_len++] = text[i];
-			if (i > 0 && text[i - 1] < 0 && text[i] < 0) {
-				wide_char++;
-			}
-			if (lex_len > 1 && lex[lex_len - 2] < 0 && lex[lex_len - 1] < 0) {
-				wide_char_lex++;
-			}
 			if (state == 3) {
 				state = 0;
 			}
@@ -252,7 +244,10 @@ highlight_apply (GtkTextBuffer *buffer, GtkTextIter *start,
 	}
 
 	if (state == 4 && lex_len > 0) {
-		highlight_add_tag (buffer, start, start_offset - wide_char + wide_char_lex, lex_len - wide_char_lex, CODE_TAG_COMMENT);
+		glong utf8_start_offset = g_utf8_pointer_to_offset (text, text + start_offset);
+		glong utf8_lex_len = g_utf8_strlen (lex, lex_len);
+
+		highlight_add_tag (buffer, start, utf8_start_offset, utf8_lex_len, CODE_TAG_COMMENT);
 	}
 	
 	g_free ((gpointer) text);
