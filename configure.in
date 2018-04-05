@@ -10,7 +10,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_DEFINE(ENABLE_BINRELOC, , [define ENABLE_BINRELOC])
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE([1.15 -Wall foreign no-define tar-ustar no-dist-gzip dist-xz])
+AM_INIT_AUTOMAKE([1.15 -Wall no-define tar-ustar no-dist-gzip dist-xz])
 
 # Support silent build rules, requires at least automake-1.11. Disable
 # by either passing --disable-silent-rules to configure or passing V=1
