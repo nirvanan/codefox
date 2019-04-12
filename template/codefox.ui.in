@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkListStore" id="liststore1"/>
@@ -15,6 +15,9 @@
     <property name="window_position">center</property>
     <property name="icon_name">codefox</property>
     <property name="gravity">center</property>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <object class="GtkBox" id="box1">
         <property name="visible">True</property>
@@ -453,7 +456,7 @@
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_markup" translatable="yes">Build current project</property>
                 <property name="tooltip_text" translatable="yes">Build current project</property>
-                <property name="icon_name">codefox-build</property>
+                <property name="icon_name">drive-harddisk-symbolic</property>
                 <accelerator key="b" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
@@ -468,7 +471,7 @@
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_markup" translatable="yes">Run compiled executable</property>
                 <property name="tooltip_text" translatable="yes">Run compiled executable</property>
-                <property name="icon_name">codefox-run</property>
+                <property name="icon_name">input-gaming-symbolic</property>
                 <accelerator key="r" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
@@ -505,7 +508,7 @@
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_markup" translatable="yes">Debug current project</property>
                 <property name="tooltip_text" translatable="yes">Debug current project</property>
-                <property name="icon_name">codefox-debug</property>
+                <property name="icon_name">system-search-symbolic</property>
                 <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
